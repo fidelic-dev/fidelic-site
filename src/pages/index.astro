@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+const title = 'Fidelic — a fake Salesforce org that breaks on command';
+const description =
+  "Fidelic is a 14MB Docker container that loads your real org's schema, runs your real Apex triggers, and injects failures you can't test anywhere else — row locks, rate limits, tenant throttling.";
+---
+
+<Base title={title} description={description}>
+  <h1>You can't test API limits without taking down Salesforce for your whole company.</h1>
+  <p class="sub">
+    Row locks, rate limits, tenant-wide throttling — untestable in any sandbox, at any
+    price.
+  </p>
+
+  <p class="answer">
+    Fidelic is a fake Salesforce org in a 14MB Docker container. Boots in 2 seconds.
+    Loads your real org's schema and runs your real Apex triggers. Breaks on command.
+  </p>
+
+  <div class="terminal" role="img" aria-label="Terminal: Fidelic boots, classifies triggers as executed, simulated, hooks, or refused, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled.">
+<pre><span class="cmd">docker run -p 8080:8080 fidelic/emulator --apex-src ./force-app</span>
+<span class="dim">fidelic v1.0  ·  booted in 1.9s  ·  image 14 MB</span>
+
+<span class="dim">classifying triggers against your org schema …</span>
+  <span class="ok">✓ EXECUTE</span>     AccountTrigger          before/after insert, update
+  <span class="ok">✓ EXECUTE</span>     ContactTrigger          after insert
+  <span class="sim">≈ SIMULATED</span>   CaseTrigger             EventBus.publish → recorded, not sent
+  <span class="hook">⚙ HOOKS</span>       OpportunityTrigger      approximated (multi-context)
+  <span class="bad">✗ REFUSED</span>     BillingSync.trigger:88  dynamic SOQL — not in the subset
+
+<span class="dim">every trigger labeled: executed, simulated, or refused — with a reason.</span>
+
+<span class="cmd">export SFEMU_FAULT_LOCK_ON_UPDATE=true</span>   <span class="dim"># break it on command</span>
+<span class="cmd">curl -sX PATCH $ORG/services/data/v62.0/sobjects/Account/001xx0000…</span>
+<span class="bad">&#123; "errorCode": "UNABLE_TO_LOCK_ROW",</span>
+<span class="bad">  "message": "unable to obtain exclusive access to this record" &#125;</span></pre>
+  </div>
+
+  <div class="receipts">
+    <p>Verified 68/68 against a public conformance suite written from Salesforce's own docs.</p>
+    <p><a href="#">Run the scorecard yourself →</a></p>
+  </div>
+
+  <blockquote class="pullquote">
+    <p>
+      The failure injection alone is worth it — row locks and API limits are untestable
+      in any real org. Fidelic makes them a config flag.
+    </p>
+    <cite>— Engineer at a major Salesforce partner</cite>
+  </blockquote>
+
+  <div class="waitlist">
+    <h2>Early access</h2>
+    <p>We're onboarding teams a few at a time. Leave an email; we'll reach out.</p>
+    <form action="https://formspree.io/f/your-form-id" method="POST">
+      <input
+        type="email"
+        name="email"
+        placeholder="you@company.com"
+        aria-label="Email address"
+        required
+      />
+      <input type="hidden" name="_subject" value="Fidelic early access" />
+      <button class="btn" type="submit">Get early access</button>
+    </form>
+  </div>
+</Base>
