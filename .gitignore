@@ -11,3 +11,6 @@ node_modules/
 *.log
 .env
 .env.production
+
+# generated: docs mirrored from sfemu (scripts/sync-docs.mjs)
+/src/content/docs/*.md
