@@ -19,9 +19,21 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
+// `src` is a path relative to the sfemu repo root (docs live under docs/, but
+// QUICKSTART.md sits at the root — so the manifest carries the full repo-relative path).
 const DOCS = [
   {
-    src: 'API.md',
+    src: 'QUICKSTART.md',
+    dest: 'src/content/docs/quickstart.md',
+    frontmatter: {
+      title: 'Quickstart — run the emulator on your own org',
+      description:
+        'Run your real Apex triggers against a fake Salesforce org on localhost, inject failures a real org never lets you reproduce, and test unapproved changes before they ship.',
+      order: 5,
+    },
+  },
+  {
+    src: 'docs/API.md',
     dest: 'src/content/docs/api.md',
     frontmatter: {
       title: 'API & options reference',
@@ -38,24 +50,24 @@ const REF = process.env.SFEMU_DOCS_REF || 'main';
 async function fetchSource(src) {
   // 1. explicit repo path
   if (process.env.SFEMU_REPO) {
-    const p = resolve(process.env.SFEMU_REPO, 'docs', src);
+    const p = resolve(process.env.SFEMU_REPO, src);
     if (existsSync(p)) return { from: p, text: await readFile(p, 'utf8') };
   }
   // 2. sibling checkout
-  const sibling = resolve(ROOT, '..', 'sfemu', 'docs', src);
+  const sibling = resolve(ROOT, '..', 'sfemu', src);
   if (existsSync(sibling)) return { from: sibling, text: await readFile(sibling, 'utf8') };
 
   // 3. GitHub raw (private repo needs a token)
   const token = process.env.SFEMU_DOCS_TOKEN || process.env.GITHUB_TOKEN;
   if (token) {
-    const url = `https://raw.githubusercontent.com/${REPO}/${REF}/docs/${src}`;
+    const url = `https://raw.githubusercontent.com/${REPO}/${REF}/${src}`;
     const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
     if (!res.ok) throw new Error(`fetch ${url} -> ${res.status} ${res.statusText}`);
     return { from: url, text: await res.text() };
   }
 
   throw new Error(
-    `cannot locate docs/${src}: no $SFEMU_REPO, no ../sfemu sibling, and no ` +
+    `cannot locate ${src}: no $SFEMU_REPO, no ../sfemu sibling, and no ` +
       `$SFEMU_DOCS_TOKEN for a GitHub fetch. Set one so the site can render the doc.`,
   );
 }
@@ -68,8 +80,8 @@ function frontmatter(fm) {
   return `---\n${lines.join('\n')}\n---`;
 }
 
-const BANNER = (from) =>
-  `<!--\n  GENERATED — DO NOT EDIT.\n  Source of truth: sfemu/docs/${from}. Edit there; ` +
+const BANNER = (src) =>
+  `<!--\n  GENERATED — DO NOT EDIT.\n  Source of truth: sfemu/${src}. Edit there; ` +
   `this file is overwritten on every build (scripts/sync-docs.mjs).\n-->`;
 
 // The page template renders the title from frontmatter, so drop the source's
