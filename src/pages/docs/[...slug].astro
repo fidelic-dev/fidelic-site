@@ -1,0 +1,21 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('docs');
+  return docs.map((doc) => ({ params: { slug: doc.id }, props: { doc } }));
+}
+
+const { doc } = Astro.props;
+const { Content } = await render(doc);
+---
+
+<Base title={`${doc.data.title} — Fidelic Docs`} description={doc.data.description}>
+  <article class="prose">
+    <p class="back"><a href="/docs">← Docs</a></p>
+    <h1>{doc.data.title}</h1>
+    <p class="sub">{doc.data.description}</p>
+    <Content />
+  </article>
+</Base>

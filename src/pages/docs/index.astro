@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const title = 'Fidelic Docs';
+const description = 'Reference documentation for the Fidelic Salesforce emulator.';
+
+const docs = (await getCollection('docs')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<Base title={title} description={description}>
+  <h1>Docs</h1>
+  <p class="sub">Reference for running the emulator and its REST API.</p>
+
+  {docs.length === 0 && <p>No docs yet.</p>}
+
+  <ul class="post-list">
+    {
+      docs.map((doc) => (
+        <li class="post-item">
+          <h2><a href={`/docs/${doc.id}`}>{doc.data.title}</a></h2>
+          <p class="desc">{doc.data.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Base>
