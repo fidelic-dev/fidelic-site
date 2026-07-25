@@ -82,6 +82,14 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0; }
   font-size: 0.95rem;
 }
 .nav a:hover { color: var(--fg); text-decoration: none; }
+.nav a.nav-cta {
+  padding: 5px 12px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.nav a.nav-cta:hover { background: var(--accent-hover); color: #fff; text-decoration: none; }
 
 .site-footer {
   border-top: 1px solid var(--border);
@@ -110,7 +118,7 @@ main { padding-top: 3.2rem; }
   color: var(--muted);
   border-left: 2px solid var(--border);
   padding-left: 16px;
-  margin: 2rem 0;
+  margin: 3rem 0;
 }
 .receipts p { margin: 0.2rem 0; }
 
@@ -139,7 +147,7 @@ main { padding-top: 3.2rem; }
 
 /* --- pull quote --- */
 .pullquote {
-  margin: 2.6rem 0;
+  margin: 4rem 0;
   padding: 1.2rem 0 1.2rem 22px;
   border-left: 3px solid var(--accent);
   font-size: 1.15rem;
@@ -154,7 +162,7 @@ main { padding-top: 3.2rem; }
 
 /* --- waitlist --- */
 .waitlist {
-  margin: 2.5rem 0 1rem;
+  margin: 4rem 0 1rem;
   padding: 1.6rem;
   background: #fff;
   border: 1px solid var(--border);
@@ -249,4 +257,66 @@ main { padding-top: 3.2rem; }
 @media (max-width: 640px) {
   h1 { font-size: 1.9rem; }
   body { font-size: 17px; }
+}
+
+/* --- docs layout: sticky table of contents ------------------------------- */
+.wrap-wide { max-width: 1040px; }
+
+.doc-grid {
+  display: grid;
+  grid-template-columns: 200px minmax(0, var(--maxw));
+  gap: 3.5rem;
+  align-items: start;
+}
+
+/* sticky = stays put no matter how far you scroll the page */
+.doc-toc {
+  position: sticky;
+  top: 1.5rem;
+  align-self: start;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  font-size: 0.9rem;
+}
+.doc-toc-title {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 0.6rem;
+}
+.doc-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--border);
+}
+.doc-toc li { margin: 0; }
+.doc-toc a {
+  display: block;
+  padding: 0.28rem 0 0.28rem 0.9rem;
+  margin-left: -1px;
+  color: var(--muted);
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  line-height: 1.35;
+}
+.doc-toc a:hover {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  text-decoration: none;
+}
+
+/* narrow screens: TOC stacks above the content, no sticky */
+@media (max-width: 900px) {
+  .wrap-wide { max-width: var(--maxw); }
+  .doc-grid { grid-template-columns: 1fr; gap: 0; }
+  .doc-toc {
+    position: static;
+    max-height: none;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
 }

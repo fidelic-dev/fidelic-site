@@ -17,18 +17,19 @@ const description =
     Loads your real org's schema and runs your real Apex triggers. Breaks on command.
   </p>
 
-  <div class="terminal" role="img" aria-label="Terminal: Fidelic boots, classifies triggers as executed, simulated, hooks, or refused, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled.">
+  {/* TODO: when async ships (C2 recorded-effects / inline-after-commit), swap the
+      CaseTrigger REFUSED row for "≈ SIMULATED  CaseTrigger  EventBus.publish → captured,
+      not sent" demonstrating inline-after-commit. Until recorded-effects is BUILT it must
+      read REFUSED — provable-claims rule (no advertising unbuilt behavior). */}
+  <div class="terminal" role="img" aria-label="Terminal: Fidelic boots, classifies each trigger as executed or refused with a reason, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled.">
 <pre><span class="cmd">docker run -p 8080:8080 fidelic/emulator --apex-src ./force-app</span>
 <span class="dim">fidelic v1.0  ·  booted in 1.9s  ·  image 14 MB</span>
 
 <span class="dim">classifying triggers against your org schema …</span>
   <span class="ok">✓ EXECUTE</span>     AccountTrigger          before/after insert, update
   <span class="ok">✓ EXECUTE</span>     ContactTrigger          after insert
-  <span class="sim">≈ SIMULATED</span>   CaseTrigger             EventBus.publish → recorded, not sent
-  <span class="hook">⚙ HOOKS</span>       OpportunityTrigger      approximated (multi-context)
+  <span class="bad">✗ REFUSED</span>     CaseTrigger             EventBus.publish — not yet simulated
   <span class="bad">✗ REFUSED</span>     BillingSync.trigger:88  dynamic SOQL — not in the subset
-
-<span class="dim">every trigger labeled: executed, simulated, or refused — with a reason.</span>
 
 <span class="cmd">export SFEMU_FAULT_LOCK_ON_UPDATE=true</span>   <span class="dim"># break it on command</span>
 <span class="cmd">curl -sX PATCH $ORG/services/data/v62.0/sobjects/Account/001xx0000…</span>
@@ -49,7 +50,7 @@ const description =
     <cite>— Engineer at a major Salesforce partner</cite>
   </blockquote>
 
-  <div class="waitlist">
+  <div class="waitlist" id="waitlist">
     <h2>Early access</h2>
     <p>We're onboarding teams a few at a time. Leave an email; we'll reach out.</p>
     <form action="https://formspree.io/f/your-form-id" method="POST">
