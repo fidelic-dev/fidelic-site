@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fidelic.dev/rss.xml
+Sitemap: https://fidelic.dev/sitemap-index.xml
