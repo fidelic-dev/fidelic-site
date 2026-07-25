@@ -249,6 +249,19 @@ main { padding-top: 3.2rem; }
 .prose ul, .prose ol { padding-left: 1.4rem; }
 .prose li { margin: 0.3rem 0; }
 
+/* --- mermaid diagrams (build-time inline SVG, zero client JS) --- */
+.mermaid-figure {
+  margin: 1.75rem 0;
+  overflow-x: auto; /* wide sequence diagrams scroll instead of overflowing the column */
+  -webkit-overflow-scrolling: touch;
+}
+.mermaid-figure svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;  /* responsive: scales to the column, so it never overflows on mobile */
+  height: auto;     /* keep aspect ratio from the viewBox → no layout shift */
+}
+
 /* --- blog index --- */
 .post-list { list-style: none; padding: 0; margin: 2rem 0 0; }
 .post-item { padding: 1.1rem 0; border-bottom: 1px solid var(--border); }
