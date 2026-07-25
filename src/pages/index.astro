@@ -22,7 +22,7 @@ const description =
       not sent" demonstrating inline-after-commit. Until recorded-effects is BUILT it must
       read REFUSED — provable-claims rule (no advertising unbuilt behavior). */}
   <div class="terminal" role="img" aria-label="Terminal: Fidelic boots, classifies each trigger as executed or refused with a reason, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled.">
-<pre><span class="cmd">docker run -p 8080:8080 fidelic/emulator --apex-src ./force-app</span>
+<pre><span class="cmd">docker run -p 8080:8080 -v ./mdapi:/mdapi fidelic/emulator --apex-src /mdapi</span>
 <span class="dim">fidelic v1.0  ·  booted in 1.9s  ·  image 14 MB</span>
 
 <span class="dim">classifying triggers against your org schema …</span>
@@ -38,8 +38,11 @@ const description =
   </div>
 
   <div class="receipts">
-    <p>Verified 68/68 against a public conformance suite written from Salesforce's own docs.</p>
-    <p><a href="#">Run the scorecard yourself →</a></p>
+    <p>Verified 68/68 against a conformance suite written from Salesforce's own docs.</p>
+    {/* TODO: the suite (sf-api-conformance) is private today. When it's published,
+        restore a real "Run the scorecard yourself →" link to the repo/scorecard.
+        Do NOT call it "public" or link "run it yourself" until it actually is. */}
+    <p class="soon">Suite + scorecard go public at launch — run it yourself then.</p>
   </div>
 
   <blockquote class="pullquote">
