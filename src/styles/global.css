@@ -112,6 +112,23 @@ main { padding-top: 3.2rem; }
   max-width: 60ch;
 }
 .answer { font-size: 1.05rem; }
+.answer + .answer-list { margin: -0.4rem 0 1.15rem; }
+.answer-list {
+  font-size: 1.05rem;
+  list-style: none;
+  padding: 0;
+  color: var(--fg);
+}
+.answer-list li {
+  padding: 0.15rem 0 0.15rem 1.4rem;
+  position: relative;
+}
+.answer-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
 
 .receipts {
   font-size: 0.92rem;

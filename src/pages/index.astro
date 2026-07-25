@@ -1,28 +1,55 @@
 ---
-import Base from '../layouts/Base.astro';
-const title = 'Fidelic — a fake Salesforce org that breaks on command';
+import Base from "../layouts/Base.astro";
+const title =
+  "Fidelic: your Salesforce org, running locally. Boots in 2s, breaks on command.";
 const description =
-  "Fidelic is a 14MB Docker container that loads your real org's schema, runs your real Apex triggers, and injects failures you can't test anywhere else — row locks, rate limits, tenant throttling.";
+  "Fidelic is a 14MB Docker container that loads your real org's schema, runs your real Apex triggers, and injects the failures you can't test anywhere else — row locks, rate limits, tenant throttling, and your own logic's edge cases.";
 ---
 
 <Base title={title} description={description}>
-  <h1>You can't test API limits without taking down Salesforce for your whole company.</h1>
+  <h1>A Salesforce org you can boot, break, and throw away.</h1>
+
   <p class="sub">
-    Row locks, rate limits, tenant-wide throttling — untestable in any sandbox, at any
-    price.
+    Yours, specifically: it loads your real schema and runs your real Apex
+    triggers, on your local machine, in about two seconds.
   </p>
 
   <p class="answer">
-    Fidelic is a fake Salesforce org in a 14MB Docker container. Boots in 2 seconds.
-    Loads your real org's schema and runs your real Apex triggers. Breaks on command.
+    Fidelic is a Salesforce emulator in a 14MB Docker container. Point your
+    tests at it instead of a real org and everything behaves the same:
   </p>
+  <ul class="answer-list">
+    <li>same REST responses</li>
+    <li>same trigger side effects</li>
+    <li>same validation errors</li>
+  </ul>
+  <p class="answer">
+    Except this org can also produce the failures no sandbox will let you stage:
+  </p>
+  <ul class="answer-list">
+    <li>row locks</li>
+    <li>rate limits</li>
+    <li>tenant-wide throttling</li>
+    <li>the edge cases hiding in your own logic</li>
+  </ul>
 
-  {/* TODO: when async ships (C2 recorded-effects / inline-after-commit), swap the
-      CaseTrigger REFUSED row for "≈ SIMULATED  CaseTrigger  EventBus.publish → captured,
-      not sent" demonstrating inline-after-commit. Until recorded-effects is BUILT it must
-      read REFUSED — provable-claims rule (no advertising unbuilt behavior). */}
-  <div class="terminal" role="img" aria-label="Terminal: Fidelic boots, classifies each trigger as executed or refused with a reason, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled.">
-<pre><span class="cmd">docker run -p 8080:8080 -v ./mdapi:/mdapi fidelic/emulator --apex-src /mdapi</span>
+  <p class="answer">
+    And it's honest about the boundary. On boot it reads your triggers and labels
+    each one — <strong>executed</strong>, or <strong>refused, with a reason</strong> —
+    so you never get a silently wrong answer:
+  </p>
+  {
+    /* TODO: when RECORDED-EFFECTS ships (EventBus.publish capture — a C2 family still
+      unbuilt as of the async/callout milestones), swap the CaseTrigger REFUSED row for
+      "≈ SIMULATED  CaseTrigger  EventBus.publish → captured, not sent". Until then it
+      must read REFUSED — provable-claims rule (no advertising unbuilt behavior). */
+  }
+  <div
+    class="terminal"
+    role="img"
+    aria-label="Terminal: Fidelic boots, classifies each trigger as executed or refused with a reason, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled."
+  >
+    <pre><span class="cmd">docker run -p 8080:8080 -v ./mdapi:/mdapi fidelic/emulator --apex-src /mdapi</span>
 <span class="dim">fidelic v1.0  ·  booted in 1.9s  ·  image 14 MB</span>
 
 <span class="dim">classifying triggers against your org schema …</span>
@@ -38,24 +65,33 @@ const description =
   </div>
 
   <div class="receipts">
-    <p>Verified 68/68 against a conformance suite written from Salesforce's own docs.</p>
-    {/* TODO: the suite (sf-api-conformance) is private today. When it's published,
+    <p>
+      Verified 68/68 against a conformance suite written from Salesforce's own
+      docs.
+    </p>
+    {
+      /* TODO: the suite (sf-api-conformance) is private today. When it's published,
         restore a real "Run the scorecard yourself →" link to the repo/scorecard.
-        Do NOT call it "public" or link "run it yourself" until it actually is. */}
-    <p class="soon">Suite + scorecard go public at launch — run it yourself then.</p>
+        Do NOT call it "public" or link "run it yourself" until it actually is. */
+    }
+    <p class="soon">
+      Suite + scorecard go public at launch — run it yourself then.
+    </p>
   </div>
 
   <blockquote class="pullquote">
     <p>
-      The failure injection alone is worth it — row locks and API limits are untestable
-      in any real org. Fidelic makes them a config flag.
+      The failure injection alone is worth it — row locks and API limits are
+      untestable in any real org. Fidelic makes them a config flag.
     </p>
     <cite>— Engineer at a major Salesforce partner</cite>
   </blockquote>
 
   <div class="waitlist" id="waitlist">
     <h2>Early access</h2>
-    <p>We're onboarding teams a few at a time. Leave an email; we'll reach out.</p>
+    <p>
+      We're onboarding teams a few at a time. Leave an email; we'll reach out.
+    </p>
     <form action="https://formspree.io/f/mkodpozp" method="POST">
       <input
         type="email"
