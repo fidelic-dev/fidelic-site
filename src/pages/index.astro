@@ -9,14 +9,11 @@ const description =
 <Base title={title} description={description}>
   <h1>A Salesforce org you can boot, break, and throw away.</h1>
 
-  <p class="sub">
-    Yours, specifically: it loads your real schema and runs your real Apex
-    triggers, on your local machine, in about two seconds.
-  </p>
-
   <p class="answer">
-    Fidelic is a Salesforce emulator in a 14MB Docker container. Point your
-    tests at it instead of a real org and everything behaves the same:
+    Fidelic is a Salesforce emulator in a 14MB Docker container that loads your
+    real schema and runs your real Apex triggers, on your local machine, in
+    about two seconds. Point your tests at it instead of a real org and
+    everything behaves the same:
   </p>
   <ul class="answer-list">
     <li>same REST responses</li>
@@ -34,9 +31,10 @@ const description =
   </ul>
 
   <p class="answer">
-    And it's honest about the boundary. On boot it reads your triggers and labels
-    each one — <strong>executed</strong>, or <strong>refused, with a reason</strong> —
-    so you never get a silently wrong answer:
+    And it's honest about what it can't do: On boot it reads your triggers and
+    labels each one: <strong>executed</strong>, or <strong
+      >refused, with a reason</strong
+    > so you get a true picture:
   </p>
   {
     /* TODO: when RECORDED-EFFECTS ships (EventBus.publish capture — a C2 family still
@@ -66,22 +64,18 @@ const description =
 
   <div class="receipts">
     <p>
-      Verified 68/68 against a conformance suite written from Salesforce's own
-      docs.
+      Verified 66/66 against the public conformance suite —
+      <a href="https://github.com/fidelic-dev/fidelic-conformance">run the scorecard yourself →</a>
     </p>
-    {
-      /* TODO: the suite (sf-api-conformance) is private today. When it's published,
-        restore a real "Run the scorecard yourself →" link to the repo/scorecard.
-        Do NOT call it "public" or link "run it yourself" until it actually is. */
-    }
     <p class="soon">
-      Suite + scorecard go public at launch — run it yourself then.
+      66/66 pass · 5 skipped (need a real org) · 2 pending (awaiting real-org
+      verification). The skips and pendings are the methodology showing its work.
     </p>
   </div>
 
   <blockquote class="pullquote">
     <p>
-      The failure injection alone is worth it — row locks and API limits are
+      The failure injection alone is worth it. Row locks and API limits are
       untestable in any real org. Fidelic makes them a config flag.
     </p>
     <cite>— Engineer at a major Salesforce partner</cite>
