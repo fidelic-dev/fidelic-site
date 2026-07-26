@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 const title = 'About Fidelic';
 const description =
-  'What Fidelic is, how it is built (conformance-driven, from public docs), and the honesty model: every trigger labeled Executed, Simulated, or Refused.';
+  'What Fidelic is, how it is built (conformance-driven, from public docs), and the honesty model: every trigger labeled Executed, Simulated, Recorded-only, or Refused.';
 ---
 
 <Base title={title} description={description}>
@@ -47,7 +47,7 @@ const description =
       a specific conformance test; nothing is there because it seemed plausible.
     </p>
 
-    <h2>The honesty model: Executed, Simulated, Refused</h2>
+    <h2>The honesty model: Executed, Simulated, Recorded-only, Refused</h2>
     <p>
       An emulator's most dangerous failure is the quiet one — silently doing the wrong
       thing and looking right. Fidelic is built to refuse that. At load time it
@@ -66,6 +66,11 @@ const description =
         presented as the real thing.
       </li>
       <li>
+        <strong>Recorded-only</strong> — we could run its body, but its trigger — a
+        platform event, a change event — can't occur in an emulator, so its run never
+        fires here. We say exactly that, instead of pretending it executed.
+      </li>
+      <li>
         <strong>Refused</strong> — anything outside the supported subset is not
         approximated. It is refused loudly, with the exact <code>file:line</code> and a
         reason. A refusal is a known gap, not a silent lie.
@@ -74,7 +79,7 @@ const description =
     <p>
       Overclaiming any simulated behavior as faithful is treated as the one unforgivable
       bug. What Fidelic executes, what it simulates, and what it refuses is documented
-      and versioned — so you always know which of the three you're looking at.
+      and versioned — so you always know which of the four you're looking at.
     </p>
 
     <h2>Contact</h2>
