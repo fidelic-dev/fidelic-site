@@ -33,7 +33,7 @@ const description =
     <ul>
       <li>
         <strong>The test is written first</strong>, from Salesforce's publicly
-        available documentation — request in, exact response envelope expected
+        available documentation: request in, exact response envelope expected
         out.
       </li>
       <li>
@@ -43,50 +43,44 @@ const description =
       </li>
       <li>
         <strong>The verified test is frozen.</strong> The emulator is then built until
-        it passes — never the reverse. The ruler comes before the thing it measures.
+        it passes.
       </li>
     </ul>
-    <p>
-      The current suite passes 68 of 68. Every behavior in the emulator traces
-      back to a specific conformance test; nothing is there because it seemed
-      plausible.
-    </p>
 
-    <h2>The honesty model: Executed, Simulated, Recorded-only, Refused</h2>
+    <h2>The model: Executed, Simulated, Recorded-only, Refused</h2>
     <p>
-      An emulator's most dangerous failure is the quiet one — silently doing the
-      wrong thing and looking right. Fidelic is built to refuse that. At load
-      time it classifies every trigger and labels it, per trigger, in the
+      An emulator's most dangerous failures are the quiet ones: silently doing
+      the wrong thing and looking right. Fidelic is built to refuse that. At
+      load time it classifies every trigger and labels it, per trigger, in the
       coverage report:
     </p>
     <ul>
       <li>
-        <strong>Executed</strong> — the trigger runs for real, as an interpreter,
-        against the store: real conditions, real computed values, real DML with re-entrancy
+        <strong>Executed</strong> the trigger runs for real, as an interpreter, against
+        the store: real conditions, real computed values, real DML with re-entrancy
         and whole-transaction rollback.
       </li>
       <li>
-        <strong>Simulated</strong> — a platform effect that can't be executed faithfully
+        <strong>Simulated</strong> a platform effect that can't be executed faithfully
         is modeled honestly and labeled as such: an async job runs inline, a platform
-        event is recorded rather than delivered, a callout answers from a mock. Never
-        presented as the real thing.
+        event is recorded rather than delivered, a callout answers from a mock. It's
+        not presented as the real thing.
       </li>
       <li>
-        <strong>Recorded-only</strong> — we could run its body, but its trigger —
-        a platform event, a change event — can't occur in an emulator, so its run
-        never fires here. We say exactly that, instead of pretending it executed.
+        <strong>Recorded-only</strong> we could run its body, but its trigger, a platform
+        event or a change event can't occur in an emulator, so its run never fires
+        here. We say exactly that, instead of pretending it executed.
       </li>
       <li>
-        <strong>Refused</strong> — anything outside the supported subset is not approximated.
-        It is refused loudly, with the exact <code>file:line</code> and a reason.
-        A refusal is a known gap, not a silent lie.
+        <strong>Refused</strong> anything outside the supported subset is not approximated.
+        It is refused, with the exact <code>file:line</code> and a reason. A refusal
+        is a known gap we have acknowledged that could be filled in future releases.
       </li>
     </ul>
     <p>
-      Overclaiming any simulated behavior as faithful is treated as the one
-      unforgivable bug. What Fidelic executes, what it simulates, and what it
-      refuses is documented and versioned — so you always know which of the four
-      you're looking at.
+      What Fidelic executes, what it simulates, and what it refuses is
+      documented and versioned so you always know which of the four you're
+      looking at.
     </p>
 
     <h2>Contact</h2>
