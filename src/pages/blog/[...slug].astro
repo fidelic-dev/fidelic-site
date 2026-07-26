@@ -24,3 +24,32 @@ const fmt = (d: Date) =>
     <Content />
   </article>
 </Base>
+
+<script>
+  // Client-side mermaid: build-time rendering needs a headless browser the deploy can't
+  // run, so diagrams render in the visitor's browser. The mermaid bundle is imported
+  // lazily and ONLY when a post actually contains a diagram, so pages without diagrams
+  // (and every other page) stay zero-JS. Each SVG is rendered off-DOM first, then swapped
+  // in — the code block stays as a graceful fallback if a diagram fails.
+  const blocks = Array.from(document.querySelectorAll('pre[data-language="mermaid"]'));
+  if (blocks.length) {
+    const { default: mermaid } = await import('mermaid');
+    mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+    for (let i = 0; i < blocks.length; i++) {
+      const pre = blocks[i];
+      const lines = pre.querySelectorAll('code .line');
+      const src = lines.length
+        ? Array.from(lines).map((l) => l.textContent).join('\n')
+        : pre.textContent || '';
+      try {
+        const { svg } = await mermaid.render('mermaid-' + i, src);
+        const figure = document.createElement('figure');
+        figure.className = 'mermaid-figure';
+        figure.innerHTML = svg;
+        pre.replaceWith(figure);
+      } catch {
+        /* leave the code block in place as a readable fallback */
+      }
+    }
+  }
+</script>

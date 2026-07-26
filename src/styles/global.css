@@ -249,7 +249,7 @@ main { padding-top: 3.2rem; }
 .prose ul, .prose ol { padding-left: 1.4rem; }
 .prose li { margin: 0.3rem 0; }
 
-/* --- mermaid diagrams (build-time inline SVG, zero client JS) --- */
+/* --- mermaid diagrams (rendered client-side into .mermaid-figure) --- */
 .mermaid-figure {
   margin: 1.75rem 0;
   overflow-x: auto; /* wide sequence diagrams scroll instead of overflowing the column */
