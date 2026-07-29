@@ -7,40 +7,37 @@ const description =
 ---
 
 <Base title={title} description={description}>
-  <h1>A Salesforce org you can boot, break, and throw away.</h1>
+  {/* SECTION 1 — the problem */}
+  <h1>Salesforce is the only part of your stack with no real CI.</h1>
+
+  <p class="sub">
+    Every deploy is "tested" — yet the failures that page you at 2am have never
+    run once: the row lock, the rate limit, the retry that double-charges. You
+    can't rehearse them in any sandbox, at any price.
+  </p>
+
+  {/* SECTION 2 — the solution */}
+  <h2>Fidelic is a Salesforce org you can boot, break, and throw away.</h2>
 
   <p class="answer">
-    Fidelic is a Salesforce emulator in a 14MB Docker container that loads your
-    real schema and runs your real Apex triggers, on your local machine, in
-    about two seconds. Point your tests at it instead of a real org and
-    everything behaves the same:
+    A 14MB Docker container that loads your real schema and runs your real Apex
+    triggers. Point your tests at localhost — same REST responses, same trigger
+    side effects, same validation errors. Then flip a switch and get the
+    failures no real org allows: row locks, rate limits, latency, on command.
+    Wiped clean between tests. As many in parallel as your CI has cores.
   </p>
-  <ul class="answer-list">
-    <li>same REST responses</li>
-    <li>same trigger side effects</li>
-    <li>same validation errors</li>
-  </ul>
-  <p class="answer">
-    Except this org can also produce the failures no sandbox will let you stage:
-  </p>
-  <ul class="answer-list">
-    <li>row locks</li>
-    <li>rate limits</li>
-    <li>tenant-wide throttling</li>
-    <li>the edge cases hiding in your own logic</li>
-  </ul>
 
-  <p class="answer">
-    And it's honest about what it can't do: On boot it reads your triggers and
-    labels each one: <strong>executed</strong>, or <strong
-      >refused, with a reason</strong
-    > so you get a true picture:
-  </p>
   {
     /* TODO: when RECORDED-EFFECTS ships (EventBus.publish capture — a C2 family still
       unbuilt as of the async/callout milestones), swap the CaseTrigger REFUSED row for
       "≈ SIMULATED  CaseTrigger  EventBus.publish → captured, not sent". Until then it
-      must read REFUSED — provable-claims rule (no advertising unbuilt behavior). */
+      must read REFUSED — provable-claims rule (no advertising unbuilt behavior).
+
+      2026-07-29: THE CONDITION HAS BEEN MET — the recorded-effect family shipped
+      2026-07-25 (EventBus.publish / Messaging.sendEmail are captured and assertable).
+      This row now UNDER-claims, and the honesty line below says "simulated" while the
+      terminal shows no simulated row. Left unchanged only because this pass was scoped
+      "keep the terminal exactly as-is"; flagged for the next copy decision. */
   }
   <div
     class="terminal"
@@ -62,6 +59,12 @@ const description =
 <span class="bad">  "message": "unable to obtain exclusive access to this record" &#125;</span></pre>
   </div>
 
+  <p class="answer">
+    Every trigger is classified at boot — executed, simulated, or refused with a
+    reason. Never a silent guess.
+  </p>
+
+  {/* SECTION 3 — receipts, proof, CTA */}
   <div class="receipts">
     <p>
       Verified 66/66 against the public conformance suite —
@@ -82,9 +85,10 @@ const description =
   </blockquote>
 
   <div class="waitlist" id="waitlist">
-    <h2>Early access</h2>
+    <h2>Get early access</h2>
     <p>
-      We're onboarding teams a few at a time. Leave an email; we'll reach out.
+      We onboard a few teams at a time. Real CI for your Salesforce stack starts
+      with an email.
     </p>
     <form action="https://formspree.io/f/mkodpozp" method="POST">
       <input
