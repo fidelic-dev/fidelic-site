@@ -8,8 +8,8 @@
   --term-bg: #f2efe8;
   --term-border: #ded7c9;
   --term-fg: #2a2622;
-  --ok: #2e7d46;
-  --sim: #9a6a12;
+  --ok: #2c7b44; /* 4.54:1 on --term-bg (was #2e7d46, 4.42 — under 4.5) */
+  --sim: #936303; /* 4.54:1 on --term-bg (was #9a6a12, 4.11) */
   --hook: #4a5568;
   --bad: #b23b3b;
   --maxw: 68ch;
@@ -138,7 +138,19 @@ main { padding-top: 3.2rem; }
   margin: 3rem 0;
 }
 .receipts p { margin: 0.2rem 0; }
-.receipts .soon { opacity: 0.72; font-style: italic; }
+/* An inline link inside a paragraph must be distinguishable by something other than
+   colour: --accent sits at 1.04:1 against the surrounding text (axe wants 3:1), so
+   colour alone carries no signal for anyone who cannot separate the two hues. The
+   site already underlines links on hover; this just makes it persistent where the
+   link is embedded in prose. */
+.receipts a { text-decoration: underline; text-underline-offset: 2px; }
+.receipts .soon {
+  /* was opacity:0.72 over --bg, which computed to #938e87 = 3.06:1. Opacity is
+     the wrong knob for text that must clear a contrast floor — the blend result
+     is invisible to anyone reading the palette. Explicit tone, 4.51:1. */
+  color: #76726b;
+  font-style: italic;
+}
 
 /* --- terminal --- */
 .terminal {
