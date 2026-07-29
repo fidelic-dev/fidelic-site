@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 const title =
   "Fidelic: your Salesforce org, running locally. Boots in 2s, breaks on command.";
 const description =
-  "Fidelic is a 14MB Docker container that loads your real org's schema, runs your real Apex triggers, and injects the failures you can't test anywhere else — row locks, rate limits, tenant throttling, and your own logic's edge cases.";
+  "The failures that page you at 2am — row locks, rate limits, the retry that double-charges — have never run in any sandbox, at any price. Fidelic is a 14MB Docker container that loads your real org's schema, runs your real Apex triggers, and produces those failures on command.";
 ---
 
 <Base title={title} description={description}>
@@ -27,22 +27,10 @@ const description =
     Wiped clean between tests. As many in parallel as your CI has cores.
   </p>
 
-  {
-    /* TODO: when RECORDED-EFFECTS ships (EventBus.publish capture — a C2 family still
-      unbuilt as of the async/callout milestones), swap the CaseTrigger REFUSED row for
-      "≈ SIMULATED  CaseTrigger  EventBus.publish → captured, not sent". Until then it
-      must read REFUSED — provable-claims rule (no advertising unbuilt behavior).
-
-      2026-07-29: THE CONDITION HAS BEEN MET — the recorded-effect family shipped
-      2026-07-25 (EventBus.publish / Messaging.sendEmail are captured and assertable).
-      This row now UNDER-claims, and the honesty line below says "simulated" while the
-      terminal shows no simulated row. Left unchanged only because this pass was scoped
-      "keep the terminal exactly as-is"; flagged for the next copy decision. */
-  }
   <div
     class="terminal"
     role="img"
-    aria-label="Terminal: Fidelic boots, classifies each trigger as executed or refused with a reason, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled."
+    aria-label="Terminal: Fidelic boots, classifies each trigger as executed, simulated, or refused with a reason, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled."
   >
     <pre><span class="cmd">docker run -p 8080:8080 -v ./mdapi:/mdapi fidelic/emulator --apex-src /mdapi</span>
 <span class="dim">fidelic v1.0  ·  booted in 1.9s  ·  image 14 MB</span>
@@ -50,7 +38,7 @@ const description =
 <span class="dim">classifying triggers against your org schema …</span>
   <span class="ok">✓ EXECUTE</span>     AccountTrigger          before/after insert, update
   <span class="ok">✓ EXECUTE</span>     ContactTrigger          after insert
-  <span class="bad">✗ REFUSED</span>     CaseTrigger             EventBus.publish — not yet simulated
+  <span class="sim">≈ SIMULATED</span>   CaseTrigger             EventBus.publish → captured, not sent
   <span class="bad">✗ REFUSED</span>     BillingSync.trigger:88  dynamic SOQL — not in the subset
 
 <span class="cmd">export SFEMU_FAULT_LOCK_ON_UPDATE=true</span>   <span class="dim"># break it on command</span>
@@ -60,8 +48,8 @@ const description =
   </div>
 
   <p class="answer">
-    Every trigger is classified at boot — executed, simulated, or refused with a
-    reason. Never a silent guess.
+    Every trigger is classified at boot — executed, simulated, recorded-only, or
+    refused with a reason. Never a silent guess.
   </p>
 
   {/* SECTION 3 — receipts, proof, CTA */}
