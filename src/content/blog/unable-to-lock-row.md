@@ -5,7 +5,7 @@ date: 2026-07-04
 draft: false
 ---
 
-In [my last post](/blog/why-is-there-no-localstack-for-salesforce) I told the story of my first `UNABLE_TO_LOCK_ROW` page. It talked about the forum thread, the error that obfuscated instead of providing clarity and the untested/absent retry logic. This post is the page I wish I had landed on that night. What the error actually is, why it's confusing on purpose (well, not on purpose, but it might as well be), where it comes from, why the standard fixes are all coin flips, and how to actually test your way out of it.
+In [my last post](/blog/why-a-fake-org) I told the story of my first `UNABLE_TO_LOCK_ROW` page. It talked about the forum thread, the error that obfuscated instead of providing clarity and the untested/absent retry logic. This post is the page I wish I had landed on that night. What the error actually is, why it's confusing on purpose (well, not on purpose, but it might as well be), where it comes from, why the standard fixes are all coin flips, and how to actually test your way out of it.
 
 ## What the error actually is
 
@@ -149,6 +149,6 @@ Your retry logic is actually tested when you can check all four boxes:
 - Nothing duplicated: no second Task, email, or charge
 - It runs green in CI, on every commit, with no timing in it
 
-If you're checking those boxes some other way, write it up! I want to read it. And if you can't check them at all today, I'd point to the platform's shape I talked about in [the last post](/blog/why-is-there-no-localstack-for-salesforce). It's why Fidelic exists.
+If you're checking those boxes some other way, write it up! I want to read it. And if you can't check them at all today, I'd point to the platform's shape I talked about in [the last post](/blog/why-a-fake-org). It's why Fidelic exists.
 
 [fidelic.dev](https://fidelic.dev)'s early access is open. And the collection continues: tell me the failure you've never been able to rehearse.

@@ -8,9 +8,28 @@ interface Props {
   description: string;
   wide?: boolean;
   noindex?: boolean;
+  /* Set on blog posts: switches og:type to "article", emits article: dates, and adds
+     BlogPosting JSON-LD. Without it every post advertised itself as og:type "website",
+     which tells a crawler the page is a landing page with no publication date. */
+  article?: { date: Date; markdown: string };
 }
-const { title, description, wide = false, noindex = false } = Astro.props;
+const { title, description, wide = false, noindex = false, article } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+
+/* No author is named anywhere on this site, so the byline is the organisation. Inventing
+   a person here would be a fabricated claim in machine-readable form — the worst place
+   for one, because nothing downstream re-checks it. */
+const jsonLd = article && {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title.replace(/ — Fidelic$/, ''),
+  description,
+  datePublished: article.date.toISOString(),
+  url: canonical,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  publisher: { '@type': 'Organization', name: 'Fidelic', url: 'https://fidelic.dev' },
+  isAccessibleForFree: true,
+};
 ---
 
 <!doctype html>
@@ -24,12 +43,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <link rel="canonical" href={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:url" content={canonical} />
+    {article && <meta property="article:published_time" content={article.date.toISOString()} />}
+    {/* Point machine readers at the un-chromed source of this page. */}
+    {article && <link rel="alternate" type="text/markdown" href={article.markdown} />}
     <meta name="twitter:card" content="summary" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title="Fidelic Blog" href="/rss.xml" />
     <meta name="generator" content={Astro.generator} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>
     <Header />

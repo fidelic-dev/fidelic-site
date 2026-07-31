@@ -88,9 +88,24 @@ const BANNER = (src) =>
 // own leading H1 to avoid a duplicate heading.
 const stripLeadingH1 = (text) => text.trimStart().replace(/^#\s+.*\r?\n+/, '');
 
+// Repo-relative links (../QUICKSTART.md, docs/API.md) are correct for someone reading
+// the file on GitHub and a 404 for someone reading it here. Rewrite them to site paths
+// at sync time so the source stays right for BOTH audiences — the alternative is
+// breaking the repo's own links to satisfy the site.
+const DOC_LINK_MAP = {
+  'QUICKSTART.md': '/docs/quickstart',
+  'API.md': '/docs/api',
+};
+const rewriteDocLinks = (text) =>
+  text.replace(/\]\(([^)]+?\.md)(#[^)]*)?\)/g, (whole, target, hash = '') => {
+    const base = target.split('/').pop();
+    const dest = DOC_LINK_MAP[base];
+    return dest ? `](${dest}${hash})` : whole;
+  });
+
 for (const doc of DOCS) {
   const { from, text } = await fetchSource(doc.src);
-  const out = `${frontmatter(doc.frontmatter)}\n\n${BANNER(doc.src)}\n\n${stripLeadingH1(text)}`;
+  const out = `${frontmatter(doc.frontmatter)}\n\n${BANNER(doc.src)}\n\n${rewriteDocLinks(stripLeadingH1(text))}`;
   const dest = resolve(ROOT, doc.dest);
   await mkdir(dirname(dest), { recursive: true });
   await writeFile(dest, out);

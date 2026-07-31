@@ -13,7 +13,11 @@ const fmt = (d: Date) =>
   d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 ---
 
-<Base title={`${post.data.title} — Fidelic`} description={post.data.description}>
+<Base
+  title={`${post.data.title} — Fidelic`}
+  description={post.data.description}
+  article={{ date: post.data.date, markdown: `/blog/${post.id}.md` }}
+>
   <article class="prose">
     <p class="back"><a href="/blog">← Blog</a></p>
     <h1>{post.data.title}</h1>

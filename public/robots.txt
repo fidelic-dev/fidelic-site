@@ -1,4 +1,15 @@
+# Everything here is public and meant to be read, by people and by machines alike.
+# No agent-specific blocks: if a claim on this site cannot survive being quoted by a
+# model, the fix is the claim, not the crawler.
 User-agent: *
 Allow: /
 
 Sitemap: https://fidelic.dev/sitemap-index.xml
+
+# Machine-readable index of the site, and of where the un-chromed source text lives:
+#   https://fidelic.dev/llms.txt          (llmstxt.org convention)
+#   https://fidelic.dev/blog/<slug>.md    (raw markdown twin of every post)
+# Deliberately a COMMENT, not a directive. An earlier revision wrote this as
+# "LLM-Content: ...", which robots.txt parsers reject as an unknown directive — it made
+# the whole file invalid (Lighthouse SEO 100 -> 92) to advertise a path that is found by
+# convention anyway.
