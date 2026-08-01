@@ -142,7 +142,7 @@ main { padding-top: 3.2rem; }
    colour: --accent sits at 1.04:1 against the surrounding text (axe wants 3:1), so
    colour alone carries no signal for anyone who cannot separate the two hues. The
    site already underlines links on hover; this just makes it persistent where the
-   link is embedded in prose. */
+   link is embedded in prose. Applied to `.prose a` too — see below. */
 .receipts a { text-decoration: underline; text-underline-offset: 2px; }
 .receipts .soon {
   /* was opacity:0.72 over --bg, which computed to #938e87 = 3.06:1. Opacity is
@@ -232,6 +232,10 @@ main { padding-top: 3.2rem; }
 
 /* --- prose (blog + about) --- */
 .prose { max-width: var(--maxw); }
+/* Same rule as `.receipts a`: a link embedded in prose must be distinguishable by
+   something other than colour. --accent sits at ~1:1 against body text, so colour
+   alone carries no signal — and blog posts are almost entirely in-prose links. */
+.prose a { text-decoration: underline; text-underline-offset: 2px; }
 .prose img { max-width: 100%; height: auto; }
 .prose code {
   font-family: var(--mono);
@@ -252,6 +256,15 @@ main { padding-top: 3.2rem; }
   overflow-x: auto;
 }
 .prose pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+/* Syntax-highlighting comments are the ONE token in Shiki's github-dark theme that
+   fails contrast on the code background: #6A737D on #24292e is 3.05:1 against a 4.5
+   floor. Every other token in the theme passes (checked: keywords 5.52, strings 8.69,
+   functions 5.79, text 11.50), so this is a single targeted override rather than a
+   theme swap. Lightened in OKLab with hue and chroma held — the background is dark, so
+   the fix is to raise lightness, not lower it: #6a737d -> #86909a, 4.52:1.
+   Shiki emits the same colour in mixed case, hence the case-insensitive match, and
+   !important because the colour arrives as an inline style. */
+.prose pre span[style*="6A737D" i] { color: #86909a !important; }
 .prose blockquote {
   margin: 1.5rem 0;
   padding-left: 18px;
