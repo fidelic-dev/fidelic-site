@@ -22,9 +22,10 @@ export async function getStaticPaths() {
     .map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
-export const GET: APIRoute = ({ props }) => {
+export const GET: APIRoute = ({ props, site }) => {
   const { post } = props as { post: Awaited<ReturnType<typeof getCollection<'blog'>>>[number] };
-  const url = `https://fidelic.dev/blog/${post.id}`;
+  const origin = String(site ?? 'https://www.fidelic.dev').replace(/\/$/, '');
+  const url = `${origin}/blog/${post.id}`;
   // A short provenance header, so a model that quotes this can attribute and date it
   // without having to guess from the prose.
   const header = [
@@ -34,7 +35,7 @@ export const GET: APIRoute = ({ props }) => {
     '',
     `Published: ${post.data.date.toISOString().slice(0, 10)}`,
     `Canonical: ${url}`,
-    `Source: Fidelic (https://fidelic.dev)`,
+    `Source: Fidelic (${origin})`,
     '',
     '---',
     '',

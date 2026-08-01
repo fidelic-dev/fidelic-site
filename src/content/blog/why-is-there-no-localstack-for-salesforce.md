@@ -61,4 +61,4 @@ So is it Salesforce outside of Salesforce? Yeah no! It's an emulator **that refu
 
 A test environment that lies confidently is worse than no test environment, and the entire value of a fake org is knowing precisely which kind of answer you're looking at. Everything it claims to emulate is backed by a conformance suite written from Salesforce's own documentation, test by test, with citations, verified against real orgs, and [public so you can run the scorecard yourself](https://github.com/fidelic-dev/fidelic-conformance) instead of trusting mine.
 
-It's in early access now, onboarding a few teams at a time: [fidelic.dev](https://fidelic.dev) if any of this is your 2am story too.
+It's in early access now, onboarding a few teams at a time: [fidelic.dev](https://www.fidelic.dev) if any of this is your 2am story too.

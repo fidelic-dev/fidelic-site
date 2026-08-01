@@ -27,7 +27,7 @@ const jsonLd = article && {
   datePublished: article.date.toISOString(),
   url: canonical,
   mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
-  publisher: { '@type': 'Organization', name: 'Fidelic', url: 'https://fidelic.dev' },
+  publisher: { '@type': 'Organization', name: 'Fidelic', url: String(Astro.site) },
   isAccessibleForFree: true,
 };
 ---

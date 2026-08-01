@@ -16,9 +16,10 @@ import { getCollection } from 'astro:content';
 // do" section is deliberate: a model summarising Fidelic will state limits either way,
 // and it should state ours rather than invent them.
 
-const SITE = 'https://fidelic.dev';
-
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async (context) => {
+  // Derived from astro.config `site` rather than hardcoded — a second copy of the origin
+  // is a second thing to forget when the canonical host changes.
+  const SITE = String(context.site ?? 'https://www.fidelic.dev').replace(/\/$/, '');
   const posts = (await getCollection('blog'))
     .filter((p) => !p.data.draft)
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());

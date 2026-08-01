@@ -4,11 +4,11 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fidelic.dev/sitemap-index.xml
+Sitemap: https://www.fidelic.dev/sitemap-index.xml
 
 # Machine-readable index of the site, and of where the un-chromed source text lives:
-#   https://fidelic.dev/llms.txt          (llmstxt.org convention)
-#   https://fidelic.dev/blog/<slug>.md    (raw markdown twin of every post)
+#   https://www.fidelic.dev/llms.txt          (llmstxt.org convention)
+#   https://www.fidelic.dev/blog/<slug>.md    (raw markdown twin of every post)
 # Deliberately a COMMENT, not a directive. An earlier revision wrote this as
 # "LLM-Content: ...", which robots.txt parsers reject as an unknown directive — it made
 # the whole file invalid (Lighthouse SEO 100 -> 92) to advertise a path that is found by

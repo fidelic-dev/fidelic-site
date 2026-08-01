@@ -96,7 +96,7 @@ The bug isn't "the retry didn't fire.", it's "the retry fired and _duplicated so
 
 ## Testing it for real
 
-This is the part that didn't exist when I got my first lock page, and it's the reason I built [Fidelic](https://fidelic.dev): a Salesforce emulator in a Docker container that loads your org's schema, runs your Apex triggers, and, drumrolls please: **produces this error on command.**
+This is the part that didn't exist when I got my first lock page, and it's the reason I built [Fidelic](https://www.fidelic.dev): a Salesforce emulator in a Docker container that loads your org's schema, runs your Apex triggers, and, drumrolls please: **produces this error on command.**
 
 ```mermaid
 sequenceDiagram
@@ -151,4 +151,4 @@ Your retry logic is actually tested when you can check all four boxes:
 
 If you're checking those boxes some other way, write it up! I want to read it. And if you can't check them at all today, I'd point to the platform's shape I talked about in [the last post](/blog/why-is-there-no-localstack-for-salesforce). It's why Fidelic exists.
 
-[fidelic.dev](https://fidelic.dev)'s early access is open. And the collection continues: tell me the failure you've never been able to rehearse.
+[fidelic.dev](https://www.fidelic.dev)'s early access is open. And the collection continues: tell me the failure you've never been able to rehearse.
