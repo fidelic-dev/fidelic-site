@@ -36,8 +36,7 @@ const description =
 <span class="dim">fidelic v1.0  ·  booted in 1.9s  ·  image 14 MB</span>
 
 <span class="dim">classifying triggers against your org schema …</span>
-  <span class="ok">✓ EXECUTE</span>     AccountTrigger          before/after insert, update
-  <span class="ok">✓ EXECUTE</span>     ContactTrigger          after insert
+  <span class="ok">✓ EXECUTE</span>     AccountGuardTrigger     before update — sets Rating when Industry=Technology
   <span class="sim">≈ SIMULATED</span>   CaseTrigger             EventBus.publish → captured, not sent
   <span class="bad">✗ REFUSED</span>     BillingSync.trigger:88  dynamic SOQL — not in the subset
 
@@ -48,8 +47,8 @@ const description =
   </div>
 
   <p class="answer">
-    Every trigger is classified at boot — executed, simulated, recorded-only, or
-    refused with a reason. Never a silent guess.
+    Every trigger is <em>classified</em> at boot — executed, simulated,
+    recorded-only, or refused with a reason. Never a silent guess.
   </p>
 
   {/* SECTION 3 — receipts, proof, CTA */}
