@@ -33,19 +33,6 @@ const DOCS = [
     },
   },
   {
-    // The demo transcript. Mirrored rather than copied by hand for the same reason as the
-    // rest: the video and this text are both generated from demo/npsp.tape, and a
-    // hand-maintained transcript would drift from the recording the first time it is re-cut.
-    src: 'demo/npsp-transcript.md',
-    dest: 'src/content/docs/demo-transcript.md',
-    frontmatter: {
-      title: 'What the demo shows — and what it does not',
-      description:
-        'Full text of the 60-second Fidelic demo: every command, every output, and an explicit list of the claims the video does NOT make.',
-      order: 6,
-    },
-  },
-  {
     src: 'docs/API.md',
     dest: 'src/content/docs/api.md',
     frontmatter: {
