@@ -63,7 +63,7 @@ central design rule.
 
 ## Docs
 
-${docs.map((d) => `- [${d.data.title}](${SITE}/docs/${d.id}): ${d.data.description}`).join('\n')}
+${docs.map((d) => `- [${d.data.title}](${SITE}/docs/${d.id}.md): ${d.data.description}`).join('\n')}
 
 ## Blog (raw markdown)
 

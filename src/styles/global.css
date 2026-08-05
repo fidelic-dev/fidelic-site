@@ -236,6 +236,14 @@ main { padding-top: 3.2rem; }
    something other than colour. --accent sits at ~1:1 against body text, so colour
    alone carries no signal — and blog posts are almost entirely in-prose links. */
 .prose a { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Links inside body copy must be underlined, not merely coloured — a link distinguishable
+   only by colour fails WCAG 1.4.1 and is invisible to a viewer with colour-vision deficiency.
+   `.receipts a` and `.prose a` already did this; `.answer` did not, and the moment a link
+   landed in one (the NPSP link in the demo section) the accessibility score went 100 -> 95.
+   Adding the rule to the CLASS rather than to that one link, because the next link dropped
+   into an .answer would have reintroduced it. */
+.answer a { text-decoration: underline; text-underline-offset: 2px; }
 .prose img { max-width: 100%; height: auto; }
 .prose code {
   font-family: var(--mono);
@@ -375,4 +383,28 @@ main { padding-top: 3.2rem; }
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--border);
   }
+}
+
+
+/* The demo recording. Click-to-play with a poster — see the comment in index.astro for why
+   this is not an autoplaying loop. max-width matches .terminal so the two sit in one column
+   and the page reads as one continuous demonstration rather than a page with a video bolted on. */
+.demo {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem 0 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--term-bg, #1e1e2e);
+}
+
+/* The transcript link's trailing note. Quieter than the link, but not so quiet it fails
+   contrast — the accessibility score is 100 and this file is where that gets lost. */
+.dim-note {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
 }

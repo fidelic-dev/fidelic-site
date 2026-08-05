@@ -51,6 +51,49 @@ const description =
     recorded-only, or refused with a reason. Never a silent guess.
   </p>
 
+  {/* SECTION 2b — the recording. Real package, real handlers, honest scoreboard. */}
+  {/*
+    CLICK-TO-PLAY, preload="none", poster frame.
+
+    Not autoplay-loop: that fetches 2 MB on every homepage load, on the LCP path, for a
+    visitor who may never watch it. The page currently scores 100 across the board and those
+    scores are load-bearing — they are the first evidence a sceptical engineer has that the
+    people making performance claims can meet them. A muted loop would trade that for motion.
+
+    The poster is a single 68 KB still of the scoreboard beat, which is also the frame that
+    earns the click.
+  */}
+  <h2>Sixty seconds against a real package.</h2>
+
+  <p class="answer">
+    Not a scripted toy org — this is <a href="https://github.com/SalesforceFoundation/NPSP">NPSP</a>,
+    the nonprofit package with a config-driven trigger framework, booted from source. It
+    classifies all 26 triggers, runs a real TDTM handler, names every refusal with a reason,
+    and breaks on command.
+  </p>
+
+  <video
+    class="demo"
+    controls
+    preload="none"
+    playsinline
+    muted
+    poster="/npsp-demo-poster.jpg"
+    width="1280"
+    height="720"
+    aria-label="Sixty-second terminal recording of Fidelic booting against the NPSP package, classifying 26 triggers, running a TDTM handler, explaining a refusal, and returning an UNABLE_TO_LOCK_ROW error on demand."
+  >
+    <source src="/npsp-demo.mp4" type="video/mp4" />
+    Your browser cannot play this video. The full transcript is linked below.
+  </video>
+
+  <p class="answer">
+    <a href="/docs/demo-transcript">What this shows — and what it doesn&rsquo;t →</a>
+    <span class="dim-note">
+      Every command and output in full, plus the claims the video deliberately does not make.
+    </span>
+  </p>
+
   {/* SECTION 3 — receipts, proof, CTA */}
   <div class="receipts">
     <p>
