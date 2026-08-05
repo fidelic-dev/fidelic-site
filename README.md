@@ -38,7 +38,7 @@ The filename becomes the URL slug (`my-post.md` → `/blog/my-post`).
 ## Before you edit copy
 
 Every claim on the site must be provable. The load-bearing numbers today are: **68/68**
-conformance, **14 MB** image, **~2 s** boot, and the partner quote. Do not invent
+conformance, **17.6 MB** image, **~2 s** boot, and the partner quote. Do not invent
 others.
 
 ## Deploying

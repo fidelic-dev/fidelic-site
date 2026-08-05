@@ -53,7 +53,7 @@ Salesforce is the biggest CRM on the planet. A mature org routinely carries more
 
 ## So I built it
 
-Fidelic is a Salesforce emulator in a 14MB Docker container. It boots in about two seconds. It loads your actual org's schema: your objects, your fields, your validation rules, pulled with your own credentials and it executes your actual Apex triggers, so a record created over the REST API comes back with the same computed fields and the same cascade of side effects your real org would produce. Your tests point at localhost and can't tell the difference.
+Fidelic is a Salesforce emulator in a 17.6MB Docker container. It boots in about two seconds. It loads your actual org's schema: your objects, your fields, your validation rules, pulled with your own credentials and it executes your actual Apex triggers, so a record created over the REST API comes back with the same computed fields and the same cascade of side effects your real org would produce. Your tests point at localhost and can't tell the difference.
 
 And because it's an emulator, it does the things a real org never will: it produces a row lock (and other categories of errors I like to call pain in the you know where) on demand. It returns `REQUEST_LIMIT_EXCEEDED` on the request you choose. It adds five seconds of latency so you can finally watch your timeout logic actually time out. It resets to empty in milliseconds between tests, and you can run as many of them in parallel as your CI has cores. The failures simplified to a config flag.
 

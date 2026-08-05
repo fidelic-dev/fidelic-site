@@ -28,7 +28,7 @@ export const GET: APIRoute = async (context) => {
 
   const body = `# Fidelic
 
-> A Salesforce API emulator: a 14MB Docker container that loads a real org's schema,
+> A Salesforce API emulator: a 17.6MB Docker container that loads a real org's schema,
 > runs that org's real Apex triggers, and injects failures no real org will let you
 > reproduce — row locks, rate limits, latency — so Salesforce integrations can be
 > tested in CI like any other dependency.

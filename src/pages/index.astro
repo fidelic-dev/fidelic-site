@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 const title =
   "Fidelic: your Salesforce org, running locally. Boots in 2s, breaks on command.";
 const description =
-  "The failures that page you at 2am — row locks, rate limits, the retry that double-charges — have never run in any sandbox, at any price. Fidelic is a 14MB Docker container that loads your real org's schema, runs your real Apex triggers, and produces those failures on command.";
+  "The failures that page you at 2am — row locks, rate limits, the retry that double-charges — have never run in any sandbox, at any price. Fidelic is a 17.6MB Docker container that loads your real org's schema, runs your real Apex triggers, and produces those failures on command.";
 ---
 
 <Base title={title} description={description}>
@@ -20,7 +20,7 @@ const description =
   <h2>Fidelic is a Salesforce org you can boot, break, and throw away.</h2>
 
   <p class="answer">
-    A 14MB Docker container that loads your real schema and runs your real Apex
+    A 17.6MB Docker container that loads your real schema and runs your real Apex
     triggers. Point your tests at localhost with same REST responses, same
     trigger side effects, same validation errors. Then flip a switch and get the
     failures no real org allows: row locks, rate limits, latency, on command.
@@ -33,7 +33,7 @@ const description =
     aria-label="Terminal: Fidelic boots, classifies each trigger as executed, simulated, or refused with a reason, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled."
   >
     <pre><span class="cmd">docker run -p 8080:8080 -v ./mdapi:/mdapi fidelic/emulator --apex-src /mdapi</span>
-<span class="dim">fidelic v1.0  ·  booted in 1.9s  ·  image 14 MB</span>
+<span class="dim">fidelic v1.0  ·  booted in 1.9s  ·  image 17.6 MB</span>
 
 <span class="dim">classifying triggers against your org schema …</span>
   <span class="ok">✓ EXECUTE</span>     AccountGuardTrigger     before update — sets Rating when Industry=Technology
