@@ -11,9 +11,9 @@ const description =
   <h1>Salesforce is the only part of your stack with no real CI.</h1>
 
   <p class="sub">
-    Every deploy is "tested" — yet the failures that page you at 2am have never
-    run once: the row lock, the rate limit, the retry that double-charges. You
-    can't rehearse them in any sandbox, at any price.
+    Every deploy is "tested" but the failures that make the pager go off have
+    never run once: the row lock, the rate limit, the retry that double-charges.
+    You can't rehearse them in any sandbox, at any price.
   </p>
 
   {/* SECTION 2 — the solution */}
@@ -21,8 +21,8 @@ const description =
 
   <p class="answer">
     A 14MB Docker container that loads your real schema and runs your real Apex
-    triggers. Point your tests at localhost — same REST responses, same trigger
-    side effects, same validation errors. Then flip a switch and get the
+    triggers. Point your tests at localhost with same REST responses, same
+    trigger side effects, same validation errors. Then flip a switch and get the
     failures no real org allows: row locks, rate limits, latency, on command.
     Wiped clean between tests. As many in parallel as your CI has cores.
   </p>
@@ -47,19 +47,22 @@ const description =
   </div>
 
   <p class="answer">
-    Every trigger is <em>classified</em> at boot — executed, simulated,
-    recorded-only, or refused with a reason. Never a silent guess.
+    Every trigger is <em>classified</em> at boot: executed, simulated, recorded-only,
+    or refused with a reason.
   </p>
 
   {/* SECTION 3 — receipts, proof, CTA */}
   <div class="receipts">
     <p>
-      Verified 66/66 against the public conformance suite —
-      <a href="https://github.com/fidelic-dev/fidelic-conformance">run the scorecard yourself →</a>
+      Verified 66/66 against the public conformance suite
+      <a href="https://github.com/fidelic-dev/fidelic-conformance"
+        >run the scorecard yourself →</a
+      >
     </p>
     <p class="soon">
       66/66 pass · 5 skipped (need a real org) · 2 pending (awaiting real-org
-      verification). The skips and pendings are the methodology showing its work.
+      verification). The skips and pendings are the methodology showing its
+      work.
     </p>
   </div>
 
@@ -86,7 +89,11 @@ const description =
         required
       />
       <input type="hidden" name="_subject" value="Fidelic early access" />
-      <input type="hidden" name="_next" value="https://www.fidelic.dev/thanks" />
+      <input
+        type="hidden"
+        name="_next"
+        value="https://www.fidelic.dev/thanks"
+      />
       <button class="btn" type="submit">Get early access</button>
     </form>
   </div>
