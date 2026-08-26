@@ -51,6 +51,47 @@ const description =
     or refused with a reason.
   </p>
 
+  {/* SECTION 2b — the live playground.
+      A LINK AND A REAL TRANSCRIPT, not an iframe. An iframe would load the whole
+      playground app into this page for every visitor who never clicks it, which is
+      third-party JavaScript in the critical path of a site that currently ships none.
+      The transcript below is verbatim output from a real session against the live
+      box — not a mock-up — so it stays honest without costing a single byte of image. */}
+  <div class="tryit">
+    <h2>Or run it now, in your browser.</h2>
+
+    <p class="answer">
+      <a href="https://play.fidelic.dev">play.fidelic.dev</a> hands you a real
+      NPSP org — the actual open-source nonprofit codebase, 26 triggers, 7 of them
+      executing real Apex. Click a command, watch the triggers fire, throw the org
+      away. No install, no signup, no Salesforce login.
+    </p>
+
+    <div
+      class="terminal"
+      role="img"
+      aria-label="Playground transcript: creating a DataImportBatch record returns HTTP 201, and the fired-trigger log shows TDTM_DataImportBatch running on both before-insert and after-insert."
+    >
+      <pre><span class="accent">POST /services/data/v62.0/sobjects/DataImportBatch__c</span> <span class="dim">&#123;"Name":"Spring Appeal"&#125;</span>
+<span class="ok">201</span>  <span class="dim">&#123;"id":"a0400000000006zAAA","success":true&#125;</span>
+
+<span class="accent">GET /__emulator__/fired</span>
+  <span class="ok">TDTM_DataImportBatch</span>  <span class="dim">before insert</span>  entered-clean
+  <span class="ok">TDTM_DataImportBatch</span>  <span class="dim">after  insert</span>  entered-clean</pre>
+    </div>
+
+    <p>
+      <a class="btn" href="https://play.fidelic.dev">Open the playground →</a>
+    </p>
+
+    {/* Says what is true rather than what sells. The pool is small and finite, and a
+        visitor who meets the busy path should have been told it exists. */}
+    <p class="soon">
+      A handful of sandboxes run at a time. If they are all busy you will be given
+      the command to run it yourself instead.
+    </p>
+  </div>
+
   {/* SECTION 3 — receipts, proof, CTA */}
   <div class="receipts">
     <p>

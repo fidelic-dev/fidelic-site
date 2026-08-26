@@ -175,6 +175,18 @@ main { padding-top: 3.2rem; }
 .terminal .bad { color: var(--bad); }
 .terminal .accent { color: var(--accent); }
 
+/* --- live playground CTA --- */
+.tryit { margin: 3rem 0; }
+/* .soon is scoped to .receipts, so it needs its own rule here rather than inheriting
+   nothing. Same explicit tone and same reason: 4.51:1 on --bg. Opacity is the wrong
+   knob for text that must clear a contrast floor — the blend result is invisible to
+   anyone reading the palette. */
+.tryit .soon {
+  color: #76726b;
+  font-style: italic;
+  font-size: 0.92rem;
+}
+
 /* --- pull quote --- */
 .pullquote {
   margin: 4rem 0;
