@@ -11,8 +11,8 @@ const description =
   <h1>Salesforce is the only part of your stack with no real CI.</h1>
 
   <p class="sub">
-    Every deploy is "tested" but the failures that make the pager go off have
-    never run once: the row lock, the rate limit, the retry that double-charges.
+    Every deploy is "tested" but the real failures that cause customer impact  
+    never run once: row locks, rate limits, retries that double-charge.
     You can't rehearse them in any sandbox, at any price.
   </p>
 
@@ -22,9 +22,10 @@ const description =
   <p class="answer">
     A 17.6MB Docker container that loads your real schema and runs your real Apex
     triggers. Point your tests at localhost with same REST responses, same
-    trigger side effects, same validation errors. Then flip a switch and get the
-    failures no real org allows: row locks, rate limits, latency, on command.
-    Wiped clean between tests. As many in parallel as your CI has cores.
+    trigger side effects, same validation errors. Then flip a switch and get the 
+    failures no real org allows: row locks, rate limits, latency on demand. It resets 
+    in milliseconds, so every test starts from a clean org and you can run as many as 
+    you need side by side.
   </p>
 
   <div
@@ -68,8 +69,8 @@ const description =
           real handlers fires" is what corpus-exec and the playground's own condition 7
           actually verify. Claim the verified thing. */}
       <a href="https://play.fidelic.dev">play.fidelic.dev</a> hands you a real
-      NPSP org — the actual open-source nonprofit codebase, all 26 triggers loaded
-      and classified. Click a command and watch one of its real handlers fire, then
+      NPSP org with the actual open-source nonprofit codebase. All 26 triggers in that repo
+      are loaded and classified. Click a command and watch one of its real handlers fire, then
       throw the org away. No install, no signup, no Salesforce login.
     </p>
 
