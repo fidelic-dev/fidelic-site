@@ -61,10 +61,16 @@ const description =
     <h2>Or run it now, in your browser.</h2>
 
     <p class="answer">
+      {/* FINDINGS #18: no artifact may state or imply that N triggers RUN. This line
+          previously read "26 triggers, 7 of them executing real Apex" — but 7 is the
+          CLASSIFIED-EXECUTE count, and runtime verification puts 2 of those 7 entered
+          and 5 refused. "Loaded and classified" is what the scanner knows; "one of its
+          real handlers fires" is what corpus-exec and the playground's own condition 7
+          actually verify. Claim the verified thing. */}
       <a href="https://play.fidelic.dev">play.fidelic.dev</a> hands you a real
-      NPSP org — the actual open-source nonprofit codebase, 26 triggers, 7 of them
-      executing real Apex. Click a command, watch the triggers fire, throw the org
-      away. No install, no signup, no Salesforce login.
+      NPSP org — the actual open-source nonprofit codebase, all 26 triggers loaded
+      and classified. Click a command and watch one of its real handlers fire, then
+      throw the org away. No install, no signup, no Salesforce login.
     </p>
 
     <div
