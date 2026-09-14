@@ -45,7 +45,7 @@ The teams that feel this worst aren't the careless ones. They're the ones with t
 
 ## It doesn't have to stay accepted
 
-The prerequisite that was missing: the disposable, breakable, honest fake org is the thing I've been building. [Fidelic](https://fidelic.dev) boots a Salesforce emulator in a Docker container in about two seconds: your org's schema, your Apex triggers actually executing, the REST API answering the way your org would. It resets between tests in milliseconds, runs as many copies in parallel as your CI has cores, and produces on command the failures no real org will ever let you stage.
+The prerequisite that was missing: the disposable, breakable, honest fake org is the thing I've been building. [Fidelic](https://fidelic.dev) boots a Salesforce emulator in a Docker container in seconds: your org's schema, your Apex triggers actually executing, the REST API answering the way your org would. It resets between tests in milliseconds, runs as many copies in parallel as your CI has cores, and produces on command the failures no real org will ever let you stage.
 
 Which means the missing pipeline stage becomes buildable: pull request → boot emulator → run your _integration_ suite against localhost. These are real requests, real trigger cascades, injected row locks, injected rate limits that can be torn down post testing. Then merge! The CI half, finally, next to your existing CD half. It's in early access, and this exact pipeline stage is what the early teams are building.
 

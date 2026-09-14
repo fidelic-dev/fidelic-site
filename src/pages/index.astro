@@ -1,7 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 const title =
-  "Fidelic: your Salesforce org, running locally. Boots in 2s, breaks on command.";
+  "Fidelic: your Salesforce org, running locally. Boots in seconds, breaks on command.";
 const description =
   "The failures that page you at 2am — row locks, rate limits, the retry that double-charges — have never run in any sandbox, at any price. Fidelic is a Docker container, a 10 MB download, that loads your real org's schema, runs your real Apex triggers, and produces those failures on command.";
 ---
@@ -28,28 +28,57 @@ const description =
     you need side by side.
   </p>
 
+  {/* TRANSCRIPT, NOT A COMPOSITION — every line below is verbatim program output.
+      Captured 2026-09-14 from image bc0f8a3 against NPSP @ 19646faa (26 triggers,
+      1,503 classes) on the production box, a Hetzner CPX21 with 3 vCPU.
+
+      Reproduce both commands exactly:
+        docker run --rm -v ./npsp:/mdapi:ro --entrypoint /sfapex \
+          fidelic/emulator:bc0f8a3 coverage /mdapi
+        docker run -p 8080:8080 -v ./npsp:/mdapi:ro -e SFEMU_FAULT_LOCK_ON_UPDATE=true \
+          fidelic/emulator:bc0f8a3 --apex-src /mdapi
+
+      Long lines are elided with … and nothing is reworded. The one line that is OURS
+      rather than the program's is the 15.9s timing, marked with a # as a comment,
+      because sfemu does not print a boot duration. If re-running stops reproducing
+      this, the copy is stale — that is the point of naming the commit.
+
+      The previous version of this block was a composition: it showed analyzer output
+      under an emulator command, invented trigger names, and a REFUSED verdict the
+      product has never emitted. */}
   <div
     class="terminal"
     role="img"
-    aria-label="Terminal: Fidelic boots, classifies each trigger as executed, simulated, or refused with a reason, then returns an UNABLE_TO_LOCK_ROW error when failure injection is enabled."
+    aria-label="Terminal transcript: the sfapex analyzer classifies the Nonprofit Success Pack's 26 triggers at load time as 7 EXECUTE, 19 UNRESOLVED; the emulator then boots that org in 15.9 seconds and, with failure injection enabled, a PATCH returns HTTP 400 with an UNABLE_TO_LOCK_ROW error array."
   >
-    <pre><span class="cmd">docker run -p 8080:8080 -v ./mdapi:/mdapi fidelic/emulator --apex-src /mdapi</span>
-<span class="dim">fidelic  ·  booted in 1.9s  ·  image 25 MB</span>
+    <pre><span class="dim"># what will run, before running it</span>
+<span class="cmd">docker run --rm -v ./npsp:/mdapi:ro --entrypoint /sfapex fidelic/emulator coverage /mdapi</span>
+COVERAGE
+  parsed:   1061 files (0 with ERROR nodes, 0 error nodes total)
+  found:    26 trigger(s), 1503 class(es)
 
-<span class="dim">classifying triggers against your org schema …</span>
-  <span class="ok">✓ EXECUTE</span>     AccountGuardTrigger     before update — sets Rating when Industry=Technology
-  <span class="sim">≈ SIMULATED</span>   CaseTrigger             EventBus.publish → captured, not sent
-  <span class="bad">✗ REFUSED</span>     BillingSync.trigger:88  dynamic SOQL — not in the subset
+RUNG B LADDER @ C1 + C2 families &#123;…&#125; <span class="dim">(load-time classification)</span>: EXECUTE=7  HOOKS=0  UNRESOLVED=19  RECORDED-ONLY=0  (SIMULATED=1)
+  <span class="ok">EXECUTE</span>     TDTM_DataImportBatch
+  <span class="sim">EXECUTE*</span>    TDTM_FormTemplate  (SIMULATED: settings: Gift_Entry_Settings__c.getInstance — Custom Setting read at C2)
+  <span class="bad">UNRESOLVED</span>  TDTM_HouseholdObject  (min tier C3; blocked by dispatch: interface Evaluator [C3])
 
-<span class="cmd">export SFEMU_FAULT_LOCK_ON_UPDATE=true</span>   <span class="dim"># break it on command</span>
-<span class="cmd">curl -sX PATCH $ORG/services/data/v62.0/sobjects/Account/001xx0000…</span>
-<span class="bad">&#123; "errorCode": "UNABLE_TO_LOCK_ROW",</span>
-<span class="bad">  "message": "unable to obtain exclusive access to this record" &#125;</span></pre>
+<span class="dim"># now boot it, with the row-lock fault armed</span>
+<span class="cmd">docker run -p 8080:8080 -v ./npsp:/mdapi:ro -e SFEMU_FAULT_LOCK_ON_UPDATE=true fidelic/emulator --apex-src /mdapi</span>
+sfemu: apexexec ON — 26 triggers loaded from "/mdapi", 7 EXECUTE-classified
+sfemu bc0f8a3 listening on :8080 (store: sqlite ":memory:", client-secret: false, metadata: "/mdapi", hooks-file: "")
+<span class="dim"># 15.9s to listening — NPSP, 26 triggers / 1,503 classes, 3-vCPU cloud VM</span>
+
+<span class="cmd">curl -sX PATCH localhost:8080/services/data/v62.0/sobjects/Account/00100000000006zAAA \
+  -H 'Content-Type: application/json' -d '&#123;"Rating":"Hot"&#125;'</span>
+<span class="bad">HTTP 400</span>
+<span class="bad">[&#123;"message":"unable to obtain exclusive access to this record or 1 records",</span>
+<span class="bad">  "errorCode":"UNABLE_TO_LOCK_ROW","fields":[]&#125;]</span></pre>
   </div>
 
   <p class="answer">
-    Every trigger is <em>classified</em> at boot: executed, simulated, recorded-only,
-    or refused with a reason.
+    Every trigger is <em>classified</em> before anything runs: EXECUTE, HOOKS,
+    RECORDED-ONLY, or UNRESOLVED with the file, line and reason it was refused.
+    Classified is not the same as executed, and the analyzer never claims otherwise.
   </p>
 
   {/* SECTION 2b — the live playground.
