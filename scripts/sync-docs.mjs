@@ -33,6 +33,26 @@ const DOCS = [
     },
   },
   {
+    src: 'docs/ci/github-actions.md',
+    dest: 'src/content/docs/ci-github-actions.md',
+    frontmatter: {
+      title: 'Run your tests in GitHub Actions',
+      description:
+        'A GitHub Actions workflow that boots Fidelic, waits until your Apex has actually loaded, runs your integration tests and tears down. Executed as a real workflow run before publication.',
+      order: 6,
+    },
+  },
+  {
+    src: 'docs/ci/gitlab.md',
+    dest: 'src/content/docs/ci-gitlab.md',
+    frontmatter: {
+      title: 'Run your tests in GitLab CI',
+      description:
+        'The GitLab variant, including the docker:dind difference that silently gives you an emulator with no Apex if you translate the GitHub recipe literally.',
+      order: 7,
+    },
+  },
+  {
     src: 'docs/API.md',
     dest: 'src/content/docs/api.md',
     frontmatter: {
@@ -95,6 +115,8 @@ const stripLeadingH1 = (text) => text.trimStart().replace(/^#\s+.*\r?\n+/, '');
 const DOC_LINK_MAP = {
   'QUICKSTART.md': '/docs/quickstart',
   'API.md': '/docs/api',
+  'github-actions.md': '/docs/ci-github-actions',
+  'gitlab.md': '/docs/ci-gitlab',
 };
 const rewriteDocLinks = (text) =>
   text.replace(/\]\(([^)]+?\.md)(#[^)]*)?\)/g, (whole, target, hash = '') => {
