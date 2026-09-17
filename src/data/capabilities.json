@@ -1,7 +1,7 @@
 {
-  "build": "054a4c7",
+  "build": "164861e",
   "imageRef": "fidelic/emulator:latest",
-  "imageVersion": "d473574",
+  "imageVersion": "054a4c7",
   "generated": "2026-09-17",
   "shippedTier": "C1",
   "capabilities": [
@@ -9,18 +9,21 @@
       "family": "async",
       "verdict": "EXECUTE",
       "simulated": true,
+      "simulationNote": "drained inline after commit, not truly deferred; per-chunk transactions and Database.Stateful are not modelled",
       "note": "Queueable, @future, Schedulable, Batchable"
     },
     {
       "family": "callout",
       "verdict": "EXECUTE",
       "simulated": true,
+      "simulationNote": "answered from a mock registry you register; nothing reaches the network",
       "note": "HttpRequest / HttpResponse outbound calls"
     },
     {
       "family": "crypto",
       "verdict": "EXECUTE",
       "simulated": true,
+      "simulationNote": "seeded and reproducible rather than real entropy, which is the property tests need",
       "note": "Crypto.getRandomInteger and friends (seeded)"
     },
     {
@@ -52,6 +55,7 @@
       "family": "recorded-effect",
       "verdict": "EXECUTE",
       "simulated": true,
+      "simulationNote": "captured and readable afterwards, never actually sent",
       "note": "EventBus.publish and Messaging.sendEmail"
     },
     {
@@ -77,6 +81,7 @@
       "family": "schema-permission",
       "verdict": "EXECUTE",
       "simulated": true,
+      "simulationNote": "answers as a system-mode user; field-level security is not enforced",
       "note": "isAccessible / isCreateable / isUpdateable / isDeletable"
     },
     {
@@ -89,6 +94,7 @@
       "family": "settings",
       "verdict": "EXECUTE",
       "simulated": true,
+      "simulationNote": "org defaults only \u2014 no per-user or per-profile resolution",
       "note": "Custom Setting and Custom Metadata reads"
     }
   ],

@@ -49,8 +49,9 @@ const refused = data.capabilities.filter((c) => c.verdict !== 'EXECUTE');
       <strong>This is not a claim that we ran it</strong> — that is what the fired log
       is for.</dd>
       <dt><span class="v v-sim">SIMULATED</span></dt>
-      <dd>A qualifier on EXECUTE, never a verdict of its own. Real code runs, but some effect
-      is deliberately modelled rather than performed. The divergence is named on the row.</dd>
+      <dd>Never a verdict on its own — it always sits beside EXECUTE. Your code runs;
+      one named thing about it is modelled rather than really done. Every row that carries
+      this says which thing.</dd>
       <dt><span class="v v-prov">Provisional</span></dt>
       <dd>Faithful behaviour whose response <em>envelope</em> still awaits confirmation against
       a real org. A different axis from SIMULATED: a capability can be neither, either, or both.</dd>
@@ -78,17 +79,24 @@ const refused = data.capabilities.filter((c) => c.verdict !== 'EXECUTE');
     <h3>Shipped — {shipped.length} of {data.capabilities.length}</h3>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>Capability</th><th>What it covers</th><th>Verdict</th><th>Caveat</th></tr></thead>
+        <thead><tr><th>Capability</th><th>What it covers</th><th>Verdict</th><th>What differs from a real org</th></tr></thead>
         <tbody>
           {shipped.map((c) => (
             <tr>
               <td><code>{c.family}</code></td>
               <td>{c.note}</td>
+              <td><span class="v v-exec">EXECUTE</span></td>
               <td>
-                <span class="v v-exec">EXECUTE</span>
-                {c.simulated && <span class="v v-sim">SIMULATED</span>}
+                {c.simulated && (
+                  <div class="caveat">
+                    <span class="v v-sim">SIMULATED</span> {c.simulationNote}
+                  </div>
+                )}
+                {c.provisional && (
+                  <div class="caveat"><span class="v v-prov">Provisional</span> {c.provisional}</div>
+                )}
+                {!c.simulated && !c.provisional && <span class="none">—</span>}
               </td>
-              <td>{c.provisional ? <span class="caveat">{c.provisional}</span> : <span class="none">—</span>}</td>
             </tr>
           ))}
         </tbody>
@@ -160,7 +168,8 @@ const refused = data.capabilities.filter((c) => c.verdict !== 'EXECUTE');
   .v-prov{background:#e7e9ff;color:#33389a}
   .v-ref{background:#ffe9ec;color:#8b1d2c}
   .v-rec{background:#eef1f4;color:#44506b}
-  .caveat{font-size:.82rem;color:#57606a}
+  .caveat{font-size:.82rem;color:#57606a;margin-bottom:.3rem}
+  .caveat:last-child{margin-bottom:0}
   .none{color:#8c959f}
   .vocab dt{margin-top:.6rem}
   .vocab dd{margin:.15rem 0 .4rem 0;font-size:.92rem}

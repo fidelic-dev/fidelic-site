@@ -59,9 +59,8 @@ const description =
 
   <p class="answer">
     It can also fail on purpose. One call arms a row lock, a rate limit, or slow responses,
-    and the next request comes back with the real Salesforce error. A sandbox hands you
-    those when it feels like it and never when you ask — which is why the error handling
-    meant to catch them has usually never run.
+    and the next request comes back with the real Salesforce error. You cannot make a sandbox
+    do that, so the code meant to handle these has usually never run.
   </p>
 
   {/* TRANSCRIPT, NOT A COMPOSITION — every line below is verbatim program output.
@@ -133,8 +132,7 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
   <ul class="answer-list">
     <li>
       <strong>EXECUTE</strong> — nothing in the reachable code is unsupported, so the
-      interpreter will attempt your real Apex. That is a prediction, not a receipt: the
-      fired log tells you what actually ran.
+      interpreter will attempt your real Apex. The fired log tells you what actually ran.
     </li>
     <li>
       <strong>HOOKS</strong> — approximated. The effect is reproduced by a rule instead of
@@ -152,9 +150,7 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
   </ul>
 
   <p class="answer">
-    Classified is not the same as executed, and the analyzer never claims otherwise.
-    The same four words appear in your own report and in the emulator's boot output —
-    <a href="/capabilities#vocabulary">see exactly what we support</a>, capability by
+    <a href="/capabilities#vocabulary">See exactly what we support</a>, capability by
     capability, generated from the classifier itself.
   </p>
 
