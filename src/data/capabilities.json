@@ -1,0 +1,114 @@
+{
+  "build": "1264a82",
+  "imageRef": "fidelic/emulator:latest",
+  "imageVersion": "cdcd3ae",
+  "generated": "2026-09-17",
+  "shippedTier": "C1",
+  "capabilities": [
+    {
+      "family": "async",
+      "verdict": "EXECUTE",
+      "simulated": true,
+      "note": "Queueable, @future, Schedulable, Batchable"
+    },
+    {
+      "family": "callout",
+      "verdict": "EXECUTE",
+      "simulated": true,
+      "note": "HttpRequest / HttpResponse outbound calls"
+    },
+    {
+      "family": "crypto",
+      "verdict": "EXECUTE",
+      "simulated": true,
+      "note": "Crypto.getRandomInteger and friends (seeded)"
+    },
+    {
+      "family": "crypto-unshipped",
+      "verdict": "REFUSED",
+      "simulated": false,
+      "note": "digests, signatures, encryption"
+    },
+    {
+      "family": "database",
+      "verdict": "EXECUTE",
+      "simulated": false,
+      "provisional": "database: SaveResult/Error envelope Provisional (partner-pinned)",
+      "note": "Database.insert/update/delete partial-success"
+    },
+    {
+      "family": "database-savepoint",
+      "verdict": "REFUSED",
+      "simulated": false,
+      "note": "Database.setSavepoint and rollback"
+    },
+    {
+      "family": "database-unshipped",
+      "verdict": "REFUSED",
+      "simulated": false,
+      "note": "Database.query and Database.merge"
+    },
+    {
+      "family": "recorded-effect",
+      "verdict": "EXECUTE",
+      "simulated": true,
+      "note": "EventBus.publish and Messaging.sendEmail"
+    },
+    {
+      "family": "schema",
+      "verdict": "EXECUTE",
+      "simulated": false,
+      "provisional": "schema: describe labels derived where the metadata carries none; DisplayType modeled as its enum name; == identity on describe results Provisional (SCHEMA-DESIGN \u00a77)",
+      "note": "describe served from the org's retrieved metadata"
+    },
+    {
+      "family": "schema-metadata-gated",
+      "verdict": "REFUSED",
+      "simulated": false,
+      "note": "describe answers the retrieved metadata does not carry"
+    },
+    {
+      "family": "schema-no-metadata",
+      "verdict": "REFUSED",
+      "simulated": false,
+      "note": "describe for an object no metadata was retrieved for"
+    },
+    {
+      "family": "schema-permission",
+      "verdict": "EXECUTE",
+      "simulated": true,
+      "note": "isAccessible / isCreateable / isUpdateable / isDeletable"
+    },
+    {
+      "family": "schema-unshipped",
+      "verdict": "REFUSED",
+      "simulated": false,
+      "note": "describe surfaces outside the shipped set"
+    },
+    {
+      "family": "settings",
+      "verdict": "EXECUTE",
+      "simulated": true,
+      "note": "Custom Setting and Custom Metadata reads"
+    }
+  ],
+  "capabilitiesCommand": "sfapex capabilities",
+  "conformance": {
+    "passed": 66,
+    "total": 66,
+    "skipped": 5,
+    "pending": 2,
+    "command": "go run ./cmd/confrun --target=emulator   (fidelic-conformance)",
+    "denominator": "66 tests in the public fidelic-conformance suite that can run against a stock emulator; 5 skipped for an org prerequisite and 2 pending real-org verification are excluded from both sides of the fraction"
+  },
+  "coverage": {
+    "corpus": "NPSP @ 19646faa (force-app)",
+    "triggers": 26,
+    "executeTriggers": 7,
+    "pairs": 177,
+    "executePairs": 44,
+    "percent": 24,
+    "command": "sfapex coverage --json <corpus>",
+    "denominator": "ALL 177 trigger-context pairs declared by the 26 triggers in this corpus. This is NOT the runtime ladder's denominator, which counts only the pairs declared by classified-EXECUTE triggers and is therefore a smaller number over a different population."
+  }
+}

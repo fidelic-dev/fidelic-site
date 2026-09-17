@@ -3,6 +3,7 @@ const path = Astro.url.pathname;
 const isDocs = path.startsWith('/docs');
 const isBlog = path.startsWith('/blog');
 const isAbout = path.startsWith('/about');
+const isCaps = path.startsWith('/capabilities');
 ---
 <header class="site-header">
   <div class="wrap">
