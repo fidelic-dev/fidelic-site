@@ -125,33 +125,31 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
   </div>
 
   <p class="answer">
-    Before anything runs, every trigger in your org gets one of four verdicts, so you know
-    what you are looking at before you trust a result:
+    Before anything runs, every trigger in your org gets one of four labels, so you know
+    what you are looking at:
   </p>
 
   <ul class="answer-list">
     <li>
-      <strong>EXECUTE</strong> — nothing in the reachable code is unsupported, so the
-      interpreter will attempt your real Apex. The fired log tells you what actually ran.
+      <strong>EXECUTE</strong>: nothing in the reachable code is unsupported, so the
+      interpreter will run your real Apex.
     </li>
     <li>
-      <strong>HOOKS</strong> — approximated. The effect is reproduced by a rule instead of
-      by running the Apex, and it is labelled as such rather than passed off as the real thing.
+      <strong>HOOKS</strong>: The effect is reproduced by a rule instead of
+      by running the Apex.
     </li>
     <li>
-      <strong>RECORDED-ONLY</strong> — the code could run, but the thing that starts it
-      cannot happen on your machine — a platform event, for instance. Nothing is claimed
-      for it either way.
+      <strong>RECORDED-ONLY</strong>: the code could run, but the thing that starts it
+      cannot happen on your machine such as a platform event, for instance.
     </li>
     <li>
-      <strong>UNRESOLVED</strong> — refused, naming the file, the line, and the construct
-      it uses that we do not support. A refusal you can read beats a wrong answer you cannot see.
+      <strong>UNRESOLVED</strong>: refused! You get the file name, line number, and the construct
+      it uses that we do not support.
     </li>
   </ul>
 
   <p class="answer">
-    <a href="/capabilities#vocabulary">See exactly what we support</a>, capability by
-    capability, generated from the classifier itself.
+    <a href="/capabilities#vocabulary">See exactly what we support</a>
   </p>
 
   {/* SECTION 2b — the live playground.
@@ -170,9 +168,9 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
           and 5 refused. "Loaded and classified" is what the scanner knows; "one of its
           real handlers fires" is what corpus-exec and the playground's own condition 7
           actually verify. Claim the verified thing. */}
-      <a href="https://play.fidelic.dev">play.fidelic.dev</a> hands you a real
-      NPSP org with the actual open-source nonprofit codebase. All 26 triggers in that repo
-      are loaded and classified. Click a command and watch one of its real handlers fire, then
+      <a href="https://play.fidelic.dev">play.fidelic.dev</a> runs a real
+      <a href="https://github.com/salesforcefoundation/npsp">NPSP </a> org with the actual open-source nonprofit codebase. All 26 triggers in that repo
+      are loaded and classified. Click a command and inspect one of its real handlers fire, then
       throw the org away. No install, no signup, no Salesforce login.
     </p>
 

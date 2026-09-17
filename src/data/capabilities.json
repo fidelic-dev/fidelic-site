@@ -1,5 +1,5 @@
 {
-  "build": "164861e",
+  "build": "c4c9ae9",
   "imageRef": "fidelic/emulator:latest",
   "imageVersion": "054a4c7",
   "generated": "2026-09-17",
@@ -96,6 +96,113 @@
       "simulated": true,
       "simulationNote": "org defaults only \u2014 no per-user or per-profile resolution",
       "note": "Custom Setting and Custom Metadata reads"
+    }
+  ],
+  "groups": [
+    {
+      "key": "database",
+      "title": "Database operations",
+      "covers": "insert, update, delete, upsert and partial success",
+      "status": "partial",
+      "summary": "Savepoints, Database.query and Database.merge are not supported. Everything else behaves as the org does.",
+      "differences": [
+        "database: SaveResult/Error envelope Provisional (partner-pinned)",
+        "not supported: Database.setSavepoint and rollback",
+        "not supported: Database.query and Database.merge"
+      ],
+      "families": [
+        "database",
+        "database-savepoint",
+        "database-unshipped"
+      ]
+    },
+    {
+      "key": "async",
+      "title": "Async jobs",
+      "covers": "Queueable, @future, Schedulable, Batchable",
+      "status": "full",
+      "summary": "Jobs run inline as soon as the transaction commits, instead of being queued for later.",
+      "differences": [
+        "drained inline after commit, not truly deferred; per-chunk transactions and Database.Stateful are not modelled"
+      ],
+      "families": [
+        "async"
+      ]
+    },
+    {
+      "key": "callout",
+      "title": "HTTP callouts",
+      "covers": "HttpRequest and HttpResponse",
+      "status": "full",
+      "summary": "Callouts return whatever you register in the mock registry. Nothing reaches the network.",
+      "differences": [
+        "answered from a mock registry you register; nothing reaches the network"
+      ],
+      "families": [
+        "callout"
+      ]
+    },
+    {
+      "key": "schema",
+      "title": "Schema and describe",
+      "covers": "describe calls and permission checks",
+      "status": "partial",
+      "summary": "Describe answers only for the objects and fields you retrieved \u2014 it refuses rather than guessing. Permission checks always answer yes, because we do not model users.",
+      "differences": [
+        "schema: describe labels derived where the metadata carries none; DisplayType modeled as its enum name; == identity on describe results Provisional (SCHEMA-DESIGN \u00a77)",
+        "not supported: describe answers the retrieved metadata does not carry",
+        "not supported: describe for an object no metadata was retrieved for",
+        "answers as a system-mode user; field-level security is not enforced",
+        "not supported: describe surfaces outside the shipped set"
+      ],
+      "families": [
+        "schema",
+        "schema-metadata-gated",
+        "schema-no-metadata",
+        "schema-permission",
+        "schema-unshipped"
+      ]
+    },
+    {
+      "key": "settings",
+      "title": "Custom Settings and Metadata",
+      "covers": "reads of both",
+      "status": "full",
+      "summary": "Org-default values only. Per-user and per-profile overrides are not modelled.",
+      "differences": [
+        "org defaults only \u2014 no per-user or per-profile resolution"
+      ],
+      "families": [
+        "settings"
+      ]
+    },
+    {
+      "key": "effects",
+      "title": "Events and email",
+      "covers": "EventBus.publish and Messaging.sendEmail",
+      "status": "full",
+      "summary": "Events and emails are captured so you can assert on them, and never actually sent.",
+      "differences": [
+        "captured and readable afterwards, never actually sent"
+      ],
+      "families": [
+        "recorded-effect"
+      ]
+    },
+    {
+      "key": "crypto",
+      "title": "Crypto",
+      "covers": "the Crypto namespace",
+      "status": "partial",
+      "summary": "Random numbers are seeded so your tests repeat. Hashing, signatures and encryption are not supported.",
+      "differences": [
+        "seeded and reproducible rather than real entropy, which is the property tests need",
+        "not supported: digests, signatures, encryption"
+      ],
+      "families": [
+        "crypto",
+        "crypto-unshipped"
+      ]
     }
   ],
   "capabilitiesCommand": "sfapex capabilities",
