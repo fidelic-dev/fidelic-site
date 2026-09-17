@@ -54,14 +54,14 @@ const description =
   <p class="answer">
     <a href="/docs/ci-github-actions">Copy the CI recipe</a> —
     a GitHub Actions workflow that boots the org, waits until your Apex has actually loaded,
-    runs your tests and tears down. It was run before it was written down, and the page
-    quotes that run.
+    runs your tests and tears down.
   </p>
 
   <p class="answer">
-    And because it is yours alone, it can do what a shared org will not: produce the failures
-    you cannot schedule. Row locks, API limits, latency — armed with one call, so the retry
-    path nobody can test finally has something to catch.
+    It can also fail on purpose. One call arms a row lock, a rate limit, or slow responses,
+    and the next request comes back with the real Salesforce error. A sandbox hands you
+    those when it feels like it and never when you ask — which is why the error handling
+    meant to catch them has usually never run.
   </p>
 
   {/* TRANSCRIPT, NOT A COMPOSITION — every line below is verbatim program output.
@@ -126,8 +126,32 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
   </div>
 
   <p class="answer">
-    Every trigger is <em>classified</em> before anything runs: EXECUTE, HOOKS,
-    RECORDED-ONLY, or UNRESOLVED with the file, line and reason it was refused.
+    Before anything runs, every trigger in your org gets one of four verdicts, so you know
+    what you are looking at before you trust a result:
+  </p>
+
+  <ul class="answer-list">
+    <li>
+      <strong>EXECUTE</strong> — nothing in the reachable code is unsupported, so the
+      interpreter will attempt your real Apex. That is a prediction, not a receipt: the
+      fired log tells you what actually ran.
+    </li>
+    <li>
+      <strong>HOOKS</strong> — approximated. The effect is reproduced by a rule instead of
+      by running the Apex, and it is labelled as such rather than passed off as the real thing.
+    </li>
+    <li>
+      <strong>RECORDED-ONLY</strong> — the code could run, but the thing that starts it
+      cannot happen on your machine — a platform event, for instance. Nothing is claimed
+      for it either way.
+    </li>
+    <li>
+      <strong>UNRESOLVED</strong> — refused, naming the file, the line, and the construct
+      it uses that we do not support. A refusal you can read beats a wrong answer you cannot see.
+    </li>
+  </ul>
+
+  <p class="answer">
     Classified is not the same as executed, and the analyzer never claims otherwise.
   </p>
 
