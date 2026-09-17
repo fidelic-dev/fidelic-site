@@ -1,7 +1,7 @@
 {
-  "build": "1264a82",
+  "build": "054a4c7",
   "imageRef": "fidelic/emulator:latest",
-  "imageVersion": "cdcd3ae",
+  "imageVersion": "d473574",
   "generated": "2026-09-17",
   "shippedTier": "C1",
   "capabilities": [
@@ -25,7 +25,7 @@
     },
     {
       "family": "crypto-unshipped",
-      "verdict": "REFUSED",
+      "verdict": "UNRESOLVED",
       "simulated": false,
       "note": "digests, signatures, encryption"
     },
@@ -38,13 +38,13 @@
     },
     {
       "family": "database-savepoint",
-      "verdict": "REFUSED",
+      "verdict": "UNRESOLVED",
       "simulated": false,
       "note": "Database.setSavepoint and rollback"
     },
     {
       "family": "database-unshipped",
-      "verdict": "REFUSED",
+      "verdict": "UNRESOLVED",
       "simulated": false,
       "note": "Database.query and Database.merge"
     },
@@ -63,13 +63,13 @@
     },
     {
       "family": "schema-metadata-gated",
-      "verdict": "REFUSED",
+      "verdict": "UNRESOLVED",
       "simulated": false,
       "note": "describe answers the retrieved metadata does not carry"
     },
     {
       "family": "schema-no-metadata",
-      "verdict": "REFUSED",
+      "verdict": "UNRESOLVED",
       "simulated": false,
       "note": "describe for an object no metadata was retrieved for"
     },
@@ -81,7 +81,7 @@
     },
     {
       "family": "schema-unshipped",
-      "verdict": "REFUSED",
+      "verdict": "UNRESOLVED",
       "simulated": false,
       "note": "describe surfaces outside the shipped set"
     },
@@ -94,12 +94,12 @@
   ],
   "capabilitiesCommand": "sfapex capabilities",
   "conformance": {
-    "passed": 66,
-    "total": 66,
+    "passed": 68,
+    "total": 68,
     "skipped": 5,
-    "pending": 2,
+    "pending": 3,
     "command": "go run ./cmd/confrun --target=emulator   (fidelic-conformance)",
-    "denominator": "66 tests in the public fidelic-conformance suite that can run against a stock emulator; 5 skipped for an org prerequisite and 2 pending real-org verification are excluded from both sides of the fraction"
+    "denominator": "68 tests in the public fidelic-conformance suite that can run against a stock emulator; 5 skipped for an org prerequisite and 3 pending real-org verification are excluded from both sides of the fraction"
   },
   "coverage": {
     "corpus": "NPSP @ 19646faa (force-app)",
