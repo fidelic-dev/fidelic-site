@@ -1,0 +1,54 @@
+# CLOSES THE PIPELINE GAP: a docs change in the sfemu repo reaches production on its own.
+#
+# THE GAP. src/content/docs/*.md is gitignored and fetched at BUILD time by
+# scripts/sync-docs.mjs from the sfemu repo. So editing a doc over there produces no commit
+# here, Vercel never rebuilds, and the fix sits unpublished indefinitely. It happened: the API
+# reference gained four control endpoints and stayed stale on the live site until something
+# unrelated pushed.
+#
+# THE MECHANISM. This pushes an empty commit on a schedule. Vercel builds on push, the build
+# re-runs the sync, and production gets whatever sfemu currently has. No content check is
+# possible from here — sfemu is private and this repo's GITHUB_TOKEN cannot read it — so the
+# rebuild is unconditional by necessity, not by preference.
+#
+# THE FAST PATH. sfemu/.github/workflows/publish-docs.yml fires a Vercel deploy hook the moment
+# a doc changes, which takes this from "within the interval" to seconds. It needs a
+# VERCEL_DEPLOY_HOOK secret that only someone with Vercel access can mint. THIS WORKFLOW IS THE
+# BACKSTOP AND STAYS EITHER WAY: a fast path that can be silently unset is not a guarantee, and
+# the whole point here is that docs cannot go stale unnoticed.
+name: republish docs
+
+on:
+  schedule:
+    # Every 30 minutes, offset off the hour to avoid the stampede. Upper bound on how long a
+    # published doc can disagree with the repo that owns it.
+    - cron: '9,39 * * * *'
+  workflow_dispatch:
+
+# One at a time. Two concurrent republishes would race on the same branch and one would fail on
+# a stale ref — a red build that says nothing about the docs.
+concurrency:
+  group: republish-docs
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  republish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Push an empty commit so Vercel rebuilds with current docs
+        run: |
+          git config user.name  "fidelic-bot"
+          git config user.email "noreply@fidelic.dev"
+          git commit --allow-empty -m "build: scheduled docs republish
+
+          Rebuilds the site so scripts/sync-docs.mjs re-fetches the docs owned by the sfemu
+          repo. Empty by design: nothing in this repo changed, and nothing should have."
+          git push
