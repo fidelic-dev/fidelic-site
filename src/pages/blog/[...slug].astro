@@ -10,7 +10,13 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const fmt = (d: Date) =>
-  d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  d.toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    // UTC, because `date: 2026-09-18` in frontmatter IS midnight UTC. Formatting it in
+    // the build machine's local zone renders the day before anywhere west of Greenwich,
+    // which dated every post on this site one day early.
+    timeZone: 'UTC',
+  });
 ---
 
 <Base

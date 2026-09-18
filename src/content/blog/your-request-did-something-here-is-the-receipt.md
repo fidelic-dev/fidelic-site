@@ -1,15 +1,17 @@
 ---
 title: "Your request did something. Here is the receipt."
 description: "Salesforce returns an id and a success flag. Inside that request, triggers ran, fields changed, and work rolled back. Fidelic now hands back the whole story with the response: an execution trace with causality, live in the playground."
-date: 2026-07-25
+date: 2026-09-18
 draft: false
 ---
 
 # Your request did something. Here is the receipt.
 
-When you post a record to Salesforce, you get back an id and `"success": true`. That is the whole story the API tells you. And guess what, it is not the whole story which is the point of this post! Before that record saved, a trigger ran. Maybe four triggers ran, each setting off the next. One of them wrote a field you never sent. If a validation failed, everything unwound, and the record you think you created never existed.
+Post a record to Salesforce and you get back an id and `"success": true`. That is the whole story the API tells you.
 
-None of that is in the response. In a real org, the answer lives in debug logs: set up a trace flag, reproduce the request, download a log, and read line by line through thousands of entries to find your four. Salesforce engineers do this every day. It works, and it costs an afternoon.
+It is not the whole story. Before that record saved, a trigger ran. Maybe four triggers ran, each setting off the next. One of them wrote a field you never sent. If a validation failed, everything unwound, and the record you think you created never existed.
+
+None of that is in the response. In a real org, the answer lives in debug logs: set up a trace flag, reproduce the request, download a log, and read line by line to find your four. Or hand the log to your favorite AI and let it tell you what happened. Either way, the log shows what ran while finding what trigger wrote the field is the part that takes the most time.
 
 Fidelic is a Salesforce emulator, so it can do something a real org cannot: hand you the story with the response.
 
@@ -28,7 +30,7 @@ Every request against the emulator can carry a trace header. The emulator record
 RESPONSE  201 · committed
 ```
 
-Line 2 is the point. `Batch_Status__c` arrived as "Open" and you never sent it. NPSP's trigger set it during before-insert, and the trace attributes the write to the trigger that made it. That is real Apex running, visible.
+Line 2 is the point. `Batch_Status__c` arrived as "Open" and you never sent it. NPSP's trigger set it during before-insert, and the trace attributes the write to the trigger that made it. That is real Apex running with the side effect visible.
 
 ## Rollbacks tell the truth
 
@@ -44,19 +46,21 @@ The more interesting document is the one where things fail. An update that a val
 RESPONSE  400 · committed=false
 ```
 
-Three triggers ran. Then the transaction unwound, and every entry that ran is marked rolled back rather than deleted. The trace refuses to pretend the work never happened, and refuses to pretend it survived. A trigger that ran in a transaction that later rolled back still ran; the org just forgot its effects. Both facts are on the page.
+In the example above, three triggers ran before a validation rejected the update. The transaction unwound, and the response is a plain 400. Notice the trace keeps all three entries and marks each one rolled back instead of deleting them. Why is this important? Because when your update fails, the 4XX tells you it died and nothing else. You would want to know: which triggers fired before the rejection, in what order, and which one raised the error. That path is erased from the org in case of a rollback. The database keeps no record of work it threw away.
 
-One design rule sits under this: the trace never fabricates. When a fault fires at the REST layer before any transaction begins, the trace shows one entry and `committed=false`, not a theatrical rollback that never happened. If the document cannot be fetched, the panel says so instead of inventing a story.
+Let's look at an example: a validation error appears on a field your request never touched. Some trigger modified that field mid-transaction, then validation rejected the record. In a real org you reconstruct that chain from debug logs. In the trace, the rolled-back entries are the chain: trigger A ran, trigger B ran because of A, validation rejected inside B. The fix is one line, found in seconds.
+
+When a transaction fails, the question you are debugging is almost never ONLY "why did it fail?" It is "how far did it get, and what caused it to fail?." If the trace dropped the rolled-back work, you would be back to guessing which trigger fired before the rejection. So the tilde entries stay: they show the work the database threw away, in order, with the entry that caused the rejection marked. The final state of the org and the path that led there are different pieces of information, and you need both.
+
+Let's take a look at another example: staged faults. If you arm `UNABLE_TO_LOCK_ROW` and fire an update, you might expect the trace to show a transaction unwinding, since that is what a real row lock looks like from outside. It does not. The fault fires at the REST layer, before a transaction ever opens, so the trace shows exactly one entry and `committed=false`.
 
 ## What this is not
 
-Honesty section, because that is the house style.
+The trace exists only inside the emulator. Your production org will never produce one, so it does not help you dissect an incident that already happened in prod. The idea is that you run your integration tests against the emulator in CI, and the transaction that would have nulled a field in production fails a test instead, with the trace attached. The "archaeology" happens before the artifact ships, on a receipt instead of a log.
 
-This is not a debug log replacement for your production org. It only exists inside the emulator, and it deliberately does not look like a Salesforce debug log, because a convincing imitation would get pasted into tools and forums as if Salesforce produced it.
+And the trace covers what the emulator actually ran. At boot, every trigger in your org gets classified: run, simulate, or refuse, each refusal named with its reason. A trigger the emulator refused never appears in a trace, because it never executed. The trace is a record of execution, not a prediction of what your org would do.
 
-It traces what the emulator runs. The emulator classifies every trigger at boot, runs what it can run faithfully, and refuses the rest by name. The trace shows the part that ran.
-
-The cost when tracing is on: 0.09 milliseconds median per request, measured against the NPSP corpus on the production box. Off by default outside the playground.
+The cost for this: 0.09 milliseconds median per request with tracing on. We measured this against the NPSP corpus on the box that serves the playground. Off by default everywhere else.
 
 ## Try it
 
