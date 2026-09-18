@@ -12,16 +12,23 @@
 # rebuild is unconditional by necessity, not by preference.
 #
 # THE FAST PATH. sfemu/.github/workflows/publish-docs.yml fires a Vercel deploy hook the moment
-# a doc changes, which takes this from "within the interval" to seconds. It needs a
-# VERCEL_DEPLOY_HOOK secret that only someone with Vercel access can mint. THIS WORKFLOW IS THE
-# BACKSTOP AND STAYS EITHER WAY: a fast path that can be silently unset is not a guarantee, and
-# the whole point here is that docs cannot go stale unnoticed.
+# a doc changes, publishing in seconds. THIS WORKFLOW IS THE BACKSTOP AND STAYS EITHER WAY: a
+# fast path that can be silently unset or revoked is not a guarantee, and the whole point here
+# is that docs cannot go stale unnoticed. Its bound is hours (see the schedule below), which is
+# a poor guarantee and a perfectly good safety net.
 name: republish docs
 
 on:
   schedule:
-    # Every 30 minutes, offset off the hour to avoid the stampede. Upper bound on how long a
-    # published doc can disagree with the repo that owns it.
+    # Requested every 30 minutes. GITHUB DOES NOT HONOUR THAT, and the schedule is the
+    # backstop rather than the guarantee, so it does not need to. Measured on this repo:
+    # runs landed at 08:28, 13:07 and 17:03 — roughly every four hours, at arbitrary
+    # minutes, with most ticks dropped rather than merely delayed. That is documented
+    # behaviour for scheduled workflows on low-activity repositories.
+    #
+    # So the real bound this path provides is HOURS, not minutes. Asking for 30 minutes
+    # costs nothing and occasionally gets us one sooner; believing it would be the error.
+    # Seconds-level publication comes from the deploy hook in sfemu, not from here.
     - cron: '9,39 * * * *'
   workflow_dispatch:
 
