@@ -1,7 +1,7 @@
 ---
 title: "Your request did something. Here is the receipt."
 description: "Salesforce returns an id and a success flag. Inside that request, triggers ran, fields changed, and work rolled back. Fidelic now hands back the whole story with the response: an execution trace with causality, live in the playground."
-date: 2026-09-18
+date: 2026-07-25
 draft: false
 ---
 
