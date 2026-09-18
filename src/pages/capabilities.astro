@@ -34,6 +34,17 @@ const LABEL = {
       the general shape: what works, and where it differs from a real org.
     </p>
 
+    <h2>The words on this page</h2>
+    <dl class="vocab">
+      <dt><span class="s s-full">Works</span></dt>
+      <dd>Your real Apex runs, and behaves as the org would.</dd>
+      <dt><span class="s s-partial">Mostly works</span></dt>
+      <dd>Your real Apex runs, but something listed beside it is modelled rather than
+      really done, or one corner of it is refused. The row says which.</dd>
+      <dt><span class="s s-none">Not supported</span></dt>
+      <dd>Refused by name, with a reason and a file and line. Never silently wrong.</dd>
+    </dl>
+
     <div class="tablewrap">
       <table class="caps">
         <thead>
@@ -72,17 +83,6 @@ const LABEL = {
       Nothing leaves your machine — it reads local files and makes no network calls. The report
       is plain text, built for pasting into a channel.
     </p>
-
-    <h2>The words on this page</h2>
-    <dl class="vocab">
-      <dt><span class="s s-full">Works</span></dt>
-      <dd>Your real Apex runs, and behaves as the org would.</dd>
-      <dt><span class="s s-partial">Mostly works</span></dt>
-      <dd>Your real Apex runs, but something named in the last column is modelled rather than
-      really done, or one corner of it is refused. The row says which.</dd>
-      <dt><span class="s s-none">Not supported</span></dt>
-      <dd>Refused by name, with a reason and a file and line. Never silently wrong.</dd>
-    </dl>
 
     <p class="fine">
       Your coverage report uses more precise words for the same ideas — EXECUTE, SIMULATED,
