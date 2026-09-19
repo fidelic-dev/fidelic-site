@@ -30,6 +30,56 @@ const description =
       <code>{data.shippedTier}</code>.
     </p>
 
+    {/* THE HOMEPAGE'S OLD PROOF BLOCK, MOVED HERE WHOLE.
+        It was three commands deep on a page whose job is to make one claim land, and it pushed
+        everything that explains it further down. Here it is the point: this page's readers came
+        for raw output, so nothing is summarised and the long lines scroll rather than wrap.
+
+        VERBATIM, and re-verified line by line against fidelic/emulator:4ea9d49 on 2026-09-19
+        against NPSP @ 19646faa, force-app subtree — not merely carried across from the old page.
+        The coverage numbers, the ladder line, the boot line and the fault envelope were each
+        re-run and compared before this section shipped.
+
+        MOUNT force-app, NOT THE REPO ROOT. The first version of this block mounted ./npsp while
+        showing output captured from ./npsp/force-app, so the commands and the output disagreed
+        and nobody could tell: the repo root carries 9 more classes that live outside the
+        deployable source and parse with errors, giving 1,514 classes and "3 with ERROR nodes"
+        instead of 1,503 and zero.
+
+        The build stamp on the boot line is elided with … because it changes every release. The
+        14.1s is OURS — sfemu prints no boot duration — so it is a # comment, measured on the
+        production box, a Hetzner CPX21 with 3 vCPU. */}
+    <h2>End to end, in three commands</h2>
+    <p class="src">
+      Run against <a href="https://github.com/SalesforceFoundation/NPSP">NPSP</a> @ 19646faa,
+      <code>force-app</code> subtree, with <code>fidelic/emulator:4ea9d49</code>. Three trigger
+      rows are shown out of 26; the rest come out of the same command.
+    </p>
+    <div class="terminal" role="img" aria-label="Terminal transcript: the sfapex analyzer classifies the Nonprofit Success Pack's 26 triggers at load time as 7 EXECUTE and 19 UNRESOLVED; the emulator then boots that org in 14.1 seconds and, with failure injection enabled, a PATCH returns HTTP 400 with an UNABLE_TO_LOCK_ROW error array.">
+      <pre><span class="dim"># what will run, before running it</span>
+<span class="cmd">docker run --rm -v ./npsp/force-app:/mdapi:ro --entrypoint /sfapex fidelic/emulator coverage /mdapi</span>
+COVERAGE
+  parsed:   1061 files (0 with ERROR nodes, 0 error nodes total)
+  found:    26 trigger(s), 1503 class(es)
+
+RUNG B LADDER @ C1 + C2 families &#123;async, callout, crypto, database, recorded-effect, schema, schema-permission, settings&#125; <span class="dim">(load-time classification)</span>: EXECUTE=7  HOOKS=0  UNRESOLVED=19  RECORDED-ONLY=0  (SIMULATED=1)
+  <span class="ok">EXECUTE</span>     TDTM_DataImportBatch  [Provisional: schema: describe labels derived where the metadata carries none; DisplayType modeled as its enum name; == identity on describe results Provisional (SCHEMA-DESIGN §7)]
+  <span class="sim">EXECUTE*</span>    TDTM_FormTemplate  (SIMULATED: settings: Gift_Entry_Settings__c.getInstance — Custom Setting read at C2; settings: Gift_Entry_Settings__c.getOrgDefaults — Custom Setting read at C2)  [Provisional: schema: describe labels derived where the metadata carries none; DisplayType modeled as its enum name; == identity on describe results Provisional (SCHEMA-DESIGN §7)]
+  <span class="bad">UNRESOLVED</span>  TDTM_HouseholdObject  (min tier C3; blocked by dispatch: interface Evaluator [C3])
+
+<span class="dim"># now boot it, with the row-lock fault armed</span>
+<span class="cmd">docker run -p 8080:8080 -v ./npsp/force-app:/mdapi:ro -e SFEMU_FAULT_LOCK_ON_UPDATE=true fidelic/emulator --apex-src /mdapi</span>
+sfemu: apexexec ON — 26 triggers loaded from "/mdapi", 7 EXECUTE-classified
+sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, metadata: "/mdapi", hooks-file: "")
+<span class="dim"># 14.1s to listening — NPSP, 26 triggers / 1,503 classes, 3-vCPU cloud VM</span>
+
+<span class="cmd">curl -sX PATCH localhost:8080/services/data/v62.0/sobjects/Account/001000000000038AAA \
+  -H 'Content-Type: application/json' -d '&#123;"Rating":"Hot"&#125;'</span>
+<span class="bad">HTTP 400</span>
+<span class="bad">[&#123;"message":"unable to obtain exclusive access to this record or 1 records",</span>
+<span class="bad">  "errorCode":"UNABLE_TO_LOCK_ROW","fields":[]&#125;]</span></pre>
+    </div>
+
     <h2>Conformance — {data.conformance.passed}/{data.conformance.total}</h2>
     <p class="src">Produced by <code>{data.conformance.command}</code></p>
     <p>

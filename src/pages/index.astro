@@ -61,65 +61,42 @@ const description =
     do that. <a href="/capabilities">See the full list of capabilities</a>.
   </p>
 
-  {/* TRANSCRIPT, NOT A COMPOSITION — every line below is verbatim program output.
-      Captured 2026-09-16 from image cdcd3ae against NPSP @ 19646faa, force-app subtree
-      (26 triggers, 1,503 classes), on the production box, a Hetzner CPX21 with 3 vCPU.
+  <p class="answer receipts-line">
+    Every claim on this page traces to a command. <a href="/receipts">See the receipts</a>.
+  </p>
 
-      MOUNT force-app, NOT THE REPO ROOT. The first version of this block mounted ./npsp
-      while showing output captured from ./npsp/force-app, so the commands and the output
-      disagreed and nobody could tell: the repo root carries 9 more classes that live
-      outside the deployable source and parse with errors, giving 1,514 classes and
-      "3 with ERROR nodes" instead of 1,503 and zero. force-app is what the project's own
-      corpus definition points at (demo.Corpus.ApexSubdir).
+  {/* THE THREE-COMMAND PROOF BLOCK MOVED TO /receipts.
+      It ran analyzer, then boot, then an armed fault — three commands deep, sitting between the
+      hero copy and everything that explains it. Raw output is what /receipts is for, and the
+      people who want to read it are already going there. What stays here is the ONE artifact
+      the hero's own claim needs: speed to listening.
 
-      Reproduce both commands exactly:
-        docker run --rm -v ./npsp/force-app:/mdapi:ro --entrypoint /sfapex \
-          fidelic/emulator:cdcd3ae coverage /mdapi
-        docker run -p 8080:8080 -v ./npsp/force-app:/mdapi:ro -e SFEMU_FAULT_LOCK_ON_UPDATE=true \
-          fidelic/emulator:cdcd3ae --apex-src /mdapi
+      TRANSCRIPT, NOT A COMPOSITION. Both lines are verbatim program output, re-verified against
+      fidelic/emulator:4ea9d49 on 2026-09-19, NPSP force-app subtree (26 triggers, 1,503 classes).
 
-      Long lines are elided with … and nothing is reworded. The one line that is OURS
-      rather than the program's is the 15.9s timing, marked with a # as a comment,
-      because sfemu does not print a boot duration. If re-running stops reproducing
-      this, the copy is stale — that is the point of naming the commit.
+      Reproduce:
+        docker run -p 8080:8080 -v ./npsp/force-app:/mdapi:ro fidelic/emulator --apex-src /mdapi
 
-      THE BUILD STAMP IS ELIDED ON PURPOSE. The boot line really reads
-      `sfemu <sha> listening on :8080 …`, and that sha changes on every release, so
-      writing one here would date this page the moment the next image ships — the same
-      trap that left "v1.0" on this line for months. The commit above is the provenance;
-      the … is where its stamp was. Everything either side of it is byte-for-byte what
-      the program printed, re-verified against the live image on 2026-09-16.
+      THE FAULT ENV VAR IS GONE FROM THE COMMAND, deliberately: this block no longer demonstrates
+      a fault, and a flag whose effect is never shown is noise the reader has to explain away. The
+      boot line is identical either way — it reports store, client-secret, metadata and hooks-file,
+      none of which faults touch — and that was checked rather than assumed.
 
-      The previous version of this block was a composition: it showed analyzer output
-      under an emulator command, invented trigger names, and a REFUSED verdict the
-      product has never emitted. */}
+      THE BUILD STAMP IS ELIDED ON PURPOSE. The line really reads `sfemu <sha> listening on :8080 …`
+      and that sha changes on every release, so writing one here would date this page the moment
+      the next image ships — the same trap that left "v1.0" on this line for months. The … is where
+      the stamp was; everything either side of it is byte-for-byte what the program printed.
+
+      The 14.1s is OURS, not the program's — sfemu prints no boot duration — so it is marked with a
+      # as a comment. Measured on the production box, a Hetzner CPX21 with 3 vCPU. */}
   <div
     class="terminal"
     role="img"
-    aria-label="Terminal transcript: the sfapex analyzer classifies the Nonprofit Success Pack's 26 triggers at load time as 7 EXECUTE, 19 UNRESOLVED; the emulator then boots that org in 15.9 seconds and, with failure injection enabled, a PATCH returns HTTP 400 with an UNABLE_TO_LOCK_ROW error array."
+    aria-label="Terminal transcript: the emulator loads the Nonprofit Success Pack from source and is listening on port 8080 in 14.1 seconds."
   >
-    <pre><span class="dim"># what will run, before running it</span>
-<span class="cmd">docker run --rm -v ./npsp/force-app:/mdapi:ro --entrypoint /sfapex fidelic/emulator coverage /mdapi</span>
-COVERAGE
-  parsed:   1061 files (0 with ERROR nodes, 0 error nodes total)
-  found:    26 trigger(s), 1503 class(es)
-
-RUNG B LADDER @ C1 + C2 families &#123;…&#125; <span class="dim">(load-time classification)</span>: EXECUTE=7  HOOKS=0  UNRESOLVED=19  RECORDED-ONLY=0  (SIMULATED=1)
-  <span class="ok">EXECUTE</span>     TDTM_DataImportBatch
-  <span class="sim">EXECUTE*</span>    TDTM_FormTemplate  (SIMULATED: settings: Gift_Entry_Settings__c.getInstance — Custom Setting read at C2)
-  <span class="bad">UNRESOLVED</span>  TDTM_HouseholdObject  (min tier C3; blocked by dispatch: interface Evaluator [C3])
-
-<span class="dim"># now boot it, with the row-lock fault armed</span>
-<span class="cmd">docker run -p 8080:8080 -v ./npsp/force-app:/mdapi:ro -e SFEMU_FAULT_LOCK_ON_UPDATE=true fidelic/emulator --apex-src /mdapi</span>
-sfemu: apexexec ON — 26 triggers loaded from "/mdapi", 7 EXECUTE-classified
+    <pre><span class="cmd">docker run -p 8080:8080 -v ./npsp/force-app:/mdapi:ro fidelic/emulator --apex-src /mdapi</span>
 sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, metadata: "/mdapi", hooks-file: "")
-<span class="dim"># 14.1s to listening — NPSP, 26 triggers / 1,503 classes, 3-vCPU cloud VM</span>
-
-<span class="cmd">curl -sX PATCH localhost:8080/services/data/v62.0/sobjects/Account/001000000000038AAA \
-  -H 'Content-Type: application/json' -d '&#123;"Rating":"Hot"&#125;'</span>
-<span class="bad">HTTP 400</span>
-<span class="bad">[&#123;"message":"unable to obtain exclusive access to this record or 1 records",</span>
-<span class="bad">  "errorCode":"UNABLE_TO_LOCK_ROW","fields":[]&#125;]</span></pre>
+<span class="dim"># 14.1s to listening — NPSP, 26 triggers / 1,503 classes, 3-vCPU cloud VM</span></pre>
   </div>
 
   <p class="answer">

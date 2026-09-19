@@ -166,6 +166,20 @@ main { padding-top: 3.2rem; }
   color: var(--term-fg);
 }
 .terminal pre { margin: 0; white-space: pre; }
+/* A .terminal placed inside .prose (the receipts page) also matches `.prose pre`, so its inner
+   <pre> picked up a second border, a second background and 16px/18px of its own padding: a box
+   drawn inside a box, costing 34px of width on a 375px screen where there is none to spare.
+   The terminal IS the box; the pre is only the text it contains.
+   overflow-x goes back to visible so the scrolling happens on .terminal — one scroll container,
+   the same element that scrolls on the homepage, rather than a nested one inset by a border. */
+.prose .terminal pre {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  overflow-x: visible;
+  font-size: inherit;
+}
 .terminal .cmd { color: var(--fg); font-weight: 600; }
 .terminal .cmd::before { content: "$ "; color: var(--muted); }
 .terminal .dim { color: var(--muted); }
