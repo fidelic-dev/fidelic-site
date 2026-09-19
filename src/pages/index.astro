@@ -44,23 +44,21 @@ const description =
   <p class="answer">
     Fidelic is a 10 MB container that loads your org's real schema and runs your real Apex
     triggers. Your tests point at <code>localhost</code> and get the same REST responses, the
-    same trigger side effects, the same validation errors. It starts in under a second on a
-    small org, resets to empty in about two milliseconds, and runs as many copies side by side
-    as you have cores — so the same suite runs on your laptop and on every push in CI.
+    same trigger side effects, the same validation errors.
   </p>
 
   {/* The CI claim above must be reachable, not merely asserted: this is the recipe that was
       executed as a real workflow run before it was published. */}
   <p class="answer">
-    <a href="/docs/ci-github-actions">Copy the CI recipe</a> —
-    a GitHub Actions workflow that boots the org, waits until your Apex has actually loaded,
+    <a href="/docs/ci-github-actions">Copy the CI recipe</a>. It's a
+    GitHub Actions workflow that boots the org, waits until your Apex has actually loaded,
     runs your tests and tears down.
   </p>
 
   <p class="answer">
-    It can also fail on purpose. One call arms a row lock, a rate limit, or slow responses,
-    and the next request comes back with the real Salesforce error. You cannot make a sandbox
-    do that, so the code meant to handle these has usually never run.
+    It can also fail on purpose: one call creates a row lock, a rate limit, or slow responses,
+    and the next request returns the real Salesforce error. You cannot make a sandbox
+    do that. <a href="/capabilities">See the full list of capabilities</a>.
   </p>
 
   {/* TRANSCRIPT, NOT A COMPOSITION — every line below is verbatim program output.
