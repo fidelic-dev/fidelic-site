@@ -1,8 +1,8 @@
 {
-  "build": "c4c9ae9",
+  "build": "4ea9d49",
   "imageRef": "fidelic/emulator:latest",
-  "imageVersion": "054a4c7",
-  "generated": "2026-09-17",
+  "imageVersion": "4ea9d49",
+  "generated": "2026-09-19",
   "shippedTier": "C1",
   "capabilities": [
     {
@@ -207,12 +207,12 @@
   ],
   "capabilitiesCommand": "sfapex capabilities",
   "conformance": {
-    "passed": 68,
-    "total": 68,
+    "passed": 70,
+    "total": 70,
     "skipped": 5,
     "pending": 3,
     "command": "go run ./cmd/confrun --target=emulator   (fidelic-conformance)",
-    "denominator": "68 tests in the public fidelic-conformance suite that can run against a stock emulator; 5 skipped for an org prerequisite and 3 pending real-org verification are excluded from both sides of the fraction"
+    "denominator": "70 tests in the public fidelic-conformance suite that can run against a stock emulator; 5 skipped for an org prerequisite and 3 pending real-org verification are excluded from both sides of the fraction"
   },
   "coverage": {
     "corpus": "NPSP @ 19646faa (force-app)",
