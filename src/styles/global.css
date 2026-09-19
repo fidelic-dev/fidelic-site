@@ -265,6 +265,13 @@ main { padding-top: 3.2rem; }
   border-radius: 4px;
   padding: 1px 5px;
 }
+/* INLINE CODE CARRYING A REST PATH HAS NO BREAK OPPORTUNITY. `PATCH
+   /sobjects/{object}/{externalIdField}/{value}` is a single 409px token with no space or hyphen
+   in it, so it cannot wrap and instead drags the whole document sideways — the last two
+   offenders on /docs/api after the grid fix, measured at 400px and 409px on a 375px screen.
+   Scoped to code that is NOT inside a <pre>: code blocks must keep their lines intact and do,
+   both because white-space:pre wins over wrapping and because their <pre> already scrolls. */
+.prose :not(pre) > code { overflow-wrap: anywhere; }
 .prose pre {
   font-family: var(--mono);
   font-size: 13.5px;
@@ -383,6 +390,13 @@ main { padding-top: 3.2rem; }
   gap: 3.5rem;
   align-items: start;
 }
+/* A GRID ITEM WILL NOT SHRINK BELOW ITS CONTENT unless told to: `min-width` computes to `auto`,
+   whose automatic minimum is the item's min-content size. On a 375px phone the table-of-contents
+   nav measured 728px wide and dragged the whole column — and therefore .prose — out to 728,
+   so every docs page scrolled sideways on every phone. The content column already opts out via
+   minmax(0, …); the nav never did, and at <=900px both stack into a single 1fr column where
+   nothing else constrains them. */
+.doc-grid > * { min-width: 0; }
 
 /* sticky = stays put no matter how far you scroll the page */
 .doc-toc {
