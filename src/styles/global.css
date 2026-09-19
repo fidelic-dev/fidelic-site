@@ -276,6 +276,45 @@ main { padding-top: 3.2rem; }
   overflow-x: auto;
 }
 .prose pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+
+/* --- prose tables ---
+   THESE HAD NO RULES AT ALL. `.prose` styled code, pre, img and blockquote, so every table in
+   the docs rendered at browser defaults: 1px cell padding, no borders, centred headers, columns
+   jammed together. Measured on the live /docs/quickstart before fixing — border-collapse
+   separate, td padding 1px, td border-bottom 0px, th text-align center. The markdown was always
+   valid; nothing was ever told how to draw it. That affects every table we publish, not one:
+   the two-binary table here, and the fault catalog, probability and request-field tables in the
+   API reference.
+   Matches the conventions already used by the hand-written tables on /receipts. */
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.92rem;
+  margin: 1.25rem 0;
+  /* Tables are the one prose element that cannot reflow: a three-column reference squeezed
+     into 360px becomes unreadable long before it becomes narrow. Let it scroll instead. */
+  display: block;
+  overflow-x: auto;
+}
+.prose thead th {
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.prose th, .prose td {
+  text-align: left;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+/* The first column of a reference table is nearly always the identifier being defined —
+   a binary, a field, an env var. Keeping it on one line preserves the scanning column. */
+.prose td:first-child { white-space: nowrap; }
+.prose tbody tr:last-child td { border-bottom: 0; }
 /* Syntax-highlighting comments are the ONE token in Shiki's github-dark theme that
    fails contrast on the code background: #6A737D on #24292e is 3.05:1 against a 4.5
    floor. Every other token in the theme passes (checked: keywords 5.52, strings 8.69,
