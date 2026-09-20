@@ -1,7 +1,7 @@
 {
-  "build": "fde389c",
+  "build": "e970cfb",
   "imageRef": "fidelic/emulator:latest",
-  "imageVersion": "fde389c",
+  "imageVersion": "e970cfb",
   "generated": "2026-09-20",
   "shippedTier": "C1",
   "capabilities": [
