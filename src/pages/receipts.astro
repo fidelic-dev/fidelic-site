@@ -79,27 +79,32 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
     <div class="tablewrap">
       <table>
         <thead>
-          <tr><th>Codebase</th><th>Triggers</th><th>EXECUTE</th><th>UNRESOLVED</th><th>Pairs</th><th>%</th></tr>
+          <tr><th>Codebase</th><th>Triggers</th><th>EXECUTE</th><th>Refused:<br>our gaps</th><th>Refused:<br>needs org files</th><th>Pairs</th><th>%</th></tr>
         </thead>
         <tbody>
           <tr><td><a href="https://github.com/SalesforceFoundation/Cumulus">NPSP</a> <code>19646faa</code></td>
-              <td>26</td><td>8</td><td>18</td><td>51/177</td><td>28%</td></tr>
+              <td>26</td><td>8</td><td>2</td><td>16</td><td>51/177</td><td>28%</td></tr>
           <tr><td><a href="https://github.com/SalesforceFoundation/EDA">EDA</a> <code>b311845</code></td>
-              <td>37</td><td>11</td><td>26</td><td>77/259</td><td>29%</td></tr>
+              <td>37</td><td>11</td><td>1</td><td>25</td><td>77/259</td><td>29%</td></tr>
           <tr><td><a href="https://github.com/SFDO-Community/declarative-lookup-rollup-summaries">DLRS</a> <code>8e43f01</code></td>
-              <td>14</td><td>0</td><td>14</td><td>0/97</td><td>0%</td></tr>
+              <td>14</td><td>0</td><td>0</td><td>14</td><td>0/97</td><td>0%</td></tr>
           <tr><td><a href="https://github.com/trailheadapps/apex-recipes">apex-recipes</a> <code>87c1c9b</code></td>
-              <td>3</td><td>2</td><td>1</td><td>2/9</td><td>22%</td></tr>
+              <td>3</td><td>2</td><td>1</td><td>0</td><td>2/9</td><td>22%</td></tr>
           <tr><td><a href="https://github.com/financialforcedev/fflib-apex-common-samplecode">fflib-samplecode</a> <code>4657d63</code></td>
-              <td>2</td><td>2</td><td>0</td><td>12/12</td><td>100%</td></tr>
+              <td>2</td><td>2</td><td>0</td><td>0</td><td>12/12</td><td>100%</td></tr>
         </tbody>
       </table>
     </div>
     <p class="denom"><strong>Denominator:</strong> every trigger-context pair declared by every
-      trigger in the checked-out source, at the commit named beside each codebase. DLRS reads 0%
-      because five separate blockers hit all 14 of its triggers, four of them things a public
-      checkout does not carry: managed-package references and custom objects whose metadata was
-      never retrieved.</p>
+      trigger in the checked-out source, at the commit named beside each codebase. A refused
+      trigger is counted against <em>our gaps</em> only when nothing else blocks it; anything
+      that also reaches a missing file is counted there instead, so the two columns add up to
+      the refusals and never double-count. DLRS reads 0% because all 14 of its triggers reach a
+      managed package or an object whose metadata the repo does not ship.</p>
+    <p class="fine">A public checkout is not an org. It carries the Apex but not the managed
+      packages, the object metadata, or the configuration records that live as data — which is
+      why 55 of these 59 refusals are files rather than features. An org export carries them, so
+      the number that matters is the one from your own: run the command below against it.</p>
     <p class="src">Reproduce, per codebase: <code>docker run --rm -v "$PWD/force-app":/mdapi:ro --entrypoint /sfapex fidelic/emulator coverage /mdapi</code></p>
 
     <h2 id="vocabulary">What do EXECUTE, SIMULATED and UNRESOLVED mean?</h2>
