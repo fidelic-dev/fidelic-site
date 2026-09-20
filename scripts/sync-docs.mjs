@@ -53,6 +53,16 @@ const DOCS = [
     },
   },
   {
+    src: 'docs/MEASUREMENT.md',
+    dest: 'src/content/docs/measurement.md',
+    frontmatter: {
+      title: 'How the numbers are measured',
+      description:
+        'What goes in the conformance suite, why the classification unit is the trigger-context pair, and what the capability families are.',
+      order: 8,
+    },
+  },
+  {
     src: 'docs/API.md',
     dest: 'src/content/docs/api.md',
     frontmatter: {

@@ -1,16 +1,19 @@
 ---
-// THE AUDIT TRAIL. Everything a skeptic needs, and nothing a buyer has to read first.
+// THE AUDIT TRAIL. Each section is one question a Salesforce developer would ask, the artifact
+// that answers it, and the command that reproduces it.
 //
-// These numbers used to sit on /capabilities, where they buried the answer the reader came for
-// under two denominator paragraphs, a build stamp and a 24% headline that needs three
-// paragraphs of context to be fair. Splitting them is not hiding them: /capabilities links here
-// directly, and every figure still names the command that produced it.
+// The page used to be a pile of artifacts with no voice saying what question each one answered,
+// which is how it came to confuse its own author. Three blocks of methodology prose could not
+// state their question in one line and moved to /docs/measurement.
+//
+// Keep the shape: question, artifact, reproduce. A section that needs a paragraph to justify
+// itself is a docs page wearing a receipt's clothes.
 import Base from '../layouts/Base.astro';
 import data from '../data/capabilities.json';
 
 const title = 'Receipts — every number, and the command that produced it';
 const description =
-  'The conformance score, the classification figures, and the exact capability families behind fidelic.dev/capabilities. Generated, with the denominator stated for every fraction.';
+  'Every number on fidelic.dev, the command that produced it, and the denominator it is counted against.';
 ---
 
 <Base title={title} description={description}>
@@ -19,42 +22,10 @@ const description =
     <h1>Receipts</h1>
 
     <p>
-      Every figure here is produced by running something, and each block names what. If a number
-      on this site is wrong, the machine is wrong — which is the only failure mode worth having,
-      because it is the one a test can catch.
+      Every figure here is produced by running something, and each block names what.
     </p>
 
-    <p class="stamp">
-      Generated {data.generated} from build <code>{data.build}</code>, against emulator image
-      <code>{data.imageRef}</code> reporting <code>{data.imageVersion}</code>. Shipped tier:
-      <code>{data.shippedTier}</code>.
-    </p>
-
-    {/* THE HOMEPAGE'S OLD PROOF BLOCK, MOVED HERE WHOLE.
-        It was three commands deep on a page whose job is to make one claim land, and it pushed
-        everything that explains it further down. Here it is the point: this page's readers came
-        for raw output, so nothing is summarised and the long lines scroll rather than wrap.
-
-        VERBATIM, and re-verified line by line against fidelic/emulator:4ea9d49 on 2026-09-19
-        against NPSP @ 19646faa, force-app subtree — not merely carried across from the old page.
-        The coverage numbers, the ladder line, the boot line and the fault envelope were each
-        re-run and compared before this section shipped.
-
-        MOUNT force-app, NOT THE REPO ROOT. The first version of this block mounted ./npsp while
-        showing output captured from ./npsp/force-app, so the commands and the output disagreed
-        and nobody could tell: the repo root carries 9 more classes that live outside the
-        deployable source and parse with errors, giving 1,514 classes and "3 with ERROR nodes"
-        instead of 1,503 and zero.
-
-        The build stamp on the boot line is elided with … because it changes every release. The
-        14.1s is OURS — sfemu prints no boot duration — so it is a # comment, measured on the
-        production box, a Hetzner CPX21 with 3 vCPU. */}
-    <h2>End to end, in three commands</h2>
-    <p class="src">
-      Run against <a href="https://github.com/SalesforceFoundation/NPSP">NPSP</a> @ 19646faa,
-      <code>force-app</code> subtree, with <code>fidelic/emulator:4ea9d49</code>. Three trigger
-      rows are shown out of 26; the rest come out of the same command.
-    </p>
+    <h2>What does it print when I point it at a real org?</h2>
     <div class="terminal" role="img" aria-label="Terminal transcript: the sfapex analyzer classifies the Nonprofit Success Pack's 26 triggers at load time as 7 EXECUTE and 19 UNRESOLVED; the emulator then boots that org in 14.1 seconds and, with failure injection enabled, a PATCH returns HTTP 400 with an UNABLE_TO_LOCK_ROW error array.">
       <pre><span class="dim"># what will run, before running it</span>
 <span class="cmd">docker run --rm -v ./npsp/force-app:/mdapi:ro --entrypoint /sfapex fidelic/emulator coverage /mdapi</span>
@@ -79,61 +50,45 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
 <span class="bad">[&#123;"message":"unable to obtain exclusive access to this record or 1 records",</span>
 <span class="bad">  "errorCode":"UNABLE_TO_LOCK_ROW","fields":[]&#125;]</span></pre>
     </div>
-
-    <h2>Conformance — {data.conformance.passed}/{data.conformance.total}</h2>
-    <p class="src">Produced by <code>{data.conformance.command}</code></p>
-    <p>
-      Every test is tied to Salesforce's own documentation or to an observation from a real org.
-      A test with no source does not go in.
+    <p class="src">
+      Reproduce: the three commands are in the block, run against
+      <a href="https://github.com/SalesforceFoundation/NPSP">NPSP</a> @ 19646faa
+      (<code>force-app</code>) on <code>fidelic/emulator:4ea9d49</code>. Three of the 26 trigger
+      rows are shown.
     </p>
-    <p class="denom"><strong>Denominator:</strong> {data.conformance.denominator}</p>
 
-    <h2>Classification over a real codebase — {data.coverage.percent}%</h2>
-    <p class="src">Produced by <code>{data.coverage.command}</code> against {data.coverage.corpus}</p>
-    <p>
+    <h2>Does the emulator match Salesforce behaviour?</h2>
+    <p class="figure">{data.conformance.passed} of {data.conformance.total} conformance tests pass.</p>
+    <p class="denom"><strong>Denominator:</strong> {data.conformance.denominator}</p>
+    <p class="src">Reproduce: <code>{data.conformance.command}</code></p>
+
+    <h2>Which of my org's triggers will actually run?</h2>
+    <p class="figure">
       {data.coverage.executePairs} of {data.coverage.pairs} trigger-context pairs classify
-      EXECUTE, across {data.coverage.executeTriggers} of {data.coverage.triggers} triggers. This
-      is a public, real Salesforce codebase, not a fixture we chose.
+      EXECUTE, across {data.coverage.executeTriggers} of {data.coverage.triggers} triggers.
+      That is {data.coverage.percent}%.
     </p>
     <p class="denom"><strong>Denominator:</strong> {data.coverage.denominator}</p>
-    <p>
-      The unit is the <strong>pair</strong>, not the trigger. A trigger declaring seven timings
-      and a one-line before-insert trigger are not the same amount of an org, so counting
-      triggers makes the figure swing on which <em>size</em> of trigger happens to be blocked. On
-      this corpus the two framings differ by three points in our favour, which is why the harder
-      one is published.
-    </p>
+    <p class="src">Reproduce: <code>{data.coverage.command}</code> against {data.coverage.corpus}</p>
 
-    <h2 id="vocabulary">The exact words</h2>
-    <p>
-      <a href="/capabilities">The capability page</a> uses three plain labels. Your own coverage
-      report uses these, and so does the emulator's boot output.
-    </p>
+    <h2 id="vocabulary">What do EXECUTE, SIMULATED and UNRESOLVED mean?</h2>
     <dl class="vocab">
       <dt><span class="v v-exec">EXECUTE</span></dt>
       <dd>Nothing in the reachable code is unsupported, so the interpreter will run your real Apex.</dd>
       <dt><span class="v v-sim">SIMULATED</span></dt>
-      <dd>Your code runs but one or more named things were modelled rather than really done.</dd>
+      <dd>Your code runs. One or more named things were modelled instead of performed, and each one is named.</dd>
       <dt><span class="v v-prov">Provisional</span></dt>
-      <dd>Faithful behaviour whose response <em>envelope</em> still awaits confirmation against a
-      real org. A different axis from SIMULATED — a capability can be neither, either, or both.</dd>
+      <dd>The behaviour is faithful. The response <em>envelope</em> has not yet been confirmed
+      against a real org. A capability can carry this label and SIMULATED at the same time.</dd>
       <dt><span class="v v-ref">UNRESOLVED</span></dt>
-      <dd>Declined by name, with a reason and a file and line.</dd>
+      <dd>Declined by name, with the file and line that caused it.</dd>
       <dt><span class="v v-rec">RECORDED-ONLY</span></dt>
       <dd>The code could run, but the event that starts it cannot happen locally: a
       platform-event subscriber, for instance.</dd>
     </dl>
+    <p class="src">Reproduce: your own coverage report prints these same words.</p>
 
-    <h2>Every capability family</h2>
-    <p class="src">
-      Produced by <code>{data.capabilitiesCommand}</code>, read from the same maps the classifier
-      consults at runtime — so a capability cannot ship without its label.
-    </p>
-    <p class="fine">
-      These are the internal families the grouped table on <a href="/capabilities">the capability
-      page</a> is folded from. They are our tier boundaries rather than Salesforce's vocabulary,
-      which is why they are here and not there.
-    </p>
+    <h2>Which Apex features are supported, one at a time?</h2>
     <div class="tablewrap">
       <table>
         <thead><tr><th>Family</th><th>What it covers</th><th>Verdict</th><th>Caveat</th></tr></thead>
@@ -156,9 +111,22 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
       </table>
     </div>
 
-    <h2>Run it against your own org</h2>
+    <p class="src">Reproduce: <code>{data.capabilitiesCommand}</code></p>
+
+    <h2>Do these numbers match the binary I would download?</h2>
+    <p class="stamp">
+      Generated {data.generated} from build <code>{data.build}</code>, against image
+      <code>{data.imageRef}</code>, which reports <code>{data.imageVersion}</code>. Shipped
+      tier: <code>{data.shippedTier}</code>.
+    </p>
+    <p class="src">Reproduce: <code>docker run --rm {data.imageRef} version</code></p>
+
+    <h2>How do I run this against my own org?</h2>
     <pre><code>docker run --rm -v "$PWD/mdapi":/mdapi:ro \
   --entrypoint /sfapex fidelic/emulator coverage --report /mdapi</code></pre>
+    <p class="src">
+      How these figures are built: <a href="/docs/measurement">how the numbers are measured</a>.
+    </p>
   </article>
 </Base>
 
@@ -166,6 +134,7 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
   .stamp{font-size:.85rem;color:#57606a;background:#f6f8fa;border-left:3px solid #89b4fa;
     padding:.6rem .85rem;border-radius:0 4px 4px 0}
   .src{font-size:.85rem;color:#57606a;margin-bottom:.4rem}
+  .figure{font-size:1.05rem;margin:.2rem 0 .5rem}
   .denom{font-size:.85rem;color:#24292f;background:#f6f8fa;padding:.6rem .85rem;border-radius:4px}
   .fine{font-size:.9rem;color:#57606a}
   .tablewrap{overflow-x:auto}

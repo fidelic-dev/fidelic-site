@@ -45,7 +45,8 @@ if (!LIVE) {
   base = `http://127.0.0.1:${srv.address().port}`;
 }
 
-const PAGES = ['/docs', '/docs/quickstart', '/docs/api', '/docs/ci-github-actions', '/docs/ci-gitlab'];
+const PAGES = ['/docs', '/docs/quickstart', '/docs/api', '/docs/ci-github-actions', '/docs/ci-gitlab',
+               '/docs/measurement'];
 // Both orientations of each phone. Landscape is not a nicety: it is 844px wide, so it misses
 // every width breakpoint, and it is the orientation people rotate into in order to read a table.
 const DEVICES = [
