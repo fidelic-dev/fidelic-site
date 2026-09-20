@@ -1,8 +1,8 @@
 {
-  "build": "4ea9d49",
+  "build": "fde389c",
   "imageRef": "fidelic/emulator:latest",
-  "imageVersion": "4ea9d49",
-  "generated": "2026-09-19",
+  "imageVersion": "fde389c",
+  "generated": "2026-09-20",
   "shippedTier": "C1",
   "capabilities": [
     {
@@ -207,20 +207,20 @@
   ],
   "capabilitiesCommand": "sfapex capabilities",
   "conformance": {
-    "passed": 70,
-    "total": 70,
+    "passed": 75,
+    "total": 75,
     "skipped": 5,
     "pending": 3,
     "command": "go run ./cmd/confrun --target=emulator   (fidelic-conformance)",
-    "denominator": "70 tests in the public fidelic-conformance suite that can run against a stock emulator; 5 skipped for an org prerequisite and 3 pending real-org verification are excluded from both sides of the fraction"
+    "denominator": "75 tests in the public fidelic-conformance suite that can run against a stock emulator; 5 skipped for an org prerequisite and 3 pending real-org verification are excluded from both sides of the fraction"
   },
   "coverage": {
     "corpus": "NPSP @ 19646faa (force-app)",
     "triggers": 26,
-    "executeTriggers": 7,
+    "executeTriggers": 8,
     "pairs": 177,
-    "executePairs": 44,
-    "percent": 24,
+    "executePairs": 51,
+    "percent": 28,
     "command": "sfapex coverage --json <corpus>",
     "denominator": "ALL 177 trigger-context pairs declared by the 26 triggers in this corpus. This is NOT the runtime ladder's denominator, which counts only the pairs declared by classified-EXECUTE triggers and is therefore a smaller number over a different population."
   }
