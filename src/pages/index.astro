@@ -34,8 +34,9 @@ const description =
 
   <p class="sub">
     Sandboxes are scarce, shared, and slow to refresh. Tests queue for an environment,
-    then fail because someone else changed the data underneath them. So the tests that
-    would catch the most expensive bugs are the ones that get run least.
+    then fail because someone else changed the data underneath them. The hardest and most
+    valuable tests are the ones that get skipped, because the environment is never free
+    when you need it.
   </p>
 
   {/* SECTION 2 — the mechanism. Emulation is the HOW. */}
@@ -44,15 +45,15 @@ const description =
   <p class="answer">
     Fidelic is a 10 MB container that loads your org's real schema and runs your real Apex
     triggers. Your tests point at <code>localhost</code> and get the same REST responses, the
-    same trigger side effects, the same validation errors.
+    same trigger side effects, the same validation errors. These are the responses a real org
+    would return.
   </p>
 
   {/* The CI claim above must be reachable, not merely asserted: this is the recipe that was
       executed as a real workflow run before it was published. */}
   <p class="answer">
-    <a href="/docs/ci-github-actions">Copy the CI recipe</a>. It's a
-    GitHub Actions workflow that boots the org, waits until your Apex has actually loaded,
-    runs your tests and tears down.
+    <a href="/docs/ci-github-actions">The CI recipe</a> — a GitHub Actions workflow you can
+    copy, that boots the org, runs your tests, and tears down.
   </p>
 
   <p class="answer">
@@ -62,7 +63,7 @@ const description =
   </p>
 
   <p class="answer receipts-line">
-    Every claim on this page traces to a command. <a href="/receipts">See the receipts</a>.
+    Every number on this page comes from a command. <a href="/receipts">Run them yourself</a>.
   </p>
 
   {/* THE THREE-COMMAND PROOF BLOCK MOVED TO /receipts.
@@ -100,8 +101,7 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
   </div>
 
   <p class="answer">
-    Before anything runs, every trigger in your org gets one of four labels, so you know
-    what you are looking at:
+    Before anything runs, every trigger in your org gets one of four labels:
   </p>
 
   <ul class="answer-list">
@@ -177,32 +177,16 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
   {/* SECTION 3 — receipts, proof, CTA */}
   <div class="receipts">
     <p>
-      Verified 75/75 against the public conformance suite
+      Passes the public conformance suite, 75 of 75 · 5 skipped, 3 pending.
       <a href="https://github.com/fidelic-dev/fidelic-conformance"
-        >run the scorecard yourself →</a
+        >Run the scorecard yourself →</a
       >
-    </p>
-    <p class="soon">
-      75/75 pass · 5 skipped (need a real org) · 3 pending (awaiting real-org
-      verification). The skips and pendings are the methodology showing its
-      work.
     </p>
   </div>
 
-  <blockquote class="pullquote">
-    <p>
-      The failure injection alone is worth it. Row locks and API limits are
-      untestable in any real org. Fidelic makes them a config flag.
-    </p>
-    <cite>— Engineer at a major Salesforce partner</cite>
-  </blockquote>
-
   <div class="waitlist" id="waitlist">
-    <h2>Get early access</h2>
-    <p>
-      We onboard a few teams at a time. Real CI for your Salesforce stack starts
-      with an email.
-    </p>
+    <h2>Want to try it on your org?</h2>
+    <p>Email me.</p>
     <form action="https://formspree.io/f/mkodpozp" method="POST">
       <input
         type="email"
@@ -211,13 +195,13 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
         aria-label="Email address"
         required
       />
-      <input type="hidden" name="_subject" value="Fidelic early access" />
+      <input type="hidden" name="_subject" value="Email me" />
       <input
         type="hidden"
         name="_next"
         value="https://www.fidelic.dev/thanks"
       />
-      <button class="btn" type="submit">Get early access</button>
+      <button class="btn" type="submit">Email me</button>
     </form>
   </div>
 </Base>
