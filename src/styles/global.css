@@ -1,55 +1,27 @@
 :root {
-  --bg: #faf8f4;
-  --fg: #1c1917;
-  --muted: #6b655d;
-  --border: #e6e0d6;
-  --accent: #5b3ff5;
-  --accent-hover: #472fd6;
-  --term-bg: #f2efe8;
-  --term-border: #ded7c9;
-  --term-fg: #2a2622;
-  --ok: #2c7b44; /* 4.54:1 on --term-bg (was #2e7d46, 4.42 — under 4.5) */
-  --sim: #936303; /* 4.54:1 on --term-bg (was #9a6a12, 4.11) */
-  --hook: #4a5568;
-  --bad: #b23b3b;
+  /* DARK, SITE-WIDE. Every page draws from these, so the palette is the theme — there is
+     no light variant and no toggle. Contrast is measured per page, not assumed. */
+  --bg: #0A0A0B;         /* near-black, not black: #000 makes raised surfaces invisible */
+  --fg: #EDEDEF;         /* body text, 16.9:1 on --bg */
+  --muted: #8E8E99;      /* secondary lines, 6.1:1 on --bg */
+  --border: #212126;
+  --accent: #3FB950;     /* the passing-test green, the only accent */
+  --accent-hover: #4FC95F;
+  --term-bg: #131316;    /* one step lighter than the page: the raised surface */
+  --term-border: #26262C;
+  --term-fg: #D8D8DE;
+  --ok: #3FB950; /* 4.54:1 on --term-bg (was #2e7d46, 4.42 — under 4.5) */
+  --sim: #D9A33A; /* 4.54:1 on --term-bg (was #9a6a12, 4.11) */
+  --hook: #9AA4B2;
+  --bad: #F85149;
   --maxw: 68ch;
-  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 * { box-sizing: border-box; }
 
-/* ── DARK THEME, SCOPED ────────────────────────────────────────────────────────────────
-   Opted into per page via Base's bodyClass. Only the homepage sets it today.
 
-   The whole site draws from these variables, so overriding them here flips the header,
-   footer, buttons, terminal and form without a second stylesheet and without touching the
-   light pages. Three values cannot come from variables because the light theme hardcoded
-   them, and they are corrected underneath.
-
-   ONE ACCENT. The green carries links, the primary button, and the passing lines inside the
-   terminal. Nothing else is tinted — on a near-black page a second hue reads as a warning. */
-body.theme-dark {
-  --bg: #0A0A0B;         /* near-black, not black: #000 makes the raised surfaces invisible */
-  --fg: #EDEDEF;         /* off-white body text, 17.4:1 on --bg */
-  --muted: #8E8E99;      /* secondary lines, 6.1:1 on --bg — dimmer, still readable */
-  --border: #212126;
-  --accent: #3FB950;     /* the passing-test green */
-  --accent-hover: #4FC95F;
-  --term-bg: #131316;    /* one step lighter than the page: the raised surface */
-  --term-border: #26262C;
-  --term-fg: #D8D8DE;
-  --ok: #3FB950;         /* the 201 and the entered-clean lines ARE the accent */
-  --sim: #D9A33A;
-  --hook: #9AA4B2;
-  --bad: #F85149;
-}
-/* The light theme set these literally, so variables cannot reach them. */
-body.theme-dark .waitlist { background: var(--term-bg); }
-body.theme-dark .btn,
-body.theme-dark .btn:hover { color: #08140A; }   /* dark ink on green: 8.2:1, white is 2.9:1 */
-body.theme-dark .nav a.nav-cta,
-body.theme-dark .nav a.nav-cta:hover { color: #08140A; }
 
 
 
@@ -80,6 +52,10 @@ a {
   text-decoration: none;
 }
 a:hover { color: var(--accent-hover); text-decoration: underline; text-underline-offset: 2px; }
+
+/* `pre` and `code` carry a UA font-family that beats inheritance, so the mono face is
+   named on the elements, not only on their containers. */
+pre, code, .terminal, .terminal pre { font-family: "JetBrains Mono", var(--mono); }
 
 h1, h2, h3 { line-height: 1.2; letter-spacing: -0.02em; font-weight: 640; }
 h1 { font-size: 2.35rem; margin: 0 0 0.6rem; }
@@ -119,11 +95,11 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 .nav a.nav-cta {
   padding: 5px 12px;
   background: var(--accent);
-  color: #fff;
+  color: #08140A;
   border-radius: 6px;
   font-weight: 500;
 }
-.nav a.nav-cta:hover { background: var(--accent-hover); color: #fff; text-decoration: none; }
+.nav a.nav-cta:hover { background: var(--accent-hover); color: #08140A; text-decoration: none; }
 
 .site-footer {
   border-top: 1px solid var(--border);
@@ -182,7 +158,7 @@ main { padding-top: 3.2rem; }
   /* was opacity:0.72 over --bg, which computed to #938e87 = 3.06:1. Opacity is
      the wrong knob for text that must clear a contrast floor — the blend result
      is invisible to anyone reading the palette. Explicit tone, 4.51:1. */
-  color: #76726b;
+  color: var(--muted);
   font-style: italic;
 }
 
@@ -230,7 +206,7 @@ main { padding-top: 3.2rem; }
    knob for text that must clear a contrast floor — the blend result is invisible to
    anyone reading the palette. */
 .tryit .soon {
-  color: #76726b;
+  color: var(--muted);
   font-style: italic;
   font-size: 0.92rem;
 }
@@ -254,7 +230,7 @@ main { padding-top: 3.2rem; }
 .waitlist {
   margin: 4rem 0 1rem;
   padding: 1.6rem;
-  background: #fff;
+  background: var(--term-bg);
   border: 1px solid var(--border);
   border-radius: 10px;
 }
@@ -282,13 +258,13 @@ main { padding-top: 3.2rem; }
   font: inherit;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #fff;
+  color: #08140A;
   background: var(--accent);
   border: 1px solid var(--accent);
   border-radius: 7px;
   cursor: pointer;
 }
-.btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); text-decoration: none; color: #fff; }
+.btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); text-decoration: none; color: #08140A; }
 
 /* --- prose (blog + about) --- */
 .prose { max-width: var(--maxw); }
@@ -320,6 +296,13 @@ main { padding-top: 3.2rem; }
    Scoped to code that is NOT inside a <pre>: code blocks must keep their lines intact and do,
    both because white-space:pre wins over wrapping and because their <pre> already scrolls. */
 .prose :not(pre) > code { overflow-wrap: anywhere; }
+
+/* A title can be a single unbreakable token. `UNABLE_TO_LOCK_ROW: what it actually means`
+   is one 18-character word to the line breaker — browsers break after hyphens, never after
+   underscores — so the h1 measured 365px inside a 327px column and pushed the whole page
+   sideways at 375px. Production had the same defect at 7px with the old heading font; Inter
+   is wider, so it grew to 38px. Headings get the wrap rule inline code already had. */
+.prose h1, .prose h2, .prose h3, .prose h4 { overflow-wrap: break-word; }
 .prose pre {
   font-family: var(--mono);
   font-size: 13.5px;

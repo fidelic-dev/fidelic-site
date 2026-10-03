@@ -44,7 +44,33 @@ const fmt = (d: Date) =>
   const blocks = Array.from(document.querySelectorAll('pre[data-language="mermaid"]'));
   if (blocks.length) {
     const { default: mermaid } = await import('mermaid');
-    mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+    // DARK THEME, and the palette handed over explicitly rather than left to mermaid's
+    // own dark preset — its defaults are tuned for a blue-grey page and land a different
+    // surface and a different accent on top of ours. Labels were rendering black on the
+    // dark page (1.06:1) under the 'neutral' theme this inherited from the light site.
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'base',
+      themeVariables: {
+        darkMode: true,
+        background: '#0A0A0B',
+        primaryColor: '#131316',        // node fill = the raised surface
+        primaryBorderColor: '#2E2E36',
+        primaryTextColor: '#EDEDEF',    // 16.4:1 on the node fill
+        lineColor: '#6E6E7A',
+        secondaryColor: '#17171B',
+        tertiaryColor: '#17171B',
+        mainBkg: '#131316',
+        nodeBorder: '#2E2E36',
+        clusterBkg: '#0F0F12',
+        clusterBorder: '#26262C',
+        titleColor: '#EDEDEF',
+        edgeLabelBackground: '#0A0A0B',
+        textColor: '#EDEDEF',
+        fontFamily: '"Inter", system-ui, sans-serif',
+      },
+    });
     for (let i = 0; i < blocks.length; i++) {
       const pre = blocks[i];
       const lines = pre.querySelectorAll('code .line');
