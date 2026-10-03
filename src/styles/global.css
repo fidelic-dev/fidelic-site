@@ -216,7 +216,7 @@ main { padding-top: 3.2rem; }
 .terminal .out    { color: #9AA4B2; }
 .terminal .data   { color: #9D9DA8; }
 .terminal .status { color: var(--accent); font-weight: 600; }
-.terminal .pass   { color: var(--ok); }
+.terminal .pass   { color: var(--ok); white-space: nowrap; }
 
 /* --- live playground CTA --- */
 .tryit { margin: 3rem 0; }

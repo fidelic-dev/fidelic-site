@@ -129,17 +129,31 @@ const TRANSCRIPT = [
       <div
         class="terminal"
         role="img"
-        aria-label="Boot output: apexexec on, 26 triggers loaded from the metadata directory, 7 EXECUTE-classified, listening on port 8080, 14.1 seconds to listening."
+        aria-label="A real session: the org boots with 26 triggers loaded, one POST creates a DataImportBatch record, and the execution trace lists seven ordered steps — the before-insert trigger entering clean, the field write setting Batch_Status__c to Open, the insert itself, the after-insert trigger, and the commit."
       >
-        <pre><span class="out">sfemu: apexexec ON — 26 triggers loaded from "/mdapi", 7 EXECUTE-classified</span>
-<span class="out">sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, metadata: "/mdapi")</span>
-<span class="dim"># 14.1s to listening — NPSP, 26 triggers / 1,503 classes, 3-vCPU cloud VM</span></pre>
+        <pre><span class="dim"># boot the org, with tracing on</span>
+<span class="cmd">docker run -p 8080:8080 -v ./mdapi:/mdapi:ro fidelic/emulator:4ea9d49 --apex-src /mdapi --trace</span>
+<span class="out">sfemu: apexexec ON — 26 triggers loaded from "/mdapi", 7 EXECUTE-classified</span>
+<span class="out">sfemu 4ea9d49 listening on :8080 (store: sqlite ":memory:", client-secret: false, metadata: "/mdapi", hooks-file: "")</span>
+
+<span class="dim"># create one record, and ask for the trace</span>
+<span class="cmd">curl -s -X POST localhost:8080/services/data/v62.0/sobjects/DataImportBatch__c -H 'X-Fidelic-Trace: 1' -d '&#123;"Name":"Spring Appeal"&#125;'</span>
+<span class="data">&#123;"id":"a04000000000038AAA","success":true,"errors":[]&#125;</span>
+
+<span class="dim"># what actually happened, in order</span>
+<span class="cmd">curl -s localhost:8080/__emulator__/trace | jq -c '.traces[-1].trace.entries[]'</span>
+<span class="out">&#123;"seq":0,"at":1,"kind":"request","depth":0,"rolled_back":false,"undo_index":0,"detail":&#123;"method":"POST","path":"/services/data/v62.0/sobjects/DataImportBatch__c"&#125;&#125;</span>
+<span class="out">&#123;"seq":1,"at":2,"kind":"transaction","depth":0,"rolled_back":false,"undo_index":0,"detail":&#123;"phase":""&#125;&#125;</span>
+<span class="out">&#123;"seq":2,"at":3,"kind":"field_change","depth":1,"rolled_back":false,"undo_index":0,"detail":&#123;"after":"Open","before":null,"field":"Batch_Status__c","id":"","object":"DataImportBatch__c"&#125;&#125;</span>
+<span class="out">&#123;"seq":3,"at":4,"kind":"trigger","depth":0,"rolled_back":false,"undo_index":0,"detail":&#123;"object":"DataImportBatch__c","op":"insert","outcome":"</span><span class="pass">entered-clean</span><span class="out">","phase":"before","trigger":"TDTM_DataImportBatch"&#125;&#125;</span>
+<span class="out">&#123;"seq":4,"at":5,"kind":"dml","depth":0,"caused_by":3,"rolled_back":false,"undo_index":0,"detail":&#123;"ids":["a04000000000038AAA"],"object":"DataImportBatch__c","op":"insert","row_count":1&#125;&#125;</span>
+<span class="out">&#123;"seq":5,"at":6,"kind":"trigger","depth":0,"caused_by":4,"rolled_back":false,"undo_index":1,"detail":&#123;"object":"DataImportBatch__c","op":"insert","outcome":"</span><span class="pass">entered-clean</span><span class="out">","phase":"after","trigger":"TDTM_DataImportBatch"&#125;&#125;</span>
+<span class="out">&#123;"seq":6,"at":7,"kind":"commit","depth":0,"caused_by":1,"rolled_back":false,"undo_index":1&#125;</span></pre>
       </div>
       <p class="src">
-        Verbatim from the boot run on
-        <a href="/receipts">receipts</a> —
-        <a href="https://github.com/SalesforceFoundation/NPSP">NPSP</a> @ 19646faa on
-        <code>fidelic/emulator:4ea9d49</code>, where the full command is.
+        One session, captured on <code>fidelic/emulator:4ea9d49</code> against
+        <a href="https://github.com/SalesforceFoundation/NPSP">NPSP</a> @ 19646faa. Boot
+        output is the first two lines of the log. Record ids are per-run.
       </p>
     </div>
   </section>
@@ -171,8 +185,23 @@ const TRANSCRIPT = [
           support.
         </li>
       </ul>
-      <p class="answer">
-        <a href="/capabilities#vocabulary">See exactly what we support</a>
+      <div
+        class="terminal"
+        role="img"
+        aria-label="Analyzer output for the Nonprofit Success Pack: EXECUTE=7, HOOKS=0, UNRESOLVED=19, RECORDED-ONLY=0, with one EXECUTE row and one UNRESOLVED row naming the construct that blocked it."
+      >
+        <pre><span class="cmd">docker run --rm -v ./mdapi:/mdapi:ro --entrypoint /sfapex fidelic/emulator:4ea9d49 coverage /mdapi</span>
+<span class="out">  EXECUTE means no blocker was found in the reachable code. It does NOT mean we ran it —</span>
+<span class="out">  run your tests and read /__emulator__/fired to see what actually fired.</span>
+<span class="out">RUNG B LADDER @ C1 + C2 families &#123;async, callout, crypto, database, recorded-effect, schema, schema-permission, settings&#125; (load-time classification): EXECUTE=7  HOOKS=0  UNRESOLVED=19  RECORDED-ONLY=0  (SIMULATED=1)</span>
+<span class="pass">  EXECUTE</span><span class="out">     TDTM_DataImportBatch  [Provisional: schema: describe labels derived where the metadata carries none; DisplayType modeled as its enum name; == identity on describe results Provisional (SCHEMA-DESIGN §7)]</span>
+<span class="bad">  UNRESOLVED</span><span class="out">  TDTM_AccountSoftCredit  (min tier C2; blocked by side-effect: Database.query [C2])</span>
+<span class="dim">  … 24 more trigger rows</span></pre>
+      </div>
+      <p class="src">
+        The labels are the analyzer's, not a summary of them. It says so itself in line two:
+        a label is what the code reads like, not proof it ran.
+        <a href="/capabilities#vocabulary">See exactly what we support</a>.
       </p>
     </div>
   </section>
@@ -181,7 +210,26 @@ const TRANSCRIPT = [
     <div class="screen-inner">
       <h2>It runs in CI.</h2>
       <p class="answer">
-        <a href="/docs/ci-github-actions">The CI recipe</a> — boot, test, tear down.
+        Boot, test, tear down. The whole job took 16 seconds, including pulling the image
+        and booting the org.
+      </p>
+      <div
+        class="terminal"
+        role="img"
+        aria-label="CI output: the emulator answers after one second, the org loads 8 triggers, and four integration tests pass with zero failures."
+      >
+        <pre><span class="out">emulator answering after 1s</span>
+<span class="out">org ready: 8 triggers loaded</span>
+<span class="pass">ok 1</span><span class="out"> - creating an Account returns a Salesforce-shaped 201</span>
+<span class="pass">ok 2</span><span class="out"> - the org's real Apex triggers actually fired</span>
+<span class="pass">ok 3</span><span class="out"> - a validation rule rejects a bad record the way the org would</span>
+<span class="pass">ok 4</span><span class="out"> - the row-lock failure can be staged on demand</span>
+<span class="out"># pass 4</span>
+<span class="out"># fail 0</span></pre>
+      </div>
+      <p class="src">
+        Printed by the workflow in <a href="/docs/ci-github-actions">the CI recipe</a>, which
+        was run before it was written down.
       </p>
     </div>
   </section>
@@ -189,15 +237,25 @@ const TRANSCRIPT = [
   <section class="screen reveal">
     <div class="screen-inner">
       <h2>Every number on this page comes from a command you can run yourself.</h2>
-      <p class="answer"><a href="/receipts">Run them yourself</a></p>
-    </div>
-  </section>
-
-  <section class="screen reveal">
-    <div class="screen-inner">
-      <h2>Passes the public conformance suite, 75 of 75.</h2>
       <p class="answer">
-        <a href="https://github.com/fidelic-dev/fidelic-conformance">Run the scorecard yourself →</a>
+        Including this one. The conformance suite is public, and it is the same suite we
+        gate on — 5 of its cases need a real org and are skipped, 3 are written from the
+        docs and still await a real-org run. It says so when you run it.
+      </p>
+      <div
+        class="terminal"
+        role="img"
+        aria-label="Conformance output: 75 tests against the emulator target, 5 skipped for org prerequisites, 3 pending real-org verification, scorecard 75 of 75 pass."
+      >
+        <pre><span class="cmd">go run ./cmd/confrun --target=emulator</span>
+<span class="out">Running 75 test(s) against target "emulator" (http://localhost:8080) — 5 SKIPPED (org prerequisite) — 3 PENDING (docs-derived, pending real-org verification)</span>
+<span class="dim">  … 75 test lines</span>
+<span class="out">Scorecard: </span><span class="pass">75/75 PASS</span></pre>
+      </div>
+      <p class="src">
+        Measured on sfemu <code>ec8d5dc</code>.
+        <a href="https://github.com/fidelic-dev/fidelic-conformance">Run the scorecard yourself</a>
+        · <a href="/receipts">every other number on this page</a>
       </p>
     </div>
   </section>
@@ -336,6 +394,21 @@ const TRANSCRIPT = [
   }
   .screen .answer { max-width: 60ch; margin: 0 0 1.8rem; font-size: 1.05rem; }
   .screen .terminal { font-size: clamp(0.72rem, 0.95vw, 0.9rem); line-height: 1.6; }
+
+  /* THE SECTION BLOCKS WRAP; THE HERO TRANSCRIPT DOES NOT.
+     These are long single lines — a 165-character trace entry, a ladder line whose counts
+     sit at column 150 — and left to scroll they hid exactly the part that is the proof:
+     "entered-clean" and "EXECUTE=7 HOOKS=0 UNRESOLVED=19" were both past the right edge on
+     a 1440 screen, so the visual argued for itself with the evidence off-stage. Wrapping
+     costs nothing here because none of this output is aligned in columns — unlike the hero
+     transcript, where `entered-clean` lining up under itself IS the thing being shown.
+     Continuations are indented, so a wrapped entry still reads as one entry. */
+  .screen .terminal pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding-left: 2ch;
+    text-indent: -2ch;
+  }
   .screen .src {
     margin: 0.9rem 0 0;
     color: var(--muted);
