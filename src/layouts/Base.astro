@@ -58,7 +58,15 @@ const jsonLd = article && {
     <link rel="alternate" type="application/rss+xml" title="Fidelic Blog" href="/rss.xml" />
     <meta name="generator" content={Astro.generator} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
-    {/* Per-page head additions (the homepage loads its two webfonts here). */}
+    {/* Inter for headings and body, JetBrains Mono for every terminal and code run.
+        Site-wide: the theme is one theme, so the faces are not a per-page decision. */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;620;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    {/* Per-page head additions. */}
     <slot name="head" />
   </head>
   <body class={bodyClass}>

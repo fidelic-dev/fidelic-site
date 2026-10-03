@@ -167,26 +167,26 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
 </Base>
 
 <style>
-  .stamp{font-size:.85rem;color:#57606a;background:#f6f8fa;border-left:3px solid #89b4fa;
+  .stamp{font-size:.85rem;color:var(--muted);background:var(--term-bg);border-left:3px solid var(--accent);
     padding:.6rem .85rem;border-radius:0 4px 4px 0}
-  .src{font-size:.85rem;color:#57606a;margin-bottom:.4rem}
+  .src{font-size:.85rem;color:var(--muted);margin-bottom:.4rem}
   .figure{font-size:1.05rem;margin:.2rem 0 .5rem}
-  .denom{font-size:.85rem;color:#24292f;background:#f6f8fa;padding:.6rem .85rem;border-radius:4px}
-  .fine{font-size:.9rem;color:#57606a}
+  .denom{font-size:.85rem;color:var(--fg);background:var(--term-bg);padding:.6rem .85rem;border-radius:4px}
+  .fine{font-size:.9rem;color:var(--muted)}
   .tablewrap{overflow-x:auto}
   table{border-collapse:collapse;width:100%;font-size:.9rem;margin:.5rem 0 1.5rem}
-  th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid #d0d7de;vertical-align:top}
-  th{font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;color:#57606a}
+  th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
+  th{font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
   .v{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;
     padding:.08rem .4rem;border-radius:3px;white-space:nowrap;margin-right:.25rem}
-  .v-exec{background:#dafbe1;color:#0a5a2a}
-  .v-sim{background:#fff4d6;color:#7a5200}
-  .v-prov{background:#e7e9ff;color:#33389a}
-  .v-ref{background:#ffe9ec;color:#8b1d2c}
-  .v-rec{background:#eef1f4;color:#44506b}
-  .caveat{font-size:.82rem;color:#57606a;margin-bottom:.3rem}
+  .v-exec{background:rgba(63,185,80,.15);color:#56D364}
+  .v-sim{background:rgba(217,163,58,.15);color:#E3B341}
+  .v-prov{background:rgba(121,139,248,.16);color:#A5B4FC}
+  .v-ref{background:rgba(248,81,73,.15);color:#FF8A80}
+  .v-rec{background:rgba(154,164,178,.15);color:#B6BECC}
+  .caveat{font-size:.82rem;color:var(--muted);margin-bottom:.3rem}
   .caveat:last-child{margin-bottom:0}
-  .none{color:#8c959f}
+  .none{color:var(--muted)}
   .vocab dt{margin-top:.6rem}
   .vocab dd{margin:.15rem 0 .4rem 0;font-size:.92rem}
   @media (max-width:640px){ table{font-size:.82rem} }

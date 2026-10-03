@@ -1,4 +1,4 @@
-// RULER: no docs page may scroll sideways on a phone.
+// RULER: no page may scroll sideways on a phone. Every route in dist/, both orientations.
 //
 // This shipped broken for weeks and nothing noticed, because nothing was looking. Every docs
 // page pushed its own document 752px wide on a 375px screen: the table-of-contents nav is a grid
@@ -14,7 +14,7 @@
 // SKIPS cleanly without puppeteer-core or Chrome: a ruler that reds on its own missing
 // dependency teaches people to ignore it.
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
 
@@ -29,6 +29,8 @@ catch { console.log('  SKIP: puppeteer-core not installed (npm i -D puppeteer-co
 if (!existsSync(CHROME)) { console.log(`  SKIP: no Chrome at ${CHROME}`); process.exit(0); }
 
 const LIVE = process.env.LIVE || '';
+// LIVE mode still enumerates from dist/ (or an explicit PAGES=): it measures the live site
+// but learns the route list locally, so a LIVE run cannot quietly cover zero pages.
 if (!LIVE && !existsSync(DIST)) { console.log('  SKIP: no dist/ — run `npm run build` first'); process.exit(0); }
 
 const TYPES = { '.html':'text/html', '.css':'text/css', '.js':'text/javascript', '.svg':'image/svg+xml' };
@@ -45,8 +47,25 @@ if (!LIVE) {
   base = `http://127.0.0.1:${srv.address().port}`;
 }
 
-const PAGES = ['/docs', '/docs/quickstart', '/docs/api', '/docs/ci-github-actions', '/docs/ci-gitlab',
-               '/docs/measurement'];
+// EVERY ROUTE, DERIVED FROM dist/ — never a hand-written list.
+//
+// The list used to be six literal docs paths, and that omission is why a real defect sat on
+// production: the h1 on /blog/unable-to-lock-row is the single unbreakable token
+// `UNABLE_TO_LOCK_ROW`, it pushed the document 7px wide at 375px, and this ruler ran green
+// every time because blog posts were never in the list. A guard whose coverage is typed by
+// hand goes stale on the next page somebody adds, and reports health for pages it never
+// loaded. Walking the build output means a new page is covered the day it exists.
+function routes(dir, prefix = '') {
+  const out = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.isDirectory()) out.push(...routes(join(dir, e.name), `${prefix}/${e.name}`));
+    else if (e.name === 'index.html') out.push(prefix || '/');
+  }
+  return out;
+}
+const PAGES = (process.env.PAGES ? process.env.PAGES.split(',') : routes(DIST)).sort();
+if (!PAGES.length) { console.log('  FAIL: walked dist/ and found no pages — the ruler cannot run'); process.exit(1); }
+console.log(`  ${PAGES.length} routes from dist/: ${PAGES.join(' ')}`);
 // Both orientations of each phone. Landscape is not a nicety: it is 844px wide, so it misses
 // every width breakpoint, and it is the orientation people rotate into in order to read a table.
 const DEVICES = [
@@ -98,6 +117,6 @@ for (const [name, pw, ph, isPhone] of DEVICES) {
 }
 await browser.close();
 if (srv) srv.close();
-console.log(`\n  ${combos} device combinations x ${PAGES.length} docs pages — ` +
+console.log(`\n  ${combos} device combinations x ${PAGES.length} pages — ` +
             (failures ? `${failures} OVERFLOWING` : 'none scroll sideways'));
 process.exit(failures ? 1 : 0);

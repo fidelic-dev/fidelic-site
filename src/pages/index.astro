@@ -23,18 +23,7 @@ const TRANSCRIPT = [
 ];
 ---
 
-<Base title={title} description={description} bodyClass="theme-dark">
-  {/* Two faces, both from Google Fonts: Inter for headings and body, JetBrains Mono for
-      every terminal and code run. Loaded here rather than globally — the light pages keep
-      the system stack they already shipped with. */}
-  <Fragment slot="head">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;620;700&family=JetBrains+Mono:wght@400;500&display=swap"
-    />
-  </Fragment>
+<Base title={title} description={description}>
 
   {/* EVERY CLAIM ON THIS PAGE TRACES TO A COMMAND, per the standing rule. The table is here
       so the next person editing this copy can re-run them instead of trusting them:
@@ -160,17 +149,6 @@ const TRANSCRIPT = [
   /* ── HOMEPAGE LAYOUT ───────────────────────────────────────────────────────────────
      Colour lives in the scoped dark palette in global.css. This file is spacing, type
      scale and motion only. */
-  :global(body.theme-dark) {
-    font-family: "Inter", var(--font);
-  }
-  /* `pre` and `code` carry a UA font-family, which beats inheritance — so the mono face
-     has to be named on the elements themselves, not only on their container. */
-  :global(body.theme-dark .terminal),
-  :global(body.theme-dark .terminal pre),
-  :global(body.theme-dark pre),
-  :global(body.theme-dark code) {
-    font-family: "JetBrains Mono", var(--mono);
-  }
 
   /* THE FIRST VIEWPORT HAS TO CARRY THE OUTCOME: headline, one line, a real call with a
      real result. So the hero is sized to fit rather than to impress — the padding is
