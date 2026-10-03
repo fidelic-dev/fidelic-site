@@ -6,24 +6,40 @@ const description =
   "Salesforce integration tests that run on your laptop and in CI — no org, no login, nothing shared. Fidelic is a 10 MB container that loads your real schema and runs your real Apex triggers, so the tests run on every push instead of whenever an environment frees up.";
 
 /* THE HERO TRANSCRIPT, TYPED OUT ON LOAD.
-   Verbatim from a real playground session — the same transcript that was already on this
-   page, unchanged. Held as data so the typewriter can reveal it line by line without the
-   animation code ever composing a line of its own.
+   Verbatim from a real playground session — the same transcript this page has carried
+   since the first version, unchanged. Held as data so the typewriter can reveal it
+   without the animation code ever composing a line of its own.
 
-   `t` is the token class: "" plain, "cmd" the request line, "ok" the green pass lines,
-   "dim" the payloads. `pause` is extra dwell after a line, in ms, used where a real
-   session had a round trip. */
+   Each line is a list of SEGMENTS so a single line can carry more than one colour:
+     req     the request line        bright, the thing a person typed
+     status  an HTTP status code     the green accent, and only ever a status
+     pass    an outcome token        the green accent: this is the proof
+     out     program output          the terminal's own foreground
+     data    a JSON body            cooler and quieter than the request
+   `pause` is extra dwell after a line, in ms, where the real session had a round trip. */
 const TRANSCRIPT = [
-  { t: "cmd", s: "POST /services/data/v62.0/sobjects/DataImportBatch__c", tail: ' {"Name":"Spring Appeal"}' },
-  { t: "ok",  s: "201", tail: '  {"id":"a0400000000006zAAA","success":true}', pause: 240 },
-  { t: "",    s: "" },
-  { t: "cmd", s: "GET /__emulator__/fired" },
-  { t: "ok",  s: "  TDTM_DataImportBatch", tail: "  before insert  entered-clean" },
-  { t: "ok",  s: "  TDTM_DataImportBatch", tail: "  after  insert  entered-clean" },
+  { segs: [
+      { c: "req",  x: "POST /services/data/v62.0/sobjects/DataImportBatch__c" },
+      { c: "data", x: ' {"Name":"Spring Appeal"}' },
+    ] },
+  { segs: [
+      { c: "status", x: "201" },
+      { c: "data",   x: '  {"id":"a0400000000006zAAA","success":true}' },
+    ], pause: 260 },
+  { segs: [{ c: "out", x: "" }] },
+  { segs: [{ c: "req", x: "GET /__emulator__/fired" }] },
+  { segs: [
+      { c: "out",  x: "  TDTM_DataImportBatch  before insert  " },
+      { c: "pass", x: "entered-clean" },
+    ] },
+  { segs: [
+      { c: "out",  x: "  TDTM_DataImportBatch  after  insert  " },
+      { c: "pass", x: "entered-clean" },
+    ] },
 ];
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} wide>
 
   {/* EVERY CLAIM ON THIS PAGE TRACES TO A COMMAND, per the standing rule. The table is here
       so the next person editing this copy can re-run them instead of trusting them:
@@ -31,155 +47,264 @@ const TRANSCRIPT = [
         "without waiting for a sandbox"  → docs/ci/github-actions.md; real workflow run
                                            35263998942, 16s, 4/4 tests, no org involved
         "10 MB"                          → hub.docker.com/r/fidelic/emulator, 10.34 MB compressed
-        "row locks, rate limits"         → POST /__emulator__/faults; conformance faults-001..005
         "your real Apex triggers"        → GET /__emulator__/fired, outcome entered-clean
         "75 of 75"                       → go run ./cmd/confrun --target=emulator
         the hero transcript              → a real playground session, verbatim
+        the row-lock envelope            → sf/faults.go faultPayloadFor; shown on /receipts
+        the boot output                  → the /receipts boot run, NPSP @ 19646faa
 
-      FINDINGS #18 review: no count of triggers that RUN appears on this page. The only
-      trigger count is in the playground line, which says "loaded and classified". */}
+      EVERY VISUAL IS REAL OUTPUT. No mock Salesforce UI, no screenshot of anyone's product,
+      no invented figure, no illustration. If it cannot be a terminal, it stays text — which
+      is why the problem section is an error envelope and not a drawing of a queue.
+
+      FINDINGS #18 review: no count of triggers that RUN appears on this page. The boot line
+      says "loaded" and "EXECUTE-classified", which is what was measured. */}
+
+  {/* ── HERO: the heading and the terminal, and nothing else ───────────────────────────
+      First load shows two things. No button, no badge, no scroll hint — getting past this
+      screen is a scroll, deliberately. */}
   <section class="hero">
-    <h1>Run your Salesforce integration tests without waiting for a sandbox.</h1>
-    <p class="hero-sub">
-      A 10 MB container that answers on <code>localhost</code> like your org does.
-    </p>
-
-    <div
-      class="terminal hero-term"
-      role="img"
-      aria-label="Playground transcript: creating a DataImportBatch record returns HTTP 201, and the fired-trigger log shows TDTM_DataImportBatch running on both before-insert and after-insert."
-    >
-      <pre id="tape" data-tape={JSON.stringify(TRANSCRIPT)}></pre>
+    <div class="hero-head">
+      <h1>Run your Salesforce integration tests without waiting for a sandbox.</h1>
+      <p class="hero-sub">
+        A 10&nbsp;MB container that answers on <code>localhost</code> like your org does.
+      </p>
     </div>
 
-    <p class="hero-cta">
-      <a class="btn" href="https://play.fidelic.dev">Open the playground →</a>
-    </p>
+    <div class="hero-stage">
+      <div
+        class="terminal hero-term"
+        role="img"
+        aria-label="Playground transcript: a POST creating a DataImportBatch record returns HTTP 201, and GET /__emulator__/fired then shows TDTM_DataImportBatch running on both before-insert and after-insert with the outcome entered-clean."
+      >
+        <pre id="tape" data-tape={JSON.stringify(TRANSCRIPT)}></pre>
+      </div>
+      {/* Appears when the trace finishes. Dim text under the terminal — not a callout, not a
+          bubble, nothing that points at anything. */}
+      <p class="hero-caption" id="caption">A real NPSP trigger ran before the record saved.</p>
+    </div>
   </section>
 
-  <section class="band reveal">
-    <h2>Sandboxes are scarce and shared.</h2>
-    <p class="answer">
-      Tests queue for an environment, then fail because someone else changed the data
-      underneath them. The hardest and most valuable tests are the ones that get skipped,
-      because the environment is never free when you need it.
-    </p>
+  {/* ── A: THE PROBLEM ─────────────────────────────────────────────────────────────────
+      The visual is the error itself. There is no sandbox-pricing figure here and there will
+      not be one: we have no sourced dollar number, and "scarce, shared, slow" is the part we
+      can defend. */}
+  <section class="screen reveal">
+    <div class="screen-inner">
+      <h2>The environment is the bottleneck.</h2>
+      <p class="answer">
+        Sandboxes are scarce and shared. Tests queue for one, and then fail because someone
+        else changed the data underneath them. The hardest and most valuable tests are the
+        ones that get skipped, because the environment is never free when you need it.
+      </p>
+      <div
+        class="terminal"
+        role="img"
+        aria-label="A row-lock error envelope: message unable to obtain exclusive access to this record or 1 records, errorCode UNABLE_TO_LOCK_ROW."
+      >
+        <pre><span class="dim"># two transactions, one record</span>
+<span class="bad">[&#123;"message":"unable to obtain exclusive access to this record or 1 records",</span>
+<span class="bad">  "errorCode":"UNABLE_TO_LOCK_ROW","fields":[]&#125;]</span></pre>
+      </div>
+      <p class="src">
+        Envelope shape per the REST error-codes doc. Fidelic returns this one on demand —
+        <a href="/receipts">the run is on the receipts page</a>.
+      </p>
+    </div>
   </section>
 
-  <section class="band reveal">
-    <h2>It runs your org on your own machine.</h2>
-    <p class="answer">
-      Fidelic loads your org's real schema and runs your real Apex triggers. Your tests point
-      at <code>localhost</code> and get the same REST responses, the same trigger side
-      effects, the same validation errors. These are the responses a real org would return.
-    </p>
+  {/* ── B: IT RUNS ON YOUR MACHINE ─────────────────────────────────────────────────────
+      The boot output, verbatim. The docker command is NOT reproduced here: the published run
+      had the row-lock fault armed for the step after it, and a command retyped without that
+      flag is a command nobody ran. The output and the timing belong to the run that happened;
+      the full command is one click away on /receipts. */}
+  <section class="screen reveal">
+    <div class="screen-inner">
+      <h2>It runs your org on your own machine.</h2>
+      <p class="answer">
+        A 10&nbsp;MB container loads your real schema and runs your real Apex. Your tests
+        point at <code>localhost</code> and get the same REST responses, the same trigger side
+        effects, the same validation errors. These are the responses a real org would return.
+      </p>
+      <div
+        class="terminal"
+        role="img"
+        aria-label="Boot output: apexexec on, 26 triggers loaded from the metadata directory, 7 EXECUTE-classified, listening on port 8080, 14.1 seconds to listening."
+      >
+        <pre><span class="out">sfemu: apexexec ON — 26 triggers loaded from "/mdapi", 7 EXECUTE-classified</span>
+<span class="out">sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, metadata: "/mdapi")</span>
+<span class="dim"># 14.1s to listening — NPSP, 26 triggers / 1,503 classes, 3-vCPU cloud VM</span></pre>
+      </div>
+      <p class="src">
+        Verbatim from the boot run on
+        <a href="/receipts">receipts</a> —
+        <a href="https://github.com/SalesforceFoundation/NPSP">NPSP</a> @ 19646faa on
+        <code>fidelic/emulator:4ea9d49</code>, where the full command is.
+      </p>
+    </div>
   </section>
 
-  <section class="band reveal">
-    <h2>Every trigger gets one of four labels.</h2>
-    <ul class="answer-list">
-      <li>
-        <strong>EXECUTE</strong>: nothing in the reachable code is unsupported, so the
-        interpreter will run your real Apex.
-      </li>
-      <li>
-        <strong>HOOKS</strong>: the effect is reproduced by a rule instead of by running
-        the Apex.
-      </li>
-      <li>
-        <strong>RECORDED-ONLY</strong>: the code could run, but the thing that starts it
-        cannot happen on your machine, a platform event for instance.
-      </li>
-      <li>
-        <strong>UNRESOLVED</strong>: refused, with the file name, line number, and the
-        construct it uses that we do not support.
-      </li>
-    </ul>
-    <p class="answer">
-      <a href="/capabilities#vocabulary">See exactly what we support</a>
-    </p>
+  {/* ── THE FOUR LABELS ────────────────────────────────────────────────────────────────
+      "the interpreter will ATTEMPT to run" — not "will run". Restored wording; a static
+      classification is not an execution receipt (FINDINGS #18). */}
+  <section class="screen reveal">
+    <div class="screen-inner">
+      <h2>Every trigger gets one of four labels.</h2>
+      <ul class="labels">
+        <li>
+          <span class="tag tag-exec">EXECUTE</span>
+          nothing in the reachable code is unsupported, so the interpreter will attempt to
+          run your real Apex.
+        </li>
+        <li>
+          <span class="tag tag-hook">HOOKS</span>
+          the effect is reproduced by a rule instead of by running the Apex.
+        </li>
+        <li>
+          <span class="tag tag-rec">RECORDED-ONLY</span>
+          the code could run, but the thing that starts it cannot happen on your machine, a
+          platform event for instance.
+        </li>
+        <li>
+          <span class="tag tag-unres">UNRESOLVED</span>
+          refused, with the file name, line number, and the construct it uses that we do not
+          support.
+        </li>
+      </ul>
+      <p class="answer">
+        <a href="/capabilities#vocabulary">See exactly what we support</a>
+      </p>
+    </div>
   </section>
 
-  <section class="band reveal">
-    <h2>It can fail on purpose.</h2>
-    <p class="answer">
-      One call creates a row lock, a rate limit, or slow responses, and the next request
-      returns the real Salesforce error. You cannot make a sandbox do that.
-      <a href="/capabilities">See the full list of capabilities</a>.
-    </p>
+  <section class="screen reveal">
+    <div class="screen-inner">
+      <h2>It runs in CI.</h2>
+      <p class="answer">
+        <a href="/docs/ci-github-actions">The CI recipe</a> — boot, test, tear down.
+      </p>
+    </div>
   </section>
 
-  <section class="band reveal">
-    <h2>It runs in CI.</h2>
-    <p class="answer">
-      <a href="/docs/ci-github-actions">The CI recipe</a> — a GitHub Actions workflow you can
-      copy, that boots the org, runs your tests, and tears down.
-    </p>
+  <section class="screen reveal">
+    <div class="screen-inner">
+      <h2>Every number on this page comes from a command you can run yourself.</h2>
+      <p class="answer"><a href="/receipts">Run them yourself</a></p>
+    </div>
   </section>
 
-  <section class="band reveal receipts">
-    <p>
-      Every number on this page comes from a command. <a href="/receipts">Run them yourself</a>.
-    </p>
-    <p>
-      Passes the public conformance suite, 75 of 75 · 5 skipped, 3 pending.
-      <a href="https://github.com/fidelic-dev/fidelic-conformance">Run the scorecard yourself →</a>
-    </p>
+  <section class="screen reveal">
+    <div class="screen-inner">
+      <h2>Passes the public conformance suite, 75 of 75.</h2>
+      <p class="answer">
+        <a href="https://github.com/fidelic-dev/fidelic-conformance">Run the scorecard yourself →</a>
+      </p>
+    </div>
   </section>
 
-  <section class="band reveal waitlist" id="waitlist">
-    <h2>Want to try it on your org?</h2>
-    <p>Email me.</p>
-    <form action="https://formspree.io/f/mkodpozp" method="POST">
-      <input
-        type="email"
-        name="email"
-        placeholder="you@company.com"
-        aria-label="Email address"
-        required
-      />
-      <input type="hidden" name="_subject" value="Email me" />
-      <input type="hidden" name="_next" value="https://www.fidelic.dev/thanks" />
-      <button class="btn" type="submit">Email me</button>
-    </form>
+  <section class="screen reveal" id="waitlist">
+    <div class="screen-inner">
+      <div class="waitlist">
+        <h2>Want to try it on your org? Email me.</h2>
+        <form action="https://formspree.io/f/mkodpozp" method="POST">
+          <input
+            type="email"
+            name="email"
+            placeholder="you@company.com"
+            aria-label="Email address"
+            required
+          />
+          <input type="hidden" name="_subject" value="Email me" />
+          <input type="hidden" name="_next" value="https://www.fidelic.dev/thanks" />
+          <button class="btn" type="submit">Email me</button>
+        </form>
+      </div>
+    </div>
   </section>
 </Base>
 
 <style>
-  /* ── HOMEPAGE LAYOUT ───────────────────────────────────────────────────────────────
-     Colour lives in the scoped dark palette in global.css. This file is spacing, type
-     scale and motion only. */
+  /* ── HOMEPAGE: ONE CLAIM PER SCREEN ────────────────────────────────────────────────
+     Colour lives in global.css. This file is layout, type scale and motion.
 
-  /* THE FIRST VIEWPORT HAS TO CARRY THE OUTCOME: headline, one line, a real call with a
-     real result. So the hero is sized to fit rather than to impress — the padding is
-     deliberately modest at the bottom, because the terminal matters more than the air
-     around it. */
+     svh, not vh. On a phone `100vh` is the viewport with the browser chrome RETRACTED, so
+     a 100vh hero is taller than what you can actually see and the next section's heading
+     peeks in under the terminal — which is precisely the "nothing else visible" rule
+     broken. svh is the small viewport: chrome shown, nothing peeking. */
+
+  /* HERO. Two children: the heading block, then the terminal taking everything left over.
+     No button, no third element. */
   .hero {
+    /* The viewport MINUS the header above it, so the hero is exactly one screen and the
+       caption under the terminal is the last thing on it rather than the first thing you
+       have to scroll for. --header-h is measured from the real element in Base.astro. */
+    min-height: calc(100svh - var(--header-h, 61px));
+    display: flex;
+    flex-direction: column;
     text-align: center;
-    padding: 3.2rem 0 1rem;
+    padding: 7svh 0 4svh;
+    box-sizing: border-box;
   }
   .hero h1 {
-    font-size: clamp(2rem, 5.2vw, 3.3rem);
-    line-height: 1.08;
+    font-size: clamp(2rem, 5.2vw, 3.35rem);
+    line-height: 1.07;
     letter-spacing: -0.03em;
     font-weight: 700;
-    max-width: 22ch;
+    max-width: 24ch;
     margin: 0 auto 1rem;
+    text-wrap: balance;
   }
   .hero-sub {
     color: var(--muted);
-    font-size: 1.1rem;
-    max-width: 46ch;
-    margin: 0 auto 2.2rem;
+    font-size: clamp(1rem, 1.4vw, 1.15rem);
+    max-width: 64ch;
+    margin: 0 auto;
   }
   .hero-sub code { font-size: 0.95em; color: var(--fg); }
-  .hero-term { text-align: left; margin: 0 auto; max-width: 100%; }
-  /* Height reserved for the tallest state so the typing animation cannot shift the page
-     under the reader as lines arrive. Six transcript lines plus padding. */
-  .hero-term pre { min-height: calc(6 * 1.65em); margin: 0; }
-  .hero-cta { margin: 2rem 0 0; }
 
-  /* The caret only exists while typing; it is removed when the tape finishes so a
+  /* The terminal takes the rest of the screen: the stage is the flex remainder, and the
+     box sits centred inside it. Sized by its content rather than stretched, so a short
+     transcript in a tall window is centred air rather than a stretched box with a
+     six-line tape stranded at the top. */
+  .hero-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.1rem;
+    min-height: 0;
+    margin-top: 2.6rem;
+  }
+  .hero-term {
+    text-align: left;
+    width: 100%;
+    max-width: 100%;
+    padding: clamp(1.1rem, 2.2vw, 1.9rem);
+    font-size: clamp(0.76rem, 1.35vw, 1.2rem);
+    line-height: 1.65;
+    /* The transcript holds its columns — `entered-clean` aligning under itself is the
+       thing being shown — so it scrolls sideways inside its own box rather than wrapping
+       into nonsense. Contained, so a sideways flick never drags the page. */
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Height reserved for the finished tape so arriving lines cannot shift the page under
+     the reader. Six lines. */
+  .hero-term pre { min-height: calc(6 * 1.65em); margin: 0; }
+
+  /* The caption is the last thing to arrive and the quietest thing on the screen. */
+  .hero-caption {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    opacity: 0;
+    transition: opacity 420ms ease-out;
+  }
+  .hero-caption.shown { opacity: 1; }
+
+  /* The caret exists only while typing, and is removed when the tape finishes so a
      finished transcript does not sit there blinking at nothing. */
   .hero-term .caret {
     display: inline-block;
@@ -190,42 +315,75 @@ const TRANSCRIPT = [
   }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* GENEROUS, AND EVEN. The old page ran sections together at 2.6rem; these are set once
-     here so the rhythm cannot drift section by section. */
-  .band { padding: 3.4rem 0; border-top: 1px solid var(--border); }
-  .band:first-of-type { border-top: 0; }
-  .band h2 {
-    font-size: 1.45rem;
-    letter-spacing: -0.02em;
-    margin: 0 0 0.9rem;
+  /* ── SCROLL SECTIONS: one claim, one screen ────────────────────────────────────────
+     Centred in the viewport rather than packed against the top edge, so each claim
+     arrives alone with air around it. */
+  .screen {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding: 4svh 0;
+    box-sizing: border-box;
+    border-top: 1px solid var(--border);
   }
-  .band .answer { max-width: 62ch; margin-bottom: 0; }
-  .band .answer + .answer { margin-top: 1.1rem; }
-  .band .answer-list { margin: 0 0 1.2rem; }
-
-  .band.receipts {
-    border-left: 0;
-    padding-left: 0;
+  .screen-inner { width: 100%; }
+  .screen h2 {
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.1rem;
+    max-width: 34ch;
+  }
+  .screen .answer { max-width: 60ch; margin: 0 0 1.8rem; font-size: 1.05rem; }
+  .screen .terminal { font-size: clamp(0.72rem, 0.95vw, 0.9rem); line-height: 1.6; }
+  .screen .src {
+    margin: 0.9rem 0 0;
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    max-width: 60ch;
   }
-  /* THE CARD NEEDS ITS OWN PADDING, all four sides. `.band` sets `padding: 3.4rem 0`,
-     which zeroed the horizontal padding the card inherited — so it kept its fill and its
-     border while the heading sat flush on the left edge and, at 375px, the input touched
-     the right one. Stated explicitly here rather than relying on the band rule, because
-     this is the one band that is a surface rather than a stripe. */
-  .band.waitlist {
-    margin: 3.4rem 0 0;
+
+  /* The four labels. A list, not cards: the tag carries the colour and the line carries
+     the meaning. */
+  .labels { list-style: none; margin: 0 0 1.6rem; padding: 0; max-width: 62ch; }
+  .labels li {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0 0.75rem;
+    align-items: baseline;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--border);
+    color: var(--fg);
+  }
+  .labels li:last-child { border-bottom: 1px solid var(--border); }
+  .tag {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .tag-exec  { background: rgba(63, 185, 80, 0.15);  color: #56D364; }
+  .tag-hook  { background: rgba(154, 164, 178, 0.15); color: #AEB6C2; }
+  .tag-rec   { background: rgba(217, 163, 58, 0.15);  color: #E0B341; }
+  .tag-unres { background: rgba(248, 81, 73, 0.15);   color: #FF8077; }
+
+  /* The one surface on the page, so it states all four sides of its own padding rather
+     than inheriting a section rule that zeroes the horizontal half. */
+  .waitlist {
     padding: 2.5rem;
     border: 1px solid var(--border);
     border-radius: 12px;
+    background: var(--term-bg);
+    max-width: 40rem;
   }
-  .band.waitlist h2 { margin-top: 0; }
+  .waitlist h2 { margin-top: 0; }
 
   /* ── MOTION ────────────────────────────────────────────────────────────────────────
-     Fade and rise, fast. 14px of travel and 320ms: enough to read as deliberate, short
-     enough that scrolling never waits for it. No bounce, no parallax, no transforms that
-     keep running after arrival. */
+     Fade and rise, unchanged from the previous build: 14px of travel, 320ms. Enough to
+     read as deliberate, short enough that scrolling never waits for it. */
   .reveal {
     opacity: 0;
     transform: translateY(14px);
@@ -234,84 +392,111 @@ const TRANSCRIPT = [
   .reveal.shown { opacity: 1; transform: none; }
 
   /* IF MOTION IS UNWELCOME, THERE IS NO MOTION — not a faster version of it. Sections are
-     simply present, and the terminal is handed over fully typed by the script. */
+     simply present, the terminal is handed over fully typed, and the caption is already
+     there rather than fading in behind an animation that never runs. */
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
+    .hero-caption { opacity: 1; transition: none; }
     .hero-term .caret { animation: none; }
   }
 
+  /* SHORT WINDOWS. The hero is a fixed budget — one screen — and type sized only to WIDTH
+     overspends it: at 1280x720 a 53.6px heading wrapped to three lines over a two-line
+     subline needed 663px of a 650px screen, so the hero grew and the first scroll revealed
+     a 13px sliver of the next section. Height is the constraint here, so height drives the
+     scale. */
+  @media (max-height: 820px) and (min-width: 641px) {
+    .hero { padding: 5svh 0 3svh; }
+    .hero h1 { font-size: clamp(1.8rem, 3.6vw, 2.5rem); margin-bottom: 0.7rem; }
+    .hero-sub { font-size: 1rem; }
+    .hero-stage { margin-top: 1.6rem; gap: 0.9rem; }
+    .hero-term { padding: 1.2rem; }
+  }
+
   @media (max-width: 640px) {
-    .hero { padding: 2rem 0 0.5rem; }
-    .hero h1 { font-size: clamp(1.75rem, 8.5vw, 2.3rem); max-width: 18ch; }
-    .hero-sub { font-size: 1rem; margin-bottom: 1.6rem; }
-    .band { padding: 2.6rem 0; }
-    .band.waitlist { padding: 1.5rem; margin-top: 2.6rem; }
-    /* The transcript holds its columns — the alignment of `entered-clean` under itself is
-       the thing being shown — so it scrolls sideways inside its own box rather than
-       wrapping into nonsense. Contained, so a sideways flick does not drag the page. */
-    .hero-term { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+    .hero { padding: 4svh 0 3svh; }
+    .hero h1 { font-size: clamp(1.7rem, 7.6vw, 2.2rem); max-width: 20ch; }
+    .hero-stage { margin-top: 1.6rem; gap: 0.9rem; }
+    .hero-term { padding: 1rem 0.9rem; line-height: 1.6; }
     .hero-term pre { min-height: calc(6 * 1.6em); }
+    .hero-caption { font-size: 0.88rem; }
+    .screen { padding: 6svh 0; }
+    .screen .answer { font-size: 1rem; }
+    .waitlist { padding: 1.5rem; }
   }
 </style>
 
 <script>
-  /* Hand-written, no library. Two jobs: type the transcript once, and reveal sections as
-     they arrive. Both check prefers-reduced-motion first and degrade to "already done". */
+  /* Hand-written, no library. Three jobs: type the transcript once, show the caption when
+     it finishes, reveal sections as they arrive. All three check prefers-reduced-motion
+     first and degrade to "already done". */
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // --- the tape -----------------------------------------------------------------------
   const tape = document.getElementById("tape");
+  const caption = document.getElementById("caption");
+  const showCaption = () => { if (caption) caption.classList.add("shown"); };
+
   if (tape) {
     const lines = JSON.parse(tape.dataset.tape || "[]");
-    const span = (cls, text) => {
+    const el = (cls, text) => {
       const e = document.createElement("span");
       if (cls) e.className = cls;
       e.textContent = text;
       return e;
     };
     // The finished state, which reduced-motion gets immediately and the animation
-    // converges on. One function so the two paths cannot drift apart.
+    // converges on. One function, so the two paths cannot drift apart. `partial` is a
+    // character count into the line being typed; segments are emitted in order and
+    // clipped against it, so a half-typed line keeps every colour it will end up with.
     const paint = (upto, partial) => {
       tape.textContent = "";
       for (let i = 0; i <= upto && i < lines.length; i++) {
-        const l = lines[i];
-        const text = i === upto && partial !== undefined ? partial : l.s + (l.tail || "");
-        // Each line is at most two spans: the token-coloured head, then the dim payload.
-        const headLen = Math.min(text.length, l.s.length);
-        if (headLen > 0) tape.appendChild(span(l.t, text.slice(0, headLen)));
-        if (text.length > l.s.length) tape.appendChild(span("dim", text.slice(l.s.length)));
-        // No newline after the final line: a trailing one leaves a blank row under the
-        // transcript, inside a box whose height is already reserved.
+        const segs = lines[i].segs || [];
+        let budget = i === upto && partial !== undefined ? partial : Infinity;
+        for (const s of segs) {
+          if (budget <= 0) break;
+          const text = s.x.length <= budget ? s.x : s.x.slice(0, budget);
+          if (text) tape.appendChild(el(s.c, text));
+          budget -= s.x.length;
+        }
+        // No newline after the final painted line: a trailing one leaves a blank row
+        // inside a box whose height is already reserved.
         if (i < upto) tape.appendChild(document.createTextNode("\n"));
       }
     };
+    const lineLen = (l) => (l.segs || []).reduce((n, s) => n + s.x.length, 0);
 
     if (reduce) {
       paint(lines.length - 1);
+      showCaption();
     } else {
       let li = 0, ci = 0;
-      const caret = span("caret", " ");
+      const caret = el("caret", " ");
       const step = () => {
         if (li >= lines.length) {
-          caret.remove();           // finished: stop blinking, do not loop
+          caret.remove();            // finished: stop blinking, and do not loop
           paint(lines.length - 1);
+          showCaption();
           return;
         }
-        const full = lines[li].s + (lines[li].tail || "");
+        const len = lineLen(lines[li]);
         ci += 1;
-        paint(li, full.slice(0, ci));
+        paint(li, ci);
         tape.appendChild(caret);
-        if (ci >= full.length) {
+        if (ci >= len) {
           li += 1; ci = 0;
           setTimeout(step, lines[li - 1].pause || 90);
         } else {
-          // 6ms/char. The whole tape lands in about 1.7s, which reads as typing without
+          // 6ms/char: the whole tape lands in about 1.7s, which reads as typing without
           // making anyone wait to see the 201.
           setTimeout(step, 6);
         }
       };
       step();
     }
+  } else {
+    showCaption();
   }
 
   // --- section reveals ----------------------------------------------------------------

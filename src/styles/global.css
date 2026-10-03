@@ -10,8 +10,8 @@
   --term-bg: #131316;    /* one step lighter than the page: the raised surface */
   --term-border: #26262C;
   --term-fg: #D8D8DE;
-  --ok: #3FB950; /* 4.54:1 on --term-bg (was #2e7d46, 4.42 — under 4.5) */
-  --sim: #D9A33A; /* 4.54:1 on --term-bg (was #9a6a12, 4.11) */
+  --ok: #3FB950;  /* 7.30:1 on --term-bg */
+  --sim: #D9A33A; /* 7.47:1 on --term-bg */
   --hook: #9AA4B2;
   --bad: #F85149;
   --maxw: 68ch;
@@ -71,6 +71,14 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 .site-header {
   border-bottom: 1px solid var(--border);
 }
+/* THE HEADER'S OWN HEIGHT, PUBLISHED AS A VARIABLE.
+   A full-screen hero has to be "the viewport minus whatever is above it". The header is in
+   normal flow above it, so `min-height: 100svh` makes the first screen taller than the
+   screen and pushes the bottom of the hero — its caption — under the fold. The fallback
+   here is the measured desktop height; Base.astro corrects it from the real element on load
+   and on resize, because the mobile header is not the same height as the desktop one and a
+   hardcoded guess is how this silently goes wrong at one breakpoint. */
+:root { --header-h: 61px; }
 .site-header .wrap {
   display: flex;
   align-items: center;
@@ -198,6 +206,17 @@ main { padding-top: 3.2rem; }
 .terminal .hook { color: var(--hook); }
 .terminal .bad { color: var(--bad); }
 .terminal .accent { color: var(--accent); }
+
+/* HERO TRANSCRIPT TOKENS. The brief is "commands in one colour, output in another, so it is
+   obvious at a glance which is which" — so the split is by BRIGHTNESS, not by hue: what a
+   person sent is the brightest thing in the box, what came back is cooler and quieter. The
+   green accent is reserved for status and outcome, which is why `201` and `entered-clean`
+   share it and nothing else in the transcript does. */
+.terminal .req    { color: var(--fg); font-weight: 600; }
+.terminal .out    { color: #9AA4B2; }
+.terminal .data   { color: #9D9DA8; }
+.terminal .status { color: var(--accent); font-weight: 600; }
+.terminal .pass   { color: var(--ok); }
 
 /* --- live playground CTA --- */
 .tryit { margin: 3rem 0; }
