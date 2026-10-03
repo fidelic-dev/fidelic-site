@@ -12,8 +12,13 @@ interface Props {
      BlogPosting JSON-LD. Without it every post advertised itself as og:type "website",
      which tells a crawler the page is a landing page with no publication date. */
   article?: { date: Date; markdown: string };
+  /* Opt-in body class. The homepage sets "theme-dark", which swaps the CSS variables the
+     whole site is built on — header, footer, buttons and terminal follow automatically.
+     Scoped rather than global because every other page is light, and a redesign of one
+     page should not silently restyle the docs. */
+  bodyClass?: string;
 }
-const { title, description, wide = false, noindex = false, article } = Astro.props;
+const { title, description, wide = false, noindex = false, article, bodyClass = '' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 
 /* No author is named anywhere on this site, so the byline is the organisation. Inventing
@@ -53,8 +58,10 @@ const jsonLd = article && {
     <link rel="alternate" type="application/rss+xml" title="Fidelic Blog" href="/rss.xml" />
     <meta name="generator" content={Astro.generator} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {/* Per-page head additions (the homepage loads its two webfonts here). */}
+    <slot name="head" />
   </head>
-  <body>
+  <body class={bodyClass}>
     <Header />
     <main class={wide ? 'wrap wrap-wide' : 'wrap'}>
       <slot />

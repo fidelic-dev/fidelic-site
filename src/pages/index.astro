@@ -4,187 +4,141 @@ const title =
   "Fidelic: run your Salesforce integration tests without waiting for a sandbox.";
 const description =
   "Salesforce integration tests that run on your laptop and in CI — no org, no login, nothing shared. Fidelic is a 10 MB container that loads your real schema and runs your real Apex triggers, so the tests run on every push instead of whenever an environment frees up.";
+
+/* THE HERO TRANSCRIPT, TYPED OUT ON LOAD.
+   Verbatim from a real playground session — the same transcript that was already on this
+   page, unchanged. Held as data so the typewriter can reveal it line by line without the
+   animation code ever composing a line of its own.
+
+   `t` is the token class: "" plain, "cmd" the request line, "ok" the green pass lines,
+   "dim" the payloads. `pause` is extra dwell after a line, in ms, used where a real
+   session had a round trip. */
+const TRANSCRIPT = [
+  { t: "cmd", s: "POST /services/data/v62.0/sobjects/DataImportBatch__c", tail: ' {"Name":"Spring Appeal"}' },
+  { t: "ok",  s: "201", tail: '  {"id":"a0400000000006zAAA","success":true}', pause: 240 },
+  { t: "",    s: "" },
+  { t: "cmd", s: "GET /__emulator__/fired" },
+  { t: "ok",  s: "  TDTM_DataImportBatch", tail: "  before insert  entered-clean" },
+  { t: "ok",  s: "  TDTM_DataImportBatch", tail: "  after  insert  entered-clean" },
+];
 ---
 
-<Base title={title} description={description}>
-  {/* SECTION 1 — the problem. SANDBOX ELIMINATION IS THE PRODUCT; emulation is HOW it
-      works and has been demoted to section 2 accordingly. The old hero led with "no real CI",
-      which names a category rather than the thing a reader is currently waiting on.
+<Base title={title} description={description} bodyClass="theme-dark">
+  {/* Two faces, both from Google Fonts: Inter for headings and body, JetBrains Mono for
+      every terminal and code run. Loaded here rather than globally — the light pages keep
+      the system stack they already shipped with. */}
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;620;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+  </Fragment>
 
-      EVERY CLAIM ON THIS PAGE TRACES TO A COMMAND, per the standing rule. The table is here so
-      the next person editing this copy can re-run them instead of trusting them:
+  {/* EVERY CLAIM ON THIS PAGE TRACES TO A COMMAND, per the standing rule. The table is here
+      so the next person editing this copy can re-run them instead of trusting them:
 
         "without waiting for a sandbox"  → docs/ci/github-actions.md; real workflow run
                                            35263998942, 16s, 4/4 tests, no org involved
-        "on every push"                  → same run, triggered by push
         "10 MB"                          → hub.docker.com/r/fidelic/emulator, 10.34 MB compressed
-        "starts in under a second"       → docker run … --apex-src ./mdapi → 0.29s to listening
-                                           (8 triggers). A 1,500-class org takes ~15s; boot is
-                                           proportional to how much Apex you have, and QUICKSTART
-                                           §3 says so rather than this page implying otherwise.
-        "about two milliseconds"         → POST /__emulator__/reset, median 1.9ms over HTTP, n=20
-        "side by side"                   → two containers on different ports: a record created in
-                                           one leaves the other at totalSize 0
         "row locks, rate limits"         → POST /__emulator__/faults; conformance faults-001..005
         "your real Apex triggers"        → GET /__emulator__/fired, outcome entered-clean
+        "75 of 75"                       → go run ./cmd/confrun --target=emulator
+        the hero transcript              → a real playground session, verbatim
 
-      FINDINGS #18 review: no count of triggers that RUN appears on this page. The only trigger
-      count is in the playground section, which says "loaded and classified" and is unchanged. */}
-  <h1>Run your Salesforce integration tests without waiting for a sandbox.</h1>
-
-  <p class="sub">
-    Sandboxes are scarce, shared, and slow to refresh. Tests queue for an environment,
-    then fail because someone else changed the data underneath them. The hardest and most
-    valuable tests are the ones that get skipped, because the environment is never free
-    when you need it.
-  </p>
-
-  {/* SECTION 2 — the mechanism. Emulation is the HOW. */}
-  <h2>It runs your org on your own machine, so nothing queues.</h2>
-
-  <p class="answer">
-    Fidelic is a 10 MB container that loads your org's real schema and runs your real Apex
-    triggers. Your tests point at <code>localhost</code> and get the same REST responses, the
-    same trigger side effects, the same validation errors. These are the responses a real org
-    would return.
-  </p>
-
-  {/* The CI claim above must be reachable, not merely asserted: this is the recipe that was
-      executed as a real workflow run before it was published. */}
-  <p class="answer">
-    <a href="/docs/ci-github-actions">The CI recipe</a> — a GitHub Actions workflow you can
-    copy, that boots the org, runs your tests, and tears down.
-  </p>
-
-  <p class="answer">
-    It can also fail on purpose: one call creates a row lock, a rate limit, or slow responses,
-    and the next request returns the real Salesforce error. You cannot make a sandbox
-    do that. <a href="/capabilities">See the full list of capabilities</a>.
-  </p>
-
-  <p class="answer receipts-line">
-    Every number on this page comes from a command. <a href="/receipts">Run them yourself</a>.
-  </p>
-
-  {/* THE THREE-COMMAND PROOF BLOCK MOVED TO /receipts.
-      It ran analyzer, then boot, then an armed fault — three commands deep, sitting between the
-      hero copy and everything that explains it. Raw output is what /receipts is for, and the
-      people who want to read it are already going there. What stays here is the ONE artifact
-      the hero's own claim needs: speed to listening.
-
-      TRANSCRIPT, NOT A COMPOSITION. Both lines are verbatim program output, re-verified against
-      fidelic/emulator:4ea9d49 on 2026-09-19, NPSP force-app subtree (26 triggers, 1,503 classes).
-
-      Reproduce:
-        docker run -p 8080:8080 -v ./npsp/force-app:/mdapi:ro fidelic/emulator --apex-src /mdapi
-
-      THE FAULT ENV VAR IS GONE FROM THE COMMAND, deliberately: this block no longer demonstrates
-      a fault, and a flag whose effect is never shown is noise the reader has to explain away. The
-      boot line is identical either way — it reports store, client-secret, metadata and hooks-file,
-      none of which faults touch — and that was checked rather than assumed.
-
-      THE BUILD STAMP IS ELIDED ON PURPOSE. The line really reads `sfemu <sha> listening on :8080 …`
-      and that sha changes on every release, so writing one here would date this page the moment
-      the next image ships — the same trap that left "v1.0" on this line for months. The … is where
-      the stamp was; everything either side of it is byte-for-byte what the program printed.
-
-      The 14.1s is OURS, not the program's — sfemu prints no boot duration — so it is marked with a
-      # as a comment. Measured on the production box, a Hetzner CPX21 with 3 vCPU. */}
-  <div
-    class="terminal"
-    role="img"
-    aria-label="Terminal transcript: the emulator loads the Nonprofit Success Pack from source and is listening on port 8080 in 14.1 seconds."
-  >
-    <pre><span class="cmd">docker run -p 8080:8080 -v ./npsp/force-app:/mdapi:ro fidelic/emulator --apex-src /mdapi</span>
-sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, metadata: "/mdapi", hooks-file: "")
-<span class="dim"># 14.1s to listening — NPSP, 26 triggers / 1,503 classes, 3-vCPU cloud VM</span></pre>
-  </div>
-
-  <p class="answer">
-    Before anything runs, every trigger in your org gets one of four labels:
-  </p>
-
-  <ul class="answer-list">
-    <li>
-      <strong>EXECUTE</strong>: nothing in the reachable code is unsupported, so the
-      interpreter will run your real Apex.
-    </li>
-    <li>
-      <strong>HOOKS</strong>: The effect is reproduced by a rule instead of
-      by running the Apex.
-    </li>
-    <li>
-      <strong>RECORDED-ONLY</strong>: the code could run, but the thing that starts it
-      cannot happen on your machine such as a platform event, for instance.
-    </li>
-    <li>
-      <strong>UNRESOLVED</strong>: refused! You get the file name, line number, and the construct
-      it uses that we do not support.
-    </li>
-  </ul>
-
-  <p class="answer">
-    <a href="/capabilities#vocabulary">See exactly what we support</a>
-  </p>
-
-  {/* SECTION 2b — the live playground.
-      A LINK AND A REAL TRANSCRIPT, not an iframe. An iframe would load the whole
-      playground app into this page for every visitor who never clicks it, which is
-      third-party JavaScript in the critical path of a site that currently ships none.
-      The transcript below is verbatim output from a real session against the live
-      box — not a mock-up — so it stays honest without costing a single byte of image. */}
-  <div class="tryit">
-    <h2>Or run it now, in your browser.</h2>
-
-    <p class="answer">
-      {/* FINDINGS #18: no artifact may state or imply that N triggers RUN. This line
-          previously read "26 triggers, 7 of them executing real Apex" — but 7 is the
-          CLASSIFIED-EXECUTE count, and runtime verification puts 2 of those 7 entered
-          and 5 refused. "Loaded and classified" is what the scanner knows; "one of its
-          real handlers fires" is what corpus-exec and the playground's own condition 7
-          actually verify. Claim the verified thing. */}
-      <a href="https://play.fidelic.dev">play.fidelic.dev</a> runs a real
-      <a href="https://github.com/salesforcefoundation/npsp">NPSP </a> org with the actual open-source nonprofit codebase. All 26 triggers in that repo
-      are loaded and classified. Click a command and inspect one of its real handlers fire, then
-      throw the org away. No install, no signup, no Salesforce login.
+      FINDINGS #18 review: no count of triggers that RUN appears on this page. The only
+      trigger count is in the playground line, which says "loaded and classified". */}
+  <section class="hero">
+    <h1>Run your Salesforce integration tests without waiting for a sandbox.</h1>
+    <p class="hero-sub">
+      A 10 MB container that answers on <code>localhost</code> like your org does.
     </p>
 
     <div
-      class="terminal"
+      class="terminal hero-term"
       role="img"
       aria-label="Playground transcript: creating a DataImportBatch record returns HTTP 201, and the fired-trigger log shows TDTM_DataImportBatch running on both before-insert and after-insert."
     >
-      <pre><span class="accent">POST /services/data/v62.0/sobjects/DataImportBatch__c</span> <span class="dim">&#123;"Name":"Spring Appeal"&#125;</span>
-<span class="ok">201</span>  <span class="dim">&#123;"id":"a0400000000006zAAA","success":true&#125;</span>
-
-<span class="accent">GET /__emulator__/fired</span>
-  <span class="ok">TDTM_DataImportBatch</span>  <span class="dim">before insert</span>  entered-clean
-  <span class="ok">TDTM_DataImportBatch</span>  <span class="dim">after  insert</span>  entered-clean</pre>
+      <pre id="tape" data-tape={JSON.stringify(TRANSCRIPT)}></pre>
     </div>
 
-    <p>
+    <p class="hero-cta">
       <a class="btn" href="https://play.fidelic.dev">Open the playground →</a>
     </p>
+  </section>
 
-    {/* Says what is true rather than what sells. The pool is small and finite, and a
-        visitor who meets the busy path should have been told it exists. */}
-    <p class="soon">
-      A handful of sandboxes run at a time. If they are all busy you will be given
-      the command to run it yourself instead.
+  <section class="band reveal">
+    <h2>Sandboxes are scarce and shared.</h2>
+    <p class="answer">
+      Tests queue for an environment, then fail because someone else changed the data
+      underneath them. The hardest and most valuable tests are the ones that get skipped,
+      because the environment is never free when you need it.
     </p>
-  </div>
+  </section>
 
-  {/* SECTION 3 — receipts, proof, CTA */}
-  <div class="receipts">
+  <section class="band reveal">
+    <h2>It runs your org on your own machine.</h2>
+    <p class="answer">
+      Fidelic loads your org's real schema and runs your real Apex triggers. Your tests point
+      at <code>localhost</code> and get the same REST responses, the same trigger side
+      effects, the same validation errors. These are the responses a real org would return.
+    </p>
+  </section>
+
+  <section class="band reveal">
+    <h2>Every trigger gets one of four labels.</h2>
+    <ul class="answer-list">
+      <li>
+        <strong>EXECUTE</strong>: nothing in the reachable code is unsupported, so the
+        interpreter will run your real Apex.
+      </li>
+      <li>
+        <strong>HOOKS</strong>: the effect is reproduced by a rule instead of by running
+        the Apex.
+      </li>
+      <li>
+        <strong>RECORDED-ONLY</strong>: the code could run, but the thing that starts it
+        cannot happen on your machine, a platform event for instance.
+      </li>
+      <li>
+        <strong>UNRESOLVED</strong>: refused, with the file name, line number, and the
+        construct it uses that we do not support.
+      </li>
+    </ul>
+    <p class="answer">
+      <a href="/capabilities#vocabulary">See exactly what we support</a>
+    </p>
+  </section>
+
+  <section class="band reveal">
+    <h2>It can fail on purpose.</h2>
+    <p class="answer">
+      One call creates a row lock, a rate limit, or slow responses, and the next request
+      returns the real Salesforce error. You cannot make a sandbox do that.
+      <a href="/capabilities">See the full list of capabilities</a>.
+    </p>
+  </section>
+
+  <section class="band reveal">
+    <h2>It runs in CI.</h2>
+    <p class="answer">
+      <a href="/docs/ci-github-actions">The CI recipe</a> — a GitHub Actions workflow you can
+      copy, that boots the org, runs your tests, and tears down.
+    </p>
+  </section>
+
+  <section class="band reveal receipts">
+    <p>
+      Every number on this page comes from a command. <a href="/receipts">Run them yourself</a>.
+    </p>
     <p>
       Passes the public conformance suite, 75 of 75 · 5 skipped, 3 pending.
-      <a href="https://github.com/fidelic-dev/fidelic-conformance"
-        >Run the scorecard yourself →</a
-      >
+      <a href="https://github.com/fidelic-dev/fidelic-conformance">Run the scorecard yourself →</a>
     </p>
-  </div>
+  </section>
 
-  <div class="waitlist" id="waitlist">
+  <section class="band reveal waitlist" id="waitlist">
     <h2>Want to try it on your org?</h2>
     <p>Email me.</p>
     <form action="https://formspree.io/f/mkodpozp" method="POST">
@@ -196,12 +150,196 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
         required
       />
       <input type="hidden" name="_subject" value="Email me" />
-      <input
-        type="hidden"
-        name="_next"
-        value="https://www.fidelic.dev/thanks"
-      />
+      <input type="hidden" name="_next" value="https://www.fidelic.dev/thanks" />
       <button class="btn" type="submit">Email me</button>
     </form>
-  </div>
+  </section>
 </Base>
+
+<style>
+  /* ── HOMEPAGE LAYOUT ───────────────────────────────────────────────────────────────
+     Colour lives in the scoped dark palette in global.css. This file is spacing, type
+     scale and motion only. */
+  :global(body.theme-dark) {
+    font-family: "Inter", var(--font);
+  }
+  /* `pre` and `code` carry a UA font-family, which beats inheritance — so the mono face
+     has to be named on the elements themselves, not only on their container. */
+  :global(body.theme-dark .terminal),
+  :global(body.theme-dark .terminal pre),
+  :global(body.theme-dark pre),
+  :global(body.theme-dark code) {
+    font-family: "JetBrains Mono", var(--mono);
+  }
+
+  /* THE FIRST VIEWPORT HAS TO CARRY THE OUTCOME: headline, one line, a real call with a
+     real result. So the hero is sized to fit rather than to impress — the padding is
+     deliberately modest at the bottom, because the terminal matters more than the air
+     around it. */
+  .hero {
+    text-align: center;
+    padding: 3.2rem 0 1rem;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5.2vw, 3.3rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    max-width: 22ch;
+    margin: 0 auto 1rem;
+  }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 1.1rem;
+    max-width: 46ch;
+    margin: 0 auto 2.2rem;
+  }
+  .hero-sub code { font-size: 0.95em; color: var(--fg); }
+  .hero-term { text-align: left; margin: 0 auto; max-width: 100%; }
+  /* Height reserved for the tallest state so the typing animation cannot shift the page
+     under the reader as lines arrive. Six transcript lines plus padding. */
+  .hero-term pre { min-height: calc(6 * 1.65em); margin: 0; }
+  .hero-cta { margin: 2rem 0 0; }
+
+  /* The caret only exists while typing; it is removed when the tape finishes so a
+     finished transcript does not sit there blinking at nothing. */
+  .hero-term .caret {
+    display: inline-block;
+    width: 0.55em;
+    background: var(--accent);
+    color: var(--accent);
+    animation: blink 1s steps(2, start) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* GENEROUS, AND EVEN. The old page ran sections together at 2.6rem; these are set once
+     here so the rhythm cannot drift section by section. */
+  .band { padding: 3.4rem 0; border-top: 1px solid var(--border); }
+  .band:first-of-type { border-top: 0; }
+  .band h2 {
+    font-size: 1.45rem;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.9rem;
+  }
+  .band .answer { max-width: 62ch; margin-bottom: 0; }
+  .band .answer + .answer { margin-top: 1.1rem; }
+  .band .answer-list { margin: 0 0 1.2rem; }
+
+  .band.receipts {
+    border-left: 0;
+    padding-left: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .band.waitlist { margin: 0; border-radius: 0; border-left: 0; border-right: 0; border-bottom: 0; }
+
+  /* ── MOTION ────────────────────────────────────────────────────────────────────────
+     Fade and rise, fast. 14px of travel and 320ms: enough to read as deliberate, short
+     enough that scrolling never waits for it. No bounce, no parallax, no transforms that
+     keep running after arrival. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 320ms ease-out, transform 320ms ease-out;
+  }
+  .reveal.shown { opacity: 1; transform: none; }
+
+  /* IF MOTION IS UNWELCOME, THERE IS NO MOTION — not a faster version of it. Sections are
+     simply present, and the terminal is handed over fully typed by the script. */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .hero-term .caret { animation: none; }
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 2rem 0 0.5rem; }
+    .hero h1 { font-size: clamp(1.75rem, 8.5vw, 2.3rem); max-width: 18ch; }
+    .hero-sub { font-size: 1rem; margin-bottom: 1.6rem; }
+    .band { padding: 2.6rem 0; }
+    /* The transcript holds its columns — the alignment of `entered-clean` under itself is
+       the thing being shown — so it scrolls sideways inside its own box rather than
+       wrapping into nonsense. Contained, so a sideways flick does not drag the page. */
+    .hero-term { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+    .hero-term pre { min-height: calc(6 * 1.6em); }
+  }
+</style>
+
+<script>
+  /* Hand-written, no library. Two jobs: type the transcript once, and reveal sections as
+     they arrive. Both check prefers-reduced-motion first and degrade to "already done". */
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // --- the tape -----------------------------------------------------------------------
+  const tape = document.getElementById("tape");
+  if (tape) {
+    const lines = JSON.parse(tape.dataset.tape || "[]");
+    const span = (cls, text) => {
+      const e = document.createElement("span");
+      if (cls) e.className = cls;
+      e.textContent = text;
+      return e;
+    };
+    // The finished state, which reduced-motion gets immediately and the animation
+    // converges on. One function so the two paths cannot drift apart.
+    const paint = (upto, partial) => {
+      tape.textContent = "";
+      for (let i = 0; i <= upto && i < lines.length; i++) {
+        const l = lines[i];
+        const text = i === upto && partial !== undefined ? partial : l.s + (l.tail || "");
+        // Each line is at most two spans: the token-coloured head, then the dim payload.
+        const headLen = Math.min(text.length, l.s.length);
+        if (headLen > 0) tape.appendChild(span(l.t, text.slice(0, headLen)));
+        if (text.length > l.s.length) tape.appendChild(span("dim", text.slice(l.s.length)));
+        // No newline after the final line: a trailing one leaves a blank row under the
+        // transcript, inside a box whose height is already reserved.
+        if (i < upto) tape.appendChild(document.createTextNode("\n"));
+      }
+    };
+
+    if (reduce) {
+      paint(lines.length - 1);
+    } else {
+      let li = 0, ci = 0;
+      const caret = span("caret", " ");
+      const step = () => {
+        if (li >= lines.length) {
+          caret.remove();           // finished: stop blinking, do not loop
+          paint(lines.length - 1);
+          return;
+        }
+        const full = lines[li].s + (lines[li].tail || "");
+        ci += 1;
+        paint(li, full.slice(0, ci));
+        tape.appendChild(caret);
+        if (ci >= full.length) {
+          li += 1; ci = 0;
+          setTimeout(step, lines[li - 1].pause || 90);
+        } else {
+          // 6ms/char. The whole tape lands in about 1.7s, which reads as typing without
+          // making anyone wait to see the 201.
+          setTimeout(step, 6);
+        }
+      };
+      step();
+    }
+  }
+
+  // --- section reveals ----------------------------------------------------------------
+  const bands = document.querySelectorAll(".reveal");
+  if (reduce || !("IntersectionObserver" in window)) {
+    bands.forEach((b) => b.classList.add("shown"));
+  } else {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("shown");
+            io.unobserve(e.target);   // reveal once; never re-animate on scroll back
+          }
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.05 }
+    );
+    bands.forEach((b) => io.observe(b));
+  }
+</script>
