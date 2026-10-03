@@ -231,7 +231,18 @@ const TRANSCRIPT = [
     color: var(--muted);
     font-size: 0.95rem;
   }
-  .band.waitlist { margin: 0; border-radius: 0; border-left: 0; border-right: 0; border-bottom: 0; }
+  /* THE CARD NEEDS ITS OWN PADDING, all four sides. `.band` sets `padding: 3.4rem 0`,
+     which zeroed the horizontal padding the card inherited — so it kept its fill and its
+     border while the heading sat flush on the left edge and, at 375px, the input touched
+     the right one. Stated explicitly here rather than relying on the band rule, because
+     this is the one band that is a surface rather than a stripe. */
+  .band.waitlist {
+    margin: 3.4rem 0 0;
+    padding: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .band.waitlist h2 { margin-top: 0; }
 
   /* ── MOTION ────────────────────────────────────────────────────────────────────────
      Fade and rise, fast. 14px of travel and 320ms: enough to read as deliberate, short
@@ -256,6 +267,7 @@ const TRANSCRIPT = [
     .hero h1 { font-size: clamp(1.75rem, 8.5vw, 2.3rem); max-width: 18ch; }
     .hero-sub { font-size: 1rem; margin-bottom: 1.6rem; }
     .band { padding: 2.6rem 0; }
+    .band.waitlist { padding: 1.5rem; margin-top: 2.6rem; }
     /* The transcript holds its columns — the alignment of `entered-clean` under itself is
        the thing being shown — so it scrolls sideways inside its own box rather than
        wrapping into nonsense. Contained, so a sideways flick does not drag the page. */
