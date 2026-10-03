@@ -75,5 +75,22 @@ const jsonLd = article && {
       <slot />
     </main>
     <Footer />
+    {/* MEASURE THE HEADER, DO NOT GUESS IT. A full-screen hero is "the viewport minus what
+        is above it", and what is above it is this header — which is not the same height on
+        a phone as on a desktop, and changes again if a nav item wraps. Eight lines of
+        hand-written script, no library, and the CSS fallback in global.css keeps the page
+        correct if this never runs. */}
+    <script is:inline>
+      (function () {
+        var h = document.querySelector('.site-header');
+        if (!h) return;
+        var set = function () {
+          document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+        };
+        set();
+        if ('ResizeObserver' in window) new ResizeObserver(set).observe(h);
+        else window.addEventListener('resize', set);
+      })();
+    </script>
   </body>
 </html>
