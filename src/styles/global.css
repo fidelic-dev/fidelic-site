@@ -19,6 +19,40 @@
 
 * { box-sizing: border-box; }
 
+/* ── DARK THEME, SCOPED ────────────────────────────────────────────────────────────────
+   Opted into per page via Base's bodyClass. Only the homepage sets it today.
+
+   The whole site draws from these variables, so overriding them here flips the header,
+   footer, buttons, terminal and form without a second stylesheet and without touching the
+   light pages. Three values cannot come from variables because the light theme hardcoded
+   them, and they are corrected underneath.
+
+   ONE ACCENT. The green carries links, the primary button, and the passing lines inside the
+   terminal. Nothing else is tinted — on a near-black page a second hue reads as a warning. */
+body.theme-dark {
+  --bg: #0A0A0B;         /* near-black, not black: #000 makes the raised surfaces invisible */
+  --fg: #EDEDEF;         /* off-white body text, 17.4:1 on --bg */
+  --muted: #8E8E99;      /* secondary lines, 6.1:1 on --bg — dimmer, still readable */
+  --border: #212126;
+  --accent: #3FB950;     /* the passing-test green */
+  --accent-hover: #4FC95F;
+  --term-bg: #131316;    /* one step lighter than the page: the raised surface */
+  --term-border: #26262C;
+  --term-fg: #D8D8DE;
+  --ok: #3FB950;         /* the 201 and the entered-clean lines ARE the accent */
+  --sim: #D9A33A;
+  --hook: #9AA4B2;
+  --bad: #F85149;
+}
+/* The light theme set these literally, so variables cannot reach them. */
+body.theme-dark .waitlist { background: var(--term-bg); }
+body.theme-dark .btn,
+body.theme-dark .btn:hover { color: #08140A; }   /* dark ink on green: 8.2:1, white is 2.9:1 */
+body.theme-dark .nav a.nav-cta,
+body.theme-dark .nav a.nav-cta:hover { color: #08140A; }
+
+
+
 html {
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
