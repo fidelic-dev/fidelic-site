@@ -1,29 +1,116 @@
 ---
 import Base from '../../layouts/Base.astro';
+import DocsNav from '../../components/DocsNav.astro';
 import { getCollection } from 'astro:content';
 
 const title = 'Fidelic Docs';
 const description = 'Reference documentation for the Fidelic Salesforce emulator.';
 
-const docs = (await getCollection('docs')).sort(
-  (a, b) => a.data.order - b.data.order,
-);
+const docs = (await getCollection('docs')).sort((a, b) => a.data.order - b.data.order);
+
+/* GROUPED, BECAUSE FIVE EQUAL ITEMS IN A COLUMN ANSWER NOTHING. The old page was one stack
+ * of five, so "run it once" and "every flag it takes" looked like the same kind of thing and
+ * a reader had to read all five descriptions to find the one they wanted.
+ *
+ * Membership is by slug, and ANYTHING NOT LISTED FALLS INTO "More" rather than disappearing
+ * — a doc that exists and is unreachable from its own index is the failure mode worth
+ * designing against. */
+const GROUPS = [
+  { label: 'Start here', slugs: ['quickstart'] },
+  { label: 'Run it in CI', slugs: ['ci-github-actions', 'ci-gitlab'] },
+  { label: 'Reference', slugs: ['api'] },
+  { label: 'How the numbers are made', slugs: ['measurement'] },
+];
+
+const placed = new Set(GROUPS.flatMap((g) => g.slugs));
+const groups = [
+  ...GROUPS.map((g) => ({
+    label: g.label,
+    items: g.slugs.map((s) => docs.find((d) => d.id === s)).filter(Boolean),
+  })),
+  { label: 'More', items: docs.filter((d) => !placed.has(d.id)) },
+].filter((g) => g.items.length > 0);
 ---
 
 <Base title={title} description={description}>
-  <h1>Docs</h1>
-  <p class="sub">Reference for running the emulator and its REST API.</p>
+  <DocsNav />
 
-  {docs.length === 0 && <p>No docs yet.</p>}
+  <header class="docs-head">
+    <h1>Docs</h1>
+    <p class="sub">How to run the emulator, wire it into CI, and read what it reports.</p>
+  </header>
 
-  <ul class="post-list">
-    {
-      docs.map((doc) => (
-        <li class="post-item">
-          <h2><a href={`/docs/${doc.id}`}>{doc.data.title}</a></h2>
-          <p class="desc">{doc.data.description}</p>
-        </li>
-      ))
-    }
-  </ul>
+  {groups.map((group) => (
+    <section class="docs-group">
+      <h2>{group.label}</h2>
+      <ul class="docs-cards">
+        {group.items.map((doc) => (
+          <li>
+            <a href={`/docs/${doc.id}`}>
+              <span class="docs-card-title">{doc.data.title}</span>
+              <span class="docs-card-desc">{doc.data.description}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
 </Base>
+
+<style>
+  .docs-head { margin-bottom: 2.6rem; }
+  .docs-head h1 { margin-bottom: 0.4rem; }
+  .docs-head .sub { margin: 0; color: var(--muted); }
+
+  .docs-group { margin-bottom: 2.4rem; }
+  .docs-group h2 {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0 0 0.9rem;
+  }
+
+  .docs-cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    /* auto-fit, so a group of one is a full-width card and a group of two is a pair —
+       without the page having to know which group has how many. */
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 0.9rem;
+  }
+  .docs-cards a {
+    display: block;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--term-bg);
+    text-decoration: none;
+    transition: border-color 140ms ease, transform 140ms ease;
+  }
+  .docs-cards a:hover { border-color: var(--muted); text-decoration: none; transform: translateY(-1px); }
+  .docs-cards a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .docs-card-title {
+    display: block;
+    color: var(--fg);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 0.35rem;
+  }
+  .docs-card-desc {
+    display: block;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .docs-cards a, .docs-cards a:hover { transition: none; transform: none; }
+  }
+</style>
