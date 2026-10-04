@@ -1,6 +1,6 @@
 ---
 title: "We have CD but no CI: the big Salesforce testing gap"
-description: "The Salesforce DevOps market built world-class deployment pipelines while gaving up on verification. Where the gap came from, why nobody talks about it, and what it costs."
+description: "The Salesforce DevOps market built world-class deployment pipelines while giving up on verification. Where the gap came from, why nobody talks about it, and what it costs."
 date: 2026-07-18
 draft: false
 ---
