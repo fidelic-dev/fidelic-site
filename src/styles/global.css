@@ -412,14 +412,7 @@ main { padding-top: 3.2rem; }
 }
 
 /* --- blog index --- */
-.post-list { list-style: none; padding: 0; margin: 2rem 0 0; }
-.post-item { padding: 1.1rem 0; border-bottom: 1px solid var(--border); }
-.post-item:first-child { border-top: 1px solid var(--border); }
-.post-item h2 { margin: 0 0 0.2rem; font-size: 1.15rem; }
-.post-item h2 a { color: var(--fg); }
-.post-item h2 a:hover { color: var(--accent); text-decoration: none; }
-.post-meta { font-size: 0.82rem; color: var(--muted); font-family: var(--mono); }
-.post-item .desc { color: var(--muted); font-size: 0.95rem; margin: 0.25rem 0 0; }
+
 .draft-tag {
   font-family: var(--mono);
   font-size: 0.72rem;

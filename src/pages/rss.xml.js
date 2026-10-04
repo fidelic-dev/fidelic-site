@@ -8,7 +8,7 @@ export async function GET(context) {
 
   return rss({
     title: 'Fidelic Blog',
-    description: 'Notes on building a conformance-driven Salesforce emulator.',
+    description: 'How we build and test a Salesforce emulator.',
     site: context.site,
     items: posts.map((post) => ({
       title: post.data.title,

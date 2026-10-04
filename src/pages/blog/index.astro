@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 
 const title = 'Fidelic Blog';
-const description = 'Notes on building a conformance-driven Salesforce emulator.';
+const description = 'How we build and test a Salesforce emulator.';
 
 // Drafts are shown in the index (clearly tagged) so the template stays visible; they
 // are excluded from RSS. Real posts set draft:false.
@@ -19,28 +19,177 @@ const fmt = (d: Date) =>
     // which dated every post on this site one day early.
     timeZone: 'UTC',
   });
+
+/* READING TIME, COMPUTED — not typed in next to the title where it would rot the first time
+ * a post is edited. Words are whitespace-separated tokens of the post body, frontmatter
+ * excluded by the loader, divided by 200 words per minute and rounded up, never below 1.
+ *
+ * It counts code blocks as words. That is deliberate and it is the conservative direction:
+ * nobody reads a 40-line YAML workflow at prose speed, so the number understates these posts
+ * rather than overstating them.
+ *
+ * It THROWS if a body is empty. If the loader ever stops handing back `body`, every post
+ * silently becomes "1 min read" — a wrong number on every row, and the kind of failure that
+ * looks exactly like a real answer. Better to fail the build. */
+const readingTime = (entry: { id: string; body?: string }) => {
+  const words = (entry.body ?? '').trim().split(/\s+/).filter(Boolean).length;
+  if (words === 0) {
+    throw new Error(
+      `blog/index: no body for "${entry.id}", so reading time cannot be computed. ` +
+      `Refusing to print a made-up number.`,
+    );
+  }
+  return Math.max(1, Math.round(words / 200));
+};
+
+/* THE LEAD: the post's own opening sentence, lifted verbatim.
+ *
+ * Not the description — that is written for search results and says what the post is about.
+ * The lead is how the post actually starts, which is the thing that makes someone read it.
+ * Headings, code fences and images are skipped to find the first real paragraph; inline
+ * markdown is stripped so a backticked token reads as a word rather than as syntax. */
+const lead = (entry: { body?: string }) => {
+  const body = entry.body ?? '';
+  const para = body
+    .split(/\n\s*\n/)
+    .map((b) => b.trim())
+    .find((b) => b && !b.startsWith('#') && !b.startsWith('```') && !b.startsWith('![') && !b.startsWith('>'));
+  if (!para) return '';
+  const plain = para
+    .replace(/`([^`]+)`/g, '$1')          // inline code
+    .replace(/\*\*([^*]+)\*\*/g, '$1')    // bold
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links keep their text
+    .replace(/\s+/g, ' ')
+    .trim();
+  // First sentence: a terminator followed by a space and a capital, or the end of the
+  // paragraph. Keeps "v62.0" and `"success": true` intact, which a naive split on "." does not.
+  const m = plain.match(/^.*?[.!?](?=\s+[A-Z"'(]|$)/);
+  return (m ? m[0] : plain).trim();
+};
+
+const [featured, ...rest] = posts;
 ---
 
 <Base title={title} description={description}>
-  <h1>Blog</h1>
-  <p class="sub">Notes on building a conformance-driven Salesforce emulator.</p>
+  <header class="blog-head">
+    <h1>Blog</h1>
+    <p class="sub">How we build and test a Salesforce emulator.</p>
+  </header>
 
   {posts.length === 0 && <p>No posts yet.</p>}
 
-  <ul class="post-list">
-    {
-      posts.map((post) => (
-        <li class="post-item">
-          <h2>
-            <a href={`/blog/${post.id}`}>{post.data.title}</a>
-            {post.data.draft && <span class="draft-tag">DRAFT</span>}
-          </h2>
-          <div class="post-meta">
+  {featured && (
+    <article class="featured">
+      <p class="meta">
+        <span class="latest">Latest</span>
+        <time datetime={featured.data.date.toISOString()}>{fmt(featured.data.date)}</time>
+        <span class="dot">·</span>
+        <span>{readingTime(featured)} min read</span>
+        {featured.data.draft && <span class="draft-tag">DRAFT</span>}
+      </p>
+      <h2><a href={`/blog/${featured.id}`}>{featured.data.title}</a></h2>
+      <p class="lead">{lead(featured)}</p>
+    </article>
+  )}
+
+  {rest.length > 0 && (
+    <ul class="rows">
+      {rest.map((post) => (
+        <li>
+          <p class="meta">
             <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>
-          </div>
+            <span class="dot">·</span>
+            <span>{readingTime(post)} min read</span>
+            {post.data.draft && <span class="draft-tag">DRAFT</span>}
+          </p>
+          <h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
           <p class="desc">{post.data.description}</p>
         </li>
-      ))
-    }
-  </ul>
+      ))}
+    </ul>
+  )}
 </Base>
+
+<style>
+  .blog-head { margin-bottom: 2.4rem; }
+  .blog-head h1 { margin-bottom: 0.4rem; }
+  .blog-head .sub { margin: 0; color: var(--muted); }
+
+  /* Shared meta line: date, reading time, and nothing else competing with the title. */
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .meta .dot { opacity: 0.6; }
+  .latest {
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* THE NEWEST POST, GIVEN ROOM. A surface rather than a row, so the eye lands here first
+     without anything shouting. */
+  .featured {
+    padding: 1.8rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--term-bg);
+    transition: border-color 140ms ease;
+  }
+  .featured:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+  .featured h2 {
+    margin: 0 0 0.7rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .featured .lead {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 58ch;
+  }
+
+  /* The rest: rows with air, a hairline between, and a hover state that is felt more than
+     seen. The negative inline padding lets the hover tint extend past the text column
+     without the text itself moving. */
+  .rows { list-style: none; margin: 2.2rem 0 0; padding: 0; }
+  .rows li {
+    padding: 1.4rem 1rem;
+    margin: 0 -1rem;
+    border-radius: 10px;
+    border-top: 1px solid var(--border);
+    transition: background-color 140ms ease;
+  }
+  .rows li:first-child { border-top: 0; }
+  .rows li:hover { background: var(--term-bg); }
+
+  /* The title is the link — the row is not a click target, so copying a sentence out of a
+     description does not navigate away. */
+  .featured h2 a, .rows h2 a { color: var(--fg); text-decoration: none; }
+  .featured:hover h2 a, .rows li:hover h2 a { color: var(--accent); }
+  .featured h2 a:hover, .rows h2 a:hover { color: var(--accent); text-decoration: none; }
+  .featured h2 a:focus-visible, .rows h2 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .rows h2 { margin: 0 0 0.35rem; font-size: 1.22rem; line-height: 1.25; letter-spacing: -0.01em; }
+  .rows .desc { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.55; max-width: 64ch; }
+
+  @media (max-width: 640px) {
+    .featured { padding: 1.3rem; }
+    .rows li { padding: 1.2rem 0.8rem; margin: 0 -0.8rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .featured, .rows li { transition: none; }
+  }
+</style>
