@@ -1,4 +1,16 @@
+<!-- The tab mark. Same geometry as the first version; only the colours moved.
+
+     FILLED GREEN, DARK LETTER, not a dark tile with a green letter. A favicon sits on browser
+     chrome we do not control, and a near black tile disappears into a dark tab strip, which is
+     where most of this site's readers are. A solid accent tile reads on light and dark chrome
+     alike, and it is the pairing the site already uses for its one solid accent surface: the
+     accent green behind the button ink.
+
+     Note for the next editor: no double hyphens in this comment. XML forbids them inside a
+     comment, and the first draft of this file wrote the CSS token name with its two leading
+     hyphens, which made the whole SVG unparseable. It failed silently as a broken image icon
+     in the tab, not as a build error. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#5b3ff5"/>
-  <path d="M11 8h11v3.4h-7.2v3.9H21v3.4h-6.2V24H11z" fill="#fff"/>
+  <rect width="32" height="32" rx="7" fill="#3FB950"/>
+  <path d="M11 8h11v3.4h-7.2v3.9H21v3.4h-6.2V24H11z" fill="#08140A"/>
 </svg>
