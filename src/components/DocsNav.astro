@@ -1,0 +1,138 @@
+---
+/* THE DOCS MENU — one floating panel on the left, hideable.
+ *
+ * It replaces two things that used to be separate: the docs index was the only way to get
+ * from one doc to another, and each doc carried its own "On this page" column in a
+ * two-column grid. That grid is the one that shipped every docs page scrolling sideways on
+ * phones (a grid item will not shrink below its content), and it meant the reader could see
+ * where they were in THIS doc but never which docs existed.
+ *
+ * Both live here now: every doc, and the sections of the one you are reading, nested under
+ * it. One panel, one scroll, and the article gets the full column back.
+ */
+import { getCollection } from 'astro:content';
+
+interface Props {
+  /** Slug of the doc being read, if any — it gets marked current and shows its sections. */
+  current?: string;
+  /** Section headings of the current doc. */
+  toc?: { slug: string; text: string }[];
+}
+const { current, toc = [] } = Astro.props;
+
+const docs = (await getCollection('docs')).sort((a, b) => a.data.order - b.data.order);
+---
+
+{/* The toggle lives outside the panel so it is still reachable when the panel is hidden. */}
+<button
+  class="docsnav-toggle"
+  id="docsnav-toggle"
+  type="button"
+  aria-controls="docsnav"
+  aria-expanded="false"
+  aria-label="Show or hide the docs menu"
+>
+  <span class="docsnav-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+  <span class="docsnav-toggle-text">Menu</span>
+</button>
+
+{/* Backdrop: only ever visible in overlay mode, where the panel covers the article. */}
+<div class="docsnav-backdrop" id="docsnav-backdrop" hidden></div>
+
+{/* STATE BEFORE PAINT. Reading localStorage from a deferred module script would let the
+    page paint with the panel in the wrong position and snap it afterwards, which reads as a
+    bug. This runs inline, during parse, before the panel has painted at all. The default is
+    open on a screen wide enough to push the article clear, closed where it would cover it. */}
+<script is:inline>
+  (function () {
+    var want;
+    try { want = localStorage.getItem('docsnav'); } catch (e) { want = null; }
+    // THE STORED PREFERENCE ONLY APPLIES WHERE THE PANEL FITS BESIDE THE TEXT. Below 1280px
+    // it overlays,
+    // and a menu that covers the article before you have read a word of it is never what
+    // anyone asked for — least of all someone who happens to have opened the docs on a
+    // desktop earlier and is now on a phone. Overlay mode always starts closed.
+    var open = window.innerWidth >= 1280 && (want === null || want === 'open');
+    if (open) document.body.classList.add('docsnav-open');
+  })();
+</script>
+
+<nav class="docsnav" id="docsnav" aria-label="Docs">
+  <p class="docsnav-title">Docs</p>
+  <ul class="docsnav-list">
+    {docs.map((doc) => (
+      <li>
+        <a
+          href={`/docs/${doc.id}`}
+          class={doc.id === current ? 'is-current' : ''}
+          aria-current={doc.id === current ? 'page' : undefined}
+        >
+          {doc.data.title}
+        </a>
+        {doc.id === current && toc.length > 1 && (
+          <ul class="docsnav-toc">
+            {toc.map((h) => (
+              <li><a href={`#${h.slug}`}>{h.text}</a></li>
+            ))}
+          </ul>
+        )}
+      </li>
+    ))}
+  </ul>
+  <p class="docsnav-foot"><a href="/docs">All docs</a></p>
+</nav>
+
+<script>
+  /* Hand-written, no library. The panel is CSS; this is the state and the ways out of it. */
+  const body = document.body;
+  const nav = document.getElementById('docsnav');
+  const toggle = document.getElementById('docsnav-toggle');
+  const backdrop = document.getElementById('docsnav-backdrop');
+  const OVERLAY = '(max-width: 1279px)';
+
+  const overlay = () => window.matchMedia(OVERLAY).matches;
+  const isOpen = () => body.classList.contains('docsnav-open');
+
+  const paint = () => {
+    const open = isOpen();
+    if (toggle) toggle.setAttribute('aria-expanded', String(open));
+    // The backdrop only exists in overlay mode; on a wide screen the article is pushed
+    // clear, so there is nothing to dim and nothing to click through.
+    if (backdrop) backdrop.hidden = !(open && overlay());
+    // A hidden panel must be hidden from the keyboard too, or Tab walks into an off-screen
+    // menu and the focus ring disappears off the left edge of the window.
+    if (nav) nav.inert = !open;
+  };
+
+  const set = (open, remember) => {
+    body.classList.toggle('docsnav-open', open);
+    if (remember) { try { localStorage.setItem('docsnav', open ? 'open' : 'closed'); } catch (e) {} }
+    paint();
+  };
+
+  toggle && toggle.addEventListener('click', () => set(!isOpen(), true));
+  backdrop && backdrop.addEventListener('click', () => set(false, true));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen() && overlay()) { set(false, false); toggle && toggle.focus(); }
+  });
+
+  // In overlay mode the panel covers what you just asked for, so following a link closes it.
+  // A section link on the page you are already on would otherwise scroll behind the panel.
+  nav && nav.addEventListener('click', (e) => {
+    const a = e.target instanceof Element ? e.target.closest('a') : null;
+    if (a && overlay()) set(false, false);
+  });
+
+  // Crossing the breakpoint changes what "open" costs, so the default is re-applied — but
+  // only when the reader has never said otherwise.
+  let stored = null;
+  try { stored = localStorage.getItem('docsnav'); } catch (e) {}
+  window.matchMedia(OVERLAY).addEventListener('change', (e) => {
+    // Into overlay: close, for the reason above. Out of overlay: honour the stored choice.
+    if (e.matches) set(false, false);
+    else set(stored === null || stored === 'open', false);
+  });
+
+  paint();
+</script>

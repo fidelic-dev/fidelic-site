@@ -334,6 +334,14 @@ main { padding-top: 3.2rem; }
 }
 .prose pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 
+/* ONE SURFACE FOR CODE, SITE-WIDE. Shiki paints its own `background-color:#24292e` inline
+   from the github-dark theme, which is a bluer, lighter grey than the --term-bg every
+   terminal on the site uses — so a docs page showed two different "code" surfaces depending
+   on whether the block came from markdown or from a .terminal. Inline styles only lose to
+   !important, which is why it is here. Token colours are left to the theme; the contrast
+   audit re-measures them against the new background. */
+.prose pre.astro-code { background-color: var(--term-bg) !important; }
+
 /* --- prose tables ---
    THESE HAD NO RULES AT ALL. `.prose` styled code, pre, img and blockquote, so every table in
    the docs rendered at browser defaults: 1px cell padding, no borders, centred headers, columns
@@ -431,73 +439,155 @@ main { padding-top: 3.2rem; }
   body { font-size: 17px; }
 }
 
-/* --- docs layout: sticky table of contents ------------------------------- */
+/* --- docs: the floating menu ---------------------------------------------
+   Replaces the two-column `.doc-grid` + `.doc-toc`. That grid is the one whose nav measured
+   728px on a 375px phone and dragged every docs page sideways; it is gone rather than
+   patched, and `scripts/docs-overflow.test.mjs` still rules every route.
+
+   The panel is FIXED, so it floats over the page rather than living in the flow. On a wide
+   screen the article is pushed clear of it, because a menu that covers the sentence you are
+   reading is worse than no menu. Below that width it overlays with a backdrop, which is the
+   only thing that fits on a phone. */
 .wrap-wide { max-width: 1040px; }
 
-.doc-grid {
-  display: grid;
-  grid-template-columns: 200px minmax(0, var(--maxw));
-  gap: 3.5rem;
-  align-items: start;
-}
-/* A GRID ITEM WILL NOT SHRINK BELOW ITS CONTENT unless told to: `min-width` computes to `auto`,
-   whose automatic minimum is the item's min-content size. On a 375px phone the table-of-contents
-   nav measured 728px wide and dragged the whole column — and therefore .prose — out to 728,
-   so every docs page scrolled sideways on every phone. The content column already opts out via
-   minmax(0, …); the nav never did, and at <=900px both stack into a single 1fr column where
-   nothing else constrains them. */
-.doc-grid > * { min-width: 0; }
+:root { --docsnav-w: 260px; }
 
-/* sticky = stays put no matter how far you scroll the page */
-.doc-toc {
-  position: sticky;
-  top: 1.5rem;
-  align-self: start;
-  max-height: calc(100vh - 3rem);
+.docsnav {
+  position: fixed;
+  top: var(--header-h, 61px);
+  bottom: 0;
+  left: 0;
+  width: var(--docsnav-w);
+  padding: 1.6rem 1.1rem 2rem;
+  box-sizing: border-box;
   overflow-y: auto;
-  font-size: 0.9rem;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  z-index: 40;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 220ms ease, visibility 0s linear 220ms;
 }
-.doc-toc-title {
+body.docsnav-open .docsnav {
+  transform: none;
+  visibility: visible;
+  transition: transform 220ms ease, visibility 0s;
+}
+
+.docsnav-title {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--muted);
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.7rem;
 }
-.doc-toc ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-left: 1px solid var(--border);
-}
-.doc-toc li { margin: 0; }
-.doc-toc a {
+.docsnav-list, .docsnav-toc { list-style: none; margin: 0; padding: 0; }
+.docsnav-list > li { margin: 0 0 0.15rem; }
+.docsnav-list > li > a {
   display: block;
-  padding: 0.28rem 0 0.28rem 0.9rem;
-  margin-left: -1px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
   color: var(--muted);
-  border-left: 2px solid transparent;
   text-decoration: none;
+  font-size: 0.92rem;
   line-height: 1.35;
 }
-.doc-toc a:hover {
-  color: var(--accent);
-  border-left-color: var(--accent);
+.docsnav-list > li > a:hover { color: var(--fg); background: var(--term-bg); text-decoration: none; }
+.docsnav-list > li > a.is-current { color: var(--fg); background: var(--term-bg); font-weight: 500; }
+
+/* The sections of the doc you are reading, nested under it — the old "On this page". */
+.docsnav-toc { margin: 0.2rem 0 0.6rem; border-left: 1px solid var(--border); margin-left: 0.85rem; }
+.docsnav-toc a {
+  display: block;
+  padding: 0.22rem 0 0.22rem 0.8rem;
+  margin-left: -1px;
+  border-left: 2px solid transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.35;
   text-decoration: none;
 }
+.docsnav-toc a:hover { color: var(--accent); border-left-color: var(--accent); text-decoration: none; }
 
-/* narrow screens: TOC stacks above the content, no sticky */
-@media (max-width: 900px) {
-  .wrap-wide { max-width: var(--maxw); }
-  .doc-grid { grid-template-columns: 1fr; gap: 0; }
-  .doc-toc {
-    position: static;
-    max-height: none;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
+.docsnav-foot { margin: 1.4rem 0 0; font-size: 0.85rem; }
+
+/* The toggle sits outside the panel, so it is still there when the panel is not. */
+.docsnav-toggle {
+  position: fixed;
+  top: calc(var(--header-h, 61px) + 0.9rem);
+  left: 0.9rem;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: var(--term-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: left 220ms ease, color 120ms ease, border-color 120ms ease;
+}
+.docsnav-toggle:hover { color: var(--fg); border-color: var(--muted); }
+.docsnav-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+body.docsnav-open .docsnav-toggle { left: calc(var(--docsnav-w) + 0.9rem); }
+
+.docsnav-bars { display: inline-block; width: 14px; }
+.docsnav-bars span {
+  display: block;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+.docsnav-bars span + span { margin-top: 3px; }
+/* Open: the bars become an ×, so the control says what it will do next. */
+body.docsnav-open .docsnav-bars span:nth-child(1) { transform: translateY(4.5px) rotate(45deg); }
+body.docsnav-open .docsnav-bars span:nth-child(2) { opacity: 0; }
+body.docsnav-open .docsnav-bars span:nth-child(3) { transform: translateY(-4.5px) rotate(-45deg); }
+
+.docsnav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 35;
+  border: 0;
+}
+
+/* WIDE: THE PANEL SITS IN THE GUTTER AND NOTHING MOVES.
+   The article is a fixed 724px column, so the left gutter is (100vw - 724) / 2 — which first
+   clears 260px of panel plus air at 1280px. That measurement, not a round number, is the
+   breakpoint. The first version pushed `main` right by the panel width instead, which was
+   worse than useless above 1280: the column was already clear, so the push only shoved the
+   text off-centre and left a 330px hole between the menu and the words. */
+@media (min-width: 1280px) {
+  /* Open, the toggle tucks into the panel's own top-right corner rather than floating in the
+     gap, where at 1280 it would have sat on top of the first line of the article. */
+  body.docsnav-open .docsnav-toggle { left: calc(var(--docsnav-w) - 2.9rem); padding: 0.45rem; }
+  body.docsnav-open .docsnav-toggle-text {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
   }
+}
+
+/* NARROW: overlay. There is no gutter to sit in, so the panel covers the page and the
+   backdrop makes it obvious that the page behind is parked rather than gone. */
+@media (max-width: 1279px) {
+  .docsnav { width: min(300px, 86vw); box-shadow: 0 0 40px rgba(0, 0, 0, 0.5); }
+  body.docsnav-open .docsnav-toggle { left: calc(min(300px, 86vw) - 2.9rem); padding: 0.45rem; }
+  .docsnav-toggle-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .docsnav,
+  body.docsnav-open .docsnav,
+  .docsnav-toggle,
+  body.docsnav-open .docsnav-toggle,
+  .docsnav-bars span,
+  body.docsnav-open .docsnav-bars span { transition: none; }
 }
 
 
