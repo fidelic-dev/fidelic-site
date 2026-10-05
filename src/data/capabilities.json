@@ -1,8 +1,8 @@
 {
-  "build": "ad5ff37",
+  "build": "099c48d",
   "imageRef": "fidelic/emulator:latest",
-  "imageVersion": "13631c0",
-  "generated": "2026-09-20",
+  "imageVersion": "099c48d",
+  "generated": "2026-10-05",
   "shippedTier": "C1",
   "capabilities": [
     {
@@ -16,7 +16,7 @@
       "family": "callout",
       "verdict": "EXECUTE",
       "simulated": true,
-      "simulationNote": "answered from a mock registry you register; nothing reaches the network",
+      "simulationNote": "answered from the mock registry you arm with POST /__emulator__/callouts; unmatched callouts throw System.CalloutException, and nothing reaches the network",
       "note": "HttpRequest / HttpResponse outbound calls"
     },
     {
@@ -104,7 +104,7 @@
       "title": "Database operations",
       "covers": "insert, update, delete, upsert and partial success",
       "status": "partial",
-      "summary": "Savepoints, Database.query and Database.merge are not supported. Everything else behaves as the org does.",
+      "summary": "Savepoints and Database.merge are not supported. Database.query is. Everything else behaves as the org does.",
       "differences": [
         "database: SaveResult/Error envelope Provisional (partner-pinned)",
         "not supported: Database.setSavepoint and rollback",
@@ -134,9 +134,9 @@
       "title": "HTTP callouts",
       "covers": "HttpRequest and HttpResponse",
       "status": "full",
-      "summary": "Callouts return whatever you register in the mock registry. Nothing reaches the network.",
+      "summary": "Callouts return whatever you register with POST /__emulator__/callouts. Nothing reaches the network, and a callout with no matching mock throws System.CalloutException rather than opening a socket.",
       "differences": [
-        "answered from a mock registry you register; nothing reaches the network"
+        "answered from the mock registry you arm with POST /__emulator__/callouts; unmatched callouts throw System.CalloutException, and nothing reaches the network"
       ],
       "families": [
         "callout"
