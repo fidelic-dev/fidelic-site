@@ -158,6 +158,46 @@ const TRANSCRIPT = [
     </div>
   </section>
 
+  {/* ── THE PLAYGROUND ─────────────────────────────────────────────────────────────────
+      RESTORED. The redesign rebuilt this page from a section list that did not include the
+      playground, and the hero's no-button rule took the last link with it — which left the
+      one thing a stranger can use without installing anything reachable from exactly one
+      page of the site, /docs/quickstart. It is also in the nav now.
+
+      The visual is a session captured from play.fidelic.dev itself, not a repeat of the hero:
+      it shows a field coming back that the request never sent. */}
+  <section class="screen reveal">
+    <div class="screen-inner">
+      <h2>Try it without installing anything.</h2>
+      <p class="answer">
+        <a href="https://play.fidelic.dev">play.fidelic.dev</a> boots a real NPSP org in your
+        browser — the 26 triggers from the open-source nonprofit codebase, loaded and
+        classified. Nothing to pull, no org, no login.
+      </p>
+      <div
+        class="terminal"
+        role="img"
+        aria-label="A playground session: creating a DataImportBatch record returns HTTP 201, and querying it back returns Batch_Status__c set to Open — a field the request never sent, written by the org's own trigger."
+      >
+        <pre><span class="dim"># in the browser, on a real NPSP org. nothing installed.</span>
+<span class="req">POST /services/data/v62.0/sobjects/DataImportBatch__c</span><span class="data"> &#123;"Name":"Spring Appeal"&#125;</span>
+<span class="status">201</span><span class="data">  &#123;"id":"a0400000000006zAAA","success":true,"errors":[]&#125;</span>
+
+<span class="dim"># you never sent Batch_Status__c. the trigger wrote it.</span>
+<span class="req">GET /services/data/v62.0/query?q=SELECT Id,Batch_Status__c FROM DataImportBatch__c</span>
+<span class="status">200</span><span class="data">  &#123;"done":true,"records":[&#123;"Batch_Status__c":"Open","Id":"a0400000000006zAAA","attributes":&#123;"type":"DataImportBatch__c","url":"/services/data/v62.0/sobjects/DataImportBatch__c/a0400000000006zAAA"&#125;&#125;],"totalSize":1&#125;</span></pre>
+      </div>
+      <p class="src">
+        Captured from a session on <a href="https://play.fidelic.dev">play.fidelic.dev</a>,
+        4 Oct 2026. The trigger count is the playground's own:
+        <code>curl -s play.fidelic.dev/api/health</code> reports it.
+      </p>
+      <p class="answer" style="margin-top:1.4rem">
+        <a href="https://play.fidelic.dev">Open the playground →</a>
+      </p>
+    </div>
+  </section>
+
   {/* ── THE FOUR LABELS ────────────────────────────────────────────────────────────────
       "the interpreter will ATTEMPT to run" — not "will run". Restored wording; a static
       classification is not an execution receipt (FINDINGS #18). */}
