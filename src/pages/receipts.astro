@@ -11,6 +11,11 @@
 import Base from '../layouts/Base.astro';
 import data from '../data/capabilities.json';
 
+// Optional for the same reason as on /capabilities: a data file generated before the test
+// runner existed has no `tests` key, and a receipts page must never break the build of the
+// numbers it already has receipts for. Absent means unpublished, never zero.
+const tests = (data as any).tests ?? null;
+
 const title = 'Receipts — every number, and the command that produced it';
 const description =
   'Every number on fidelic.dev, the command that produced it, and the denominator it is counted against.';
@@ -106,6 +111,64 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
       why 55 of these 59 refusals are files rather than features. An org export carries them, so
       the number that matters is the one from your own: run the command below against it.</p>
     <p class="src">Reproduce, per codebase: <code>docker run --rm -v "$PWD/force-app":/mdapi:ro --entrypoint /sfapex fidelic/emulator coverage /mdapi</code></p>
+
+    {tests && (
+      <Fragment>
+        <h2 id="tests">How much of a real Apex test suite actually runs?</h2>
+        <p class="figure">
+          {tests.cleanClasses} of {tests.testClasses} test classes run every method with nothing
+          refused — {tests.cleanClassPercent}%. {tests.methodsWithAVerdict.toLocaleString()} of{' '}
+          {tests.testMethods.toLocaleString()} methods report a result:{' '}
+          {tests.passed.toLocaleString()} pass, {tests.failed.toLocaleString()} fail.
+        </p>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Codebase</th><th>Test<br />classes</th><th>Test<br />methods</th>
+                <th>Classes the<br />analyzer admits</th><th>Classes that<br />run clean</th>
+                <th>Methods with<br />a result</th><th>Passed</th><th>Failed</th>
+                <th>Refused<br />at runtime</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tests.corpora.map((c) => (
+                <tr>
+                  <td>{c.corpus}</td>
+                  <td>{c.testClasses}</td>
+                  <td>{c.testMethods.toLocaleString()}</td>
+                  <td>{c.admittedClasses}</td>
+                  <td>{c.cleanClasses}</td>
+                  <td>{(c.passed + c.failed).toLocaleString()}</td>
+                  <td>{c.passed.toLocaleString()}</td>
+                  <td>{c.failed.toLocaleString()}</td>
+                  <td>{c.refusedAtRuntime.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="denom"><strong>Denominator:</strong> {tests.denominator}</p>
+        <p class="fine">
+          <strong>Two columns disagree on purpose.</strong> <em>Classes the analyzer admits</em> is
+          what we predict can run; <em>classes that run clean</em> is what did. The difference is{' '}
+          {tests.gapRatePercent}% of the prediction, and it is published because a page that showed
+          only the prediction would be claiming {tests.corpora.reduce((n, c) => n + c.admittedClasses, 0)}{' '}
+          classes where {tests.cleanClasses} is the measured answer. We are closing that gap in the
+          open; until it is closed, the smaller number is the one that counts.
+        </p>
+        <p class="fine">
+          <strong>A failure is not an accusation.</strong> It means the assertion compared two
+          values and they differed — sometimes this emulator diverging, sometimes a test that
+          depends on org state we do not model. We have not split them and do not claim the split.
+        </p>
+        <p class="src">
+          Reproduce: boot against your source, then <code>{tests.command}</code> —{' '}
+          <code>GET</code> reports what would run, <code>POST</code> runs it. The commits for each
+          codebase are the ones named in the trigger table above.
+        </p>
+      </Fragment>
+    )}
 
     <h2 id="vocabulary">What do EXECUTE, SIMULATED and UNRESOLVED mean?</h2>
     <dl class="vocab">
