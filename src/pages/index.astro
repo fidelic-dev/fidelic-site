@@ -1,11 +1,22 @@
 ---
 import Base from "../layouts/Base.astro";
+// INLINED, NOT <img src>. The graph is one 5 KB file and inlining costs a request rather
+// than saving one — but an <img> is opaque to CSS, and the labels have to be addressable:
+// at 375px they compute to under 4px and have to be hidden rather than shipped as noise.
+import orgGraph from "../../public/org-graph.svg?raw";
+// A SECOND LAYOUT FOR PORTRAIT, FROM THE SAME PROGRAM AND THE SAME METADATA — not a
+// CSS-scaled copy of the first. A 2:1 drawing in a 375px column is 191px tall: a thin strip
+// of specks, which is not "a mid-size Salesforce org" by any reading. The generator takes
+// the canvas it is laying out for (-w 720 -h 940), and because gravity is weighted by that
+// canvas's aspect the graph RELAXES into portrait rather than being squashed into it. Same
+// 39 objects, same 59 relationships; only the arrangement differs.
+import orgGraphTall from "../../public/org-graph-tall.svg?raw";
 const title =
   "Fidelic: run your Salesforce integration tests without waiting for a sandbox.";
 const description =
   "Salesforce integration tests that run on your laptop and in CI — no org, no login, nothing shared. Fidelic is a 10 MB container that loads your real schema and runs your real Apex triggers, so the tests run on every push instead of whenever an environment frees up.";
 
-/* THE HERO TRANSCRIPT, TYPED OUT ON LOAD.
+/* THE TRANSCRIPT, TYPED OUT ONCE.
    Verbatim from a real playground session — the same transcript this page has carried
    since the first version, unchanged. Held as data so the typewriter can reveal it
    without the animation code ever composing a line of its own.
@@ -44,34 +55,69 @@ const TRANSCRIPT = [
   {/* EVERY CLAIM ON THIS PAGE TRACES TO A COMMAND, per the standing rule. The table is here
       so the next person editing this copy can re-run them instead of trusting them:
 
-        "without waiting for a sandbox"  → docs/ci/github-actions.md; real workflow run
-                                           35263998942, 16s, 4/4 tests, no org involved
-        "10 MB"                          → hub.docker.com/r/fidelic/emulator, 10.34 MB compressed
-        "your real Apex triggers"        → GET /__emulator__/fired, outcome entered-clean
-        "75 of 75"                       → go run ./cmd/confrun --target=emulator
-        the hero transcript              → a real playground session, verbatim
-        the row-lock envelope            → sf/faults.go faultPayloadFor; shown on /receipts
-        the boot output                  → the /receipts boot run, NPSP @ 19646faa
+        the hero graph        → go run ./scripts/orggraph -src <npsp>/force-app
+                                -out public/org-graph.svg          (sfemu repo)
+                                prints: 39 objects drawn, 20 with triggers,
+                                59 relationships (50 lookup, 9 master-detail)
+        "boots in seconds"    → the /receipts boot run, NPSP @ 19646faa; the live
+                                playground reports warmSeconds 13.9 at /api/health
+        "what fired"          → GET /__emulator__/fired, outcome entered-clean
+        the transcript        → a real playground session, verbatim
+        the analyzer block    → docker run --rm -v ./mdapi:/mdapi:ro --entrypoint /sfapex
+                                fidelic/emulator coverage /mdapi — pasted verbatim,
+                                including the line saying EXECUTE is not proof it ran
+        "75 of 75"            → go run ./cmd/confrun --target=emulator
 
       EVERY VISUAL IS REAL OUTPUT. No mock Salesforce UI, no screenshot of anyone's product,
-      no invented figure, no illustration. If it cannot be a terminal, it stays text — which
-      is why the problem section is an error envelope and not a drawing of a queue.
+      no invented figure, no illustration. The graph is the only non-terminal visual here and
+      it is GENERATED FROM NPSP'S OWN METADATA by a committed program, through the same
+      loaders the emulator uses — so if the loader stops seeing a relationship, the line
+      disappears from the hero too. It is not drawn, and it must never become drawn.
 
-      FINDINGS #18 review: no count of triggers that RUN appears on this page. The boot line
-      says "loaded" and "EXECUTE-classified", which is what was measured. */}
+      FINDINGS #18 review: no count of triggers that RUN appears on this page. The analyzer
+      block says "classifies EXECUTE" and carries its own disclaimer that this is not proof
+      anything ran. */}
 
-  {/* ── HERO: the heading and the terminal, and nothing else ───────────────────────────
-      First load shows two things. No button, no badge, no scroll hint — getting past this
-      screen is a scroll, deliberately. */}
+  {/* ── PROBLEM: the org, as a graph ──────────────────────────────────────────────────
+      One screen: the picture and one line under it. No heading competing with it, because
+      the picture IS the heading. */}
   <section class="hero">
-    <div class="hero-head">
-      <h1>Run your Salesforce integration tests without waiting for a sandbox.</h1>
-      <p class="hero-sub">
-        A 10&nbsp;MB container that answers on <code>localhost</code> like your org does.
-      </p>
-    </div>
+    {/* The SVG carries its own <title>/<desc>, generated alongside the drawing, so the
+        accessible description cannot drift from the picture the way a hand-written alt
+        attribute on an <img> would. */}
+    <div class="graph-wrap graph graph-wide" set:html={orgGraph} />
+    <div class="graph-wrap graph graph-tall" set:html={orgGraphTall} />
+    <p class="graph-caption">
+      This is a mid-size Salesforce org. Every line is something a change can break.
+    </p>
+  </section>
 
-    <div class="hero-stage">
+  {/* ── QUESTIONS: three screens, one question each ───────────────────────────────────
+      Large type and nothing else on the screen — no terminal, no caption, no link. These
+      are the only things on this site that ask the reader to think about their own org
+      rather than about ours, so nothing shares the screen with them. */}
+  <section class="question reveal">
+    <p>How confident are you that your last change did not break something three objects away?</p>
+  </section>
+
+  <section class="question reveal">
+    <p>How long do you wait for a sandbox to find out?</p>
+  </section>
+
+  <section class="question reveal">
+    <p>Can every developer on your team test at the same time?</p>
+  </section>
+
+  {/* ── FIDELIC: one paragraph, then the terminal that shows it running ───────────────── */}
+  <section class="screen reveal">
+    <div class="screen-inner">
+      <h2>Fidelic.</h2>
+      <p class="answer lead">
+        It boots that org on your laptop in seconds. Your tests run against it the way they
+        run against a real org, and every request can tell you exactly what fired. No
+        sandbox, no queue, no shared data.
+      </p>
+
       <div
         class="terminal hero-term"
         role="img"
@@ -79,128 +125,14 @@ const TRANSCRIPT = [
       >
         <pre id="tape" data-tape={JSON.stringify(TRANSCRIPT)}></pre>
       </div>
-      {/* Appears when the trace finishes. Dim text under the terminal — not a callout, not a
-          bubble, nothing that points at anything. */}
       <p class="hero-caption" id="caption">A real NPSP trigger ran before the record saved.</p>
     </div>
   </section>
 
-  {/* ── A: THE PROBLEM ─────────────────────────────────────────────────────────────────
-      The visual is the error itself. There is no sandbox-pricing figure here and there will
-      not be one: we have no sourced dollar number, and "scarce, shared, slow" is the part we
-      can defend. */}
-  <section class="screen reveal">
-    <div class="screen-inner">
-      <h2>The environment is the bottleneck.</h2>
-      <p class="answer">
-        Sandboxes are scarce and shared. Tests queue for one, and then fail because someone
-        else changed the data underneath them. The hardest and most valuable tests are the
-        ones that get skipped, because the environment is never free when you need it.
-      </p>
-      <div
-        class="terminal"
-        role="img"
-        aria-label="A row-lock error envelope: message unable to obtain exclusive access to this record or 1 records, errorCode UNABLE_TO_LOCK_ROW."
-      >
-        <pre><span class="dim"># two transactions, one record</span>
-<span class="bad">[&#123;"message":"unable to obtain exclusive access to this record or 1 records",</span>
-<span class="bad">  "errorCode":"UNABLE_TO_LOCK_ROW","fields":[]&#125;]</span></pre>
-      </div>
-      <p class="src">
-        Envelope shape per the REST error-codes doc. Fidelic returns this one on demand —
-        <a href="/receipts">the run is on the receipts page</a>.
-      </p>
-    </div>
-  </section>
-
-  {/* ── B: IT RUNS ON YOUR MACHINE ─────────────────────────────────────────────────────
-      The boot output, verbatim. The docker command is NOT reproduced here: the published run
-      had the row-lock fault armed for the step after it, and a command retyped without that
-      flag is a command nobody ran. The output and the timing belong to the run that happened;
-      the full command is one click away on /receipts. */}
-  <section class="screen reveal">
-    <div class="screen-inner">
-      <h2>It runs your org on your own machine.</h2>
-      <p class="answer">
-        A 10&nbsp;MB container loads your real schema and runs your real Apex. Your tests
-        point at <code>localhost</code> and get the same REST responses, the same trigger side
-        effects, the same validation errors. These are the responses a real org would return.
-      </p>
-      <div
-        class="terminal"
-        role="img"
-        aria-label="A real session: the org boots with 26 triggers loaded, one POST creates a DataImportBatch record, and the execution trace lists seven ordered steps — the before-insert trigger entering clean, the field write setting Batch_Status__c to Open, the insert itself, the after-insert trigger, and the commit."
-      >
-        <pre><span class="dim"># boot the org, with tracing on</span>
-<span class="cmd">docker run -p 8080:8080 -v ./mdapi:/mdapi:ro fidelic/emulator:4ea9d49 --apex-src /mdapi --trace</span>
-<span class="out">sfemu: apexexec ON — 26 triggers loaded from "/mdapi", 7 EXECUTE-classified</span>
-<span class="out">sfemu 4ea9d49 listening on :8080 (store: sqlite ":memory:", client-secret: false, metadata: "/mdapi", hooks-file: "")</span>
-
-<span class="dim"># create one record, and ask for the trace</span>
-<span class="cmd">curl -s -X POST localhost:8080/services/data/v62.0/sobjects/DataImportBatch__c -H 'X-Fidelic-Trace: 1' -d '&#123;"Name":"Spring Appeal"&#125;'</span>
-<span class="data">&#123;"id":"a04000000000038AAA","success":true,"errors":[]&#125;</span>
-
-<span class="dim"># what actually happened, in order</span>
-<span class="cmd">curl -s localhost:8080/__emulator__/trace | jq -c '.traces[-1].trace.entries[]'</span>
-<span class="out">&#123;"seq":0,"at":1,"kind":"request","depth":0,"rolled_back":false,"undo_index":0,"detail":&#123;"method":"POST","path":"/services/data/v62.0/sobjects/DataImportBatch__c"&#125;&#125;</span>
-<span class="out">&#123;"seq":1,"at":2,"kind":"transaction","depth":0,"rolled_back":false,"undo_index":0,"detail":&#123;"phase":""&#125;&#125;</span>
-<span class="out">&#123;"seq":2,"at":3,"kind":"field_change","depth":1,"rolled_back":false,"undo_index":0,"detail":&#123;"after":"Open","before":null,"field":"Batch_Status__c","id":"","object":"DataImportBatch__c"&#125;&#125;</span>
-<span class="out">&#123;"seq":3,"at":4,"kind":"trigger","depth":0,"rolled_back":false,"undo_index":0,"detail":&#123;"object":"DataImportBatch__c","op":"insert","outcome":"</span><span class="pass">entered-clean</span><span class="out">","phase":"before","trigger":"TDTM_DataImportBatch"&#125;&#125;</span>
-<span class="out">&#123;"seq":4,"at":5,"kind":"dml","depth":0,"caused_by":3,"rolled_back":false,"undo_index":0,"detail":&#123;"ids":["a04000000000038AAA"],"object":"DataImportBatch__c","op":"insert","row_count":1&#125;&#125;</span>
-<span class="out">&#123;"seq":5,"at":6,"kind":"trigger","depth":0,"caused_by":4,"rolled_back":false,"undo_index":1,"detail":&#123;"object":"DataImportBatch__c","op":"insert","outcome":"</span><span class="pass">entered-clean</span><span class="out">","phase":"after","trigger":"TDTM_DataImportBatch"&#125;&#125;</span>
-<span class="out">&#123;"seq":6,"at":7,"kind":"commit","depth":0,"caused_by":1,"rolled_back":false,"undo_index":1&#125;</span></pre>
-      </div>
-      <p class="src">
-        One session, captured on <code>fidelic/emulator:4ea9d49</code> against
-        <a href="https://github.com/SalesforceFoundation/NPSP">NPSP</a> @ 19646faa. Boot
-        output is the first two lines of the log. Record ids are per-run.
-      </p>
-    </div>
-  </section>
-
-  {/* ── THE PLAYGROUND ─────────────────────────────────────────────────────────────────
-      RESTORED. The redesign rebuilt this page from a section list that did not include the
-      playground, and the hero's no-button rule took the last link with it — which left the
-      one thing a stranger can use without installing anything reachable from exactly one
-      page of the site, /docs/quickstart. It is also in the nav now.
-
-      The visual is a session captured from play.fidelic.dev itself, not a repeat of the hero:
-      it shows a field coming back that the request never sent. */}
-  <section class="screen reveal">
-    <div class="screen-inner">
-      <h2>Try it without installing anything.</h2>
-      <p class="answer">
-        <a href="https://play.fidelic.dev">play.fidelic.dev</a> boots a real NPSP org in your
-        browser — the 26 triggers from the open-source nonprofit codebase, loaded and
-        classified. Nothing to pull, no org, no login.
-      </p>
-      <div
-        class="terminal"
-        role="img"
-        aria-label="A playground session: creating a DataImportBatch record returns HTTP 201, and querying it back returns Batch_Status__c set to Open — a field the request never sent, written by the org's own trigger."
-      >
-        <pre><span class="dim"># in the browser, on a real NPSP org. nothing installed.</span>
-<span class="req">POST /services/data/v62.0/sobjects/DataImportBatch__c</span><span class="data"> &#123;"Name":"Spring Appeal"&#125;</span>
-<span class="status">201</span><span class="data">  &#123;"id":"a0400000000006zAAA","success":true,"errors":[]&#125;</span>
-
-<span class="dim"># you never sent Batch_Status__c. the trigger wrote it.</span>
-<span class="req">GET /services/data/v62.0/query?q=SELECT Id,Batch_Status__c FROM DataImportBatch__c</span>
-<span class="status">200</span><span class="data">  &#123;"done":true,"records":[&#123;"Batch_Status__c":"Open","Id":"a0400000000006zAAA","attributes":&#123;"type":"DataImportBatch__c","url":"/services/data/v62.0/sobjects/DataImportBatch__c/a0400000000006zAAA"&#125;&#125;],"totalSize":1&#125;</span></pre>
-      </div>
-      <p class="src">
-        Captured from a session on <a href="https://play.fidelic.dev">play.fidelic.dev</a>,
-        4 Oct 2026. The trigger count is the playground's own:
-        <code>curl -s play.fidelic.dev/api/health</code> reports it.
-      </p>
-      <p class="answer" style="margin-top:1.4rem">
-        <a href="https://play.fidelic.dev">Open the playground →</a>
-      </p>
-    </div>
-  </section>
-
-  {/* ── THE FOUR LABELS ────────────────────────────────────────────────────────────────
-      "the interpreter will ATTEMPT to run" — not "will run". Restored wording; a static
-      classification is not an execution receipt (FINDINGS #18). */}
+  {/* ── PROOF: the labels, the one command, the receipts ──────────────────────────────
+      Shortened deliberately. The long form lives on /capabilities and /receipts; this
+      screen establishes that the labels are the machine's own and that every figure has a
+      command behind it. */}
   <section class="screen reveal">
     <div class="screen-inner">
       <h2>Every trigger gets one of four labels.</h2>
@@ -225,81 +157,40 @@ const TRANSCRIPT = [
           support.
         </li>
       </ul>
+
       <div
         class="terminal"
         role="img"
-        aria-label="Analyzer output for the Nonprofit Success Pack: EXECUTE=7, HOOKS=0, UNRESOLVED=19, RECORDED-ONLY=0, with one EXECUTE row and one UNRESOLVED row naming the construct that blocked it."
+        aria-label="Analyzer output for the Nonprofit Success Pack: 28 percent of the org classifies EXECUTE, 51 of 177 trigger-context pairs across 8 of 26 triggers. The report states that EXECUTE does not mean the code was run. One refused trigger is shown, naming the built-in method that blocked it."
       >
-        <pre><span class="cmd">docker run --rm -v ./mdapi:/mdapi:ro --entrypoint /sfapex fidelic/emulator:4ea9d49 coverage /mdapi</span>
+        <pre><span class="cmd">docker run --rm -v ./mdapi:/mdapi:ro --entrypoint /sfapex fidelic/emulator coverage /mdapi</span>
+<span class="out">CAN I TRUST THIS TEST?</span>
+<span class="out">  28% of this org classifies </span><span class="pass">EXECUTE</span><span class="out"> — 51 of 177 trigger-context pairs, across 8 of 26 triggers.</span>
 <span class="out">  EXECUTE means no blocker was found in the reachable code. It does NOT mean we ran it —</span>
 <span class="out">  run your tests and read /__emulator__/fired to see what actually fired.</span>
-<span class="out">RUNG B LADDER @ C1 + C2 families &#123;async, callout, crypto, database, recorded-effect, schema, schema-permission, settings&#125; (load-time classification): EXECUTE=7  HOOKS=0  UNRESOLVED=19  RECORDED-ONLY=0  (SIMULATED=1)</span>
-<span class="pass">  EXECUTE</span><span class="out">     TDTM_DataImportBatch  [Provisional: schema: describe labels derived where the metadata carries none; DisplayType modeled as its enum name; == identity on describe results Provisional (SCHEMA-DESIGN §7)]</span>
-<span class="bad">  UNRESOLVED</span><span class="out">  TDTM_AccountSoftCredit  (min tier C2; blocked by side-effect: Database.query [C2])</span>
-<span class="dim">  … 24 more trigger rows</span></pre>
+<span class="dim">  build:  sfapex f0cded6</span>
+<span class="out">WHAT DOES NOT, AND WHY (18)</span>
+<span class="bad">  TDTM_EngagementPlan</span><span class="out">  stdlib not implemented: Date.daysBetween() [C3]</span>
+<span class="dim">      unblocked by: that built-in method</span>
+<span class="dim">  … 17 more, each naming what blocked it</span></pre>
       </div>
       <p class="src">
-        The labels are the analyzer's, not a summary of them. It says so itself in line two:
-        a label is what the code reads like, not proof it ran.
-        <a href="/capabilities#vocabulary">See exactly what we support</a>.
+        The labels are the analyzer's, not a summary of them. It says so itself in line
+        three: a label is what the code reads like, not proof it ran.
+        <a href="/capabilities">See exactly what we support</a>.
+      </p>
+      <p class="src">
+        Every number on this page comes from a command you can run yourself — including the
+        graph at the top, generated from NPSP's own object metadata and never drawn. The
+        conformance suite is public and is the same one we gate on:
+        <code>go run ./cmd/confrun --target=emulator</code> reports
+        <span class="pass">75/75 PASS</span>.
+        <a href="/receipts">Every number, and the command that produced it</a>.
       </p>
     </div>
   </section>
 
-  <section class="screen reveal">
-    <div class="screen-inner">
-      <h2>It runs in CI.</h2>
-      <p class="answer">
-        Boot, test, tear down. The whole job took 16 seconds, including pulling the image
-        and booting the org.
-      </p>
-      <div
-        class="terminal"
-        role="img"
-        aria-label="CI output: the emulator answers after one second, the org loads 8 triggers, and four integration tests pass with zero failures."
-      >
-        <pre><span class="out">emulator answering after 1s</span>
-<span class="out">org ready: 8 triggers loaded</span>
-<span class="pass">ok 1</span><span class="out"> - creating an Account returns a Salesforce-shaped 201</span>
-<span class="pass">ok 2</span><span class="out"> - the org's real Apex triggers actually fired</span>
-<span class="pass">ok 3</span><span class="out"> - a validation rule rejects a bad record the way the org would</span>
-<span class="pass">ok 4</span><span class="out"> - the row-lock failure can be staged on demand</span>
-<span class="out"># pass 4</span>
-<span class="out"># fail 0</span></pre>
-      </div>
-      <p class="src">
-        Printed by the workflow in <a href="/docs/ci-github-actions">the CI recipe</a>, which
-        was run before it was written down.
-      </p>
-    </div>
-  </section>
-
-  <section class="screen reveal">
-    <div class="screen-inner">
-      <h2>Every number on this page comes from a command you can run yourself.</h2>
-      <p class="answer">
-        Including this one. The conformance suite is public, and it is the same suite we
-        gate on — 5 of its cases need a real org and are skipped, 3 are written from the
-        docs and still await a real-org run. It says so when you run it.
-      </p>
-      <div
-        class="terminal"
-        role="img"
-        aria-label="Conformance output: 75 tests against the emulator target, 5 skipped for org prerequisites, 3 pending real-org verification, scorecard 75 of 75 pass."
-      >
-        <pre><span class="cmd">go run ./cmd/confrun --target=emulator</span>
-<span class="out">Running 75 test(s) against target "emulator" (http://localhost:8080) — 5 SKIPPED (org prerequisite) — 3 PENDING (docs-derived, pending real-org verification)</span>
-<span class="dim">  … 75 test lines</span>
-<span class="out">Scorecard: </span><span class="pass">75/75 PASS</span></pre>
-      </div>
-      <p class="src">
-        Measured on sfemu <code>ec8d5dc</code>.
-        <a href="https://github.com/fidelic-dev/fidelic-conformance">Run the scorecard yourself</a>
-        · <a href="/receipts">every other number on this page</a>
-      </p>
-    </div>
-  </section>
-
+  {/* ── ASK ───────────────────────────────────────────────────────────────────────────── */}
   <section class="screen reveal" id="waitlist">
     <div class="screen-inner">
       <div class="waitlist">
@@ -326,64 +217,115 @@ const TRANSCRIPT = [
      Colour lives in global.css. This file is layout, type scale and motion.
 
      svh, not vh. On a phone `100vh` is the viewport with the browser chrome RETRACTED, so
-     a 100vh hero is taller than what you can actually see and the next section's heading
-     peeks in under the terminal — which is precisely the "nothing else visible" rule
-     broken. svh is the small viewport: chrome shown, nothing peeking. */
+     a 100vh hero is taller than what you can actually see and the next section peeks in
+     underneath — which is precisely the "nothing else visible" rule broken. svh is the
+     small viewport: chrome shown, nothing peeking. */
 
-  /* HERO. Two children: the heading block, then the terminal taking everything left over.
-     No button, no third element. */
+  /* HERO. The graph and one line. No heading, no button, no scroll hint. */
   .hero {
-    /* The viewport MINUS the header above it, so the hero is exactly one screen and the
-       caption under the terminal is the last thing on it rather than the first thing you
-       have to scroll for. --header-h is measured from the real element in Base.astro. */
     min-height: calc(100svh - var(--header-h, 61px));
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    padding: 7svh 0 4svh;
-    box-sizing: border-box;
-  }
-  .hero h1 {
-    font-size: clamp(2rem, 5.2vw, 3.35rem);
-    line-height: 1.07;
-    letter-spacing: -0.03em;
-    font-weight: 700;
-    max-width: 24ch;
-    margin: 0 auto 1rem;
-    text-wrap: balance;
-  }
-  .hero-sub {
-    color: var(--muted);
-    font-size: clamp(1rem, 1.4vw, 1.15rem);
-    max-width: 64ch;
-    margin: 0 auto;
-  }
-  .hero-sub code { font-size: 0.95em; color: var(--fg); }
-
-  /* The terminal takes the rest of the screen: the stage is the flex remainder, and the
-     box sits centred inside it. Sized by its content rather than stretched, so a short
-     transcript in a tall window is centred air rather than a stretched box with a
-     six-line tape stranded at the top. */
-  .hero-stage {
-    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 1.1rem;
-    min-height: 0;
-    margin-top: 2.6rem;
+    gap: clamp(1.4rem, 3.5svh, 2.4rem);
+    text-align: center;
+    padding: 4svh 0;
+    box-sizing: border-box;
   }
+  .graph-wrap { width: 100%; min-height: 0; display: flex; justify-content: center; }
+  /* ONE OF THE TWO IS ALWAYS DISPLAY:NONE, never both. They are the same org drawn for two
+     canvas shapes; showing both would say there are two graphs. */
+  .graph-tall { display: none; }
+  .graph :global(svg) {
+    width: 100%;
+    height: auto;
+    /* The graph must never push the caption off the screen: it is the hero's flexible
+       part and the caption is the fixed one, so the picture gives way first. */
+    max-height: 72svh;
+    object-fit: contain;
+    /* A SUBTLE FADE AND NOTHING ELSE. No pan, no draw-on, no parallax — the picture is
+       evidence, and animating evidence into place makes it look staged. */
+    animation: graph-in 760ms ease-out both;
+  }
+  @keyframes graph-in { from { opacity: 0; } to { opacity: 1; } }
+
+  .graph-caption {
+    margin: 0;
+    color: var(--muted);
+    font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+    max-width: 52ch;
+    text-wrap: balance;
+    animation: graph-in 760ms ease-out 240ms both;
+  }
+
+  /* ── THE THREE QUESTIONS ───────────────────────────────────────────────────────────
+     One per screen, centred, and ALONE. The largest type on the site, because a question
+     the reader is meant to answer for themselves should not be sized like body copy
+     sitting under a heading. */
+  .question {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6svh 0;
+    box-sizing: border-box;
+    border-top: 1px solid var(--border);
+  }
+  .question p {
+    margin: 0;
+    font-size: clamp(1.75rem, 4.6vw, 3.1rem);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+
+  /* ── SCROLL SECTIONS: one claim, one screen ──────────────────────────────────────── */
+  .screen {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding: 4svh 0;
+    box-sizing: border-box;
+    border-top: 1px solid var(--border);
+  }
+  .screen-inner { width: 100%; }
+  .screen h2 {
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.1rem;
+    max-width: 34ch;
+  }
+  .screen .answer { max-width: 60ch; margin: 0 0 1.8rem; font-size: 1.05rem; }
+  /* The one-paragraph definition carries a little more weight than the copy around it —
+     it is the only paragraph on the page that says what this product is. */
+  .screen .answer.lead { font-size: clamp(1.1rem, 1.7vw, 1.3rem); line-height: 1.55; }
+  .screen .terminal { font-size: clamp(0.72rem, 0.95vw, 0.9rem); line-height: 1.6; }
+
+  /* THE ANALYZER BLOCK WRAPS; THE TRANSCRIPT DOES NOT.
+     Those are long single lines — a ladder line whose counts sit at column 150 — and left
+     to scroll they hid exactly the part that is the proof. Wrapping costs nothing there
+     because none of that output is aligned in columns, unlike the transcript, where
+     `entered-clean` lining up under itself IS the thing being shown. Continuations are
+     indented, so a wrapped entry still reads as one entry. */
+  .screen .terminal:not(.hero-term) pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding-left: 2ch;
+    text-indent: -2ch;
+  }
+
+  /* The transcript keeps its columns and scrolls sideways inside its own box rather than
+     wrapping into nonsense. Contained, so a sideways flick never drags the page. */
   .hero-term {
     text-align: left;
     width: 100%;
-    max-width: 100%;
-    padding: clamp(1.1rem, 2.2vw, 1.9rem);
-    font-size: clamp(0.76rem, 1.35vw, 1.2rem);
+    padding: clamp(1.1rem, 2.2vw, 1.6rem);
+    font-size: clamp(0.76rem, 1.1vw, 1rem);
     line-height: 1.65;
-    /* The transcript holds its columns — `entered-clean` aligning under itself is the
-       thing being shown — so it scrolls sideways inside its own box rather than wrapping
-       into nonsense. Contained, so a sideways flick never drags the page. */
     overflow-x: auto;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
@@ -394,7 +336,7 @@ const TRANSCRIPT = [
 
   /* The caption is the last thing to arrive and the quietest thing on the screen. */
   .hero-caption {
-    margin: 0;
+    margin: 0.9rem 0 0;
     color: var(--muted);
     font-size: 0.95rem;
     opacity: 0;
@@ -413,48 +355,13 @@ const TRANSCRIPT = [
   }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* ── SCROLL SECTIONS: one claim, one screen ────────────────────────────────────────
-     Centred in the viewport rather than packed against the top edge, so each claim
-     arrives alone with air around it. */
-  .screen {
-    min-height: 100svh;
-    display: flex;
-    align-items: center;
-    padding: 4svh 0;
-    box-sizing: border-box;
-    border-top: 1px solid var(--border);
-  }
-  .screen-inner { width: 100%; }
-  .screen h2 {
-    font-size: clamp(1.5rem, 3vw, 2.1rem);
-    line-height: 1.15;
-    letter-spacing: -0.025em;
-    margin: 0 0 1.1rem;
-    max-width: 34ch;
-  }
-  .screen .answer { max-width: 60ch; margin: 0 0 1.8rem; font-size: 1.05rem; }
-  .screen .terminal { font-size: clamp(0.72rem, 0.95vw, 0.9rem); line-height: 1.6; }
-
-  /* THE SECTION BLOCKS WRAP; THE HERO TRANSCRIPT DOES NOT.
-     These are long single lines — a 165-character trace entry, a ladder line whose counts
-     sit at column 150 — and left to scroll they hid exactly the part that is the proof:
-     "entered-clean" and "EXECUTE=7 HOOKS=0 UNRESOLVED=19" were both past the right edge on
-     a 1440 screen, so the visual argued for itself with the evidence off-stage. Wrapping
-     costs nothing here because none of this output is aligned in columns — unlike the hero
-     transcript, where `entered-clean` lining up under itself IS the thing being shown.
-     Continuations are indented, so a wrapped entry still reads as one entry. */
-  .screen .terminal pre {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    padding-left: 2ch;
-    text-indent: -2ch;
-  }
   .screen .src {
     margin: 0.9rem 0 0;
     color: var(--muted);
     font-size: 0.85rem;
-    max-width: 60ch;
+    max-width: 66ch;
   }
+  .screen .src code { color: var(--fg); font-size: 0.95em; }
 
   /* The four labels. A list, not cards: the tag carries the colour and the line carries
      the meaning. */
@@ -495,8 +402,8 @@ const TRANSCRIPT = [
   .waitlist h2 { margin-top: 0; }
 
   /* ── MOTION ────────────────────────────────────────────────────────────────────────
-     Fade and rise, unchanged from the previous build: 14px of travel, 320ms. Enough to
-     read as deliberate, short enough that scrolling never waits for it. */
+     Fade and rise: 14px of travel, 320ms. Enough to read as deliberate, short enough that
+     scrolling never waits for it. */
   .reveal {
     opacity: 0;
     transform: translateY(14px);
@@ -505,36 +412,54 @@ const TRANSCRIPT = [
   .reveal.shown { opacity: 1; transform: none; }
 
   /* IF MOTION IS UNWELCOME, THERE IS NO MOTION — not a faster version of it. Sections are
-     simply present, the terminal is handed over fully typed, and the caption is already
-     there rather than fading in behind an animation that never runs. */
+     simply present, the graph is already there rather than fading in, the terminal is
+     handed over fully typed, and the caption is not waiting behind an animation that will
+     never run. */
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
+    .graph :global(svg), .graph-caption { animation: none; }
     .hero-caption { opacity: 1; transition: none; }
     .hero-term .caret { animation: none; }
   }
 
-  /* SHORT WINDOWS. The hero is a fixed budget — one screen — and type sized only to WIDTH
-     overspends it: at 1280x720 a 53.6px heading wrapped to three lines over a two-line
-     subline needed 663px of a 650px screen, so the hero grew and the first scroll revealed
-     a 13px sliver of the next section. Height is the constraint here, so height drives the
-     scale. */
+  /* SHORT WINDOWS. The hero is a fixed budget — one screen — and a picture sized only to
+     WIDTH overspends it: on a 1280x720 laptop a full-width graph is 589px tall before the
+     caption gets a line. Height is the constraint here, so height drives the scale. */
   @media (max-height: 820px) and (min-width: 641px) {
-    .hero { padding: 5svh 0 3svh; }
-    .hero h1 { font-size: clamp(1.8rem, 3.6vw, 2.5rem); margin-bottom: 0.7rem; }
-    .hero-sub { font-size: 1rem; }
-    .hero-stage { margin-top: 1.6rem; gap: 0.9rem; }
-    .hero-term { padding: 1.2rem; }
+    .hero { padding: 3svh 0; }
+    .graph :global(svg) { max-height: 64svh; }
+    .question p { font-size: clamp(1.6rem, 3.6vw, 2.4rem); }
   }
 
   @media (max-width: 640px) {
-    .hero { padding: 4svh 0 3svh; }
-    .hero h1 { font-size: clamp(1.7rem, 7.6vw, 2.2rem); max-width: 20ch; }
-    .hero-stage { margin-top: 1.6rem; gap: 0.9rem; }
+    .hero { padding: 3svh 0; gap: 1.2rem; }
+    /* ON A PHONE THE GRAPH IS THE WHOLE POINT AND WIDTH IS THE PROBLEM. A 2:1 drawing in a
+       343px column is 175px tall — a smear with unreadable labels. Bleeding to the full
+       viewport width buys back the page gutters, and the taller cap gives it room to be
+       looked at rather than glanced past. */
+    .graph-wrap {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+    .graph-wide { display: none; }
+    .graph-tall { display: flex; }
+    .graph :global(svg) { max-height: 62svh; }
+    /* LABELS OFF ON A PHONE. The viewBox is 1154 wide, so at 375px the 11-unit type
+       renders under 4 CSS px: not small, ILLEGIBLE — it reads as speckle and makes the
+       drawing look like a rendering artefact. The names are not lost, they are in the
+       SVG's own <desc>, which is what a screen reader gets either way. Structure is what
+       survives at this width, and structure is what the caption is about. */
+    .graph :global(text) { display: none; }
+    .graph-caption { font-size: 0.95rem; padding: 0 0.25rem; }
+    .question { padding: 8svh 0; }
+    .question p { font-size: clamp(1.5rem, 7.2vw, 2rem); max-width: 16ch; }
+    .screen { padding: 6svh 0; }
+    .screen .answer { font-size: 1rem; }
+    .screen .answer.lead { font-size: 1.08rem; }
     .hero-term { padding: 1rem 0.9rem; line-height: 1.6; }
     .hero-term pre { min-height: calc(6 * 1.6em); }
     .hero-caption { font-size: 0.88rem; }
-    .screen { padding: 6svh 0; }
-    .screen .answer { font-size: 1rem; }
     .waitlist { padding: 1.5rem; }
   }
 </style>
@@ -580,10 +505,7 @@ const TRANSCRIPT = [
     };
     const lineLen = (l) => (l.segs || []).reduce((n, s) => n + s.x.length, 0);
 
-    if (reduce) {
-      paint(lines.length - 1);
-      showCaption();
-    } else {
+    const type = () => {
       let li = 0, ci = 0;
       const caret = el("caret", " ");
       const step = () => {
@@ -607,6 +529,26 @@ const TRANSCRIPT = [
         }
       };
       step();
+    };
+
+    if (reduce || !("IntersectionObserver" in window)) {
+      paint(lines.length - 1);
+      showCaption();
+    } else {
+      // TYPE ON ARRIVAL, NOT ON LOAD. The terminal used to be the hero and could safely
+      // start typing immediately. It now sits four screens down, where typing on load
+      // means the animation plays to an empty room and the reader arrives at a finished
+      // transcript — the one thing a typewriter is supposed to avoid. Once only,
+      // unobserved on first intersection: a transcript that retypes every time it scrolls
+      // past is a toy.
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          io.unobserve(e.target);
+          type();
+        });
+      }, { threshold: 0.35 });
+      io.observe(tape);
     }
   } else {
     showCaption();
