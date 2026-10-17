@@ -1,8 +1,8 @@
 {
-  "build": "099c48d",
+  "build": "2c12af2",
   "imageRef": "fidelic/emulator:latest",
-  "imageVersion": "099c48d",
-  "generated": "2026-10-05",
+  "imageVersion": "f0cded6",
+  "generated": "2026-10-17",
   "shippedTier": "C1",
   "capabilities": [
     {
@@ -213,6 +213,77 @@
     "pending": 3,
     "command": "go run ./cmd/confrun --target=emulator   (fidelic-conformance)",
     "denominator": "75 tests in the public fidelic-conformance suite that can run against a stock emulator; 5 skipped for an org prerequisite and 3 pending real-org verification are excluded from both sides of the fraction"
+  },
+  "tests": {
+    "corpora": [
+      {
+        "corpus": "apex-recipes",
+        "testClasses": 61,
+        "testMethods": 322,
+        "admittedClasses": 32,
+        "cleanClasses": 2,
+        "methodsRan": 84,
+        "passed": 8,
+        "failed": 7,
+        "refusedAtRuntime": 69
+      },
+      {
+        "corpus": "dlrs",
+        "testClasses": 66,
+        "testMethods": 838,
+        "admittedClasses": 8,
+        "cleanClasses": 0,
+        "methodsRan": 45,
+        "passed": 1,
+        "failed": 0,
+        "refusedAtRuntime": 44
+      },
+      {
+        "corpus": "eda",
+        "testClasses": 288,
+        "testMethods": 2357,
+        "admittedClasses": 214,
+        "cleanClasses": 114,
+        "methodsRan": 1283,
+        "passed": 583,
+        "failed": 123,
+        "refusedAtRuntime": 577
+      },
+      {
+        "corpus": "fflib-apex-common-samplecode",
+        "testClasses": 10,
+        "testMethods": 16,
+        "admittedClasses": 1,
+        "cleanClasses": 0,
+        "methodsRan": 1,
+        "passed": 0,
+        "failed": 0,
+        "refusedAtRuntime": 1
+      },
+      {
+        "corpus": "npsp",
+        "testClasses": 368,
+        "testMethods": 3985,
+        "admittedClasses": 62,
+        "cleanClasses": 9,
+        "methodsRan": 305,
+        "passed": 25,
+        "failed": 13,
+        "refusedAtRuntime": 267
+      }
+    ],
+    "testClasses": 793,
+    "testMethods": 7518,
+    "cleanClasses": 125,
+    "cleanClassPercent": 15,
+    "methodsWithAVerdict": 760,
+    "methodVerdictPercent": 10,
+    "passed": 617,
+    "failed": 143,
+    "refusedAtRuntime": 958,
+    "gapRatePercent": 60,
+    "command": "POST /__emulator__/testrun",
+    "denominator": "ALL 7518 @isTest methods in 793 test classes across five pinned open-source Salesforce codebases (apex-recipes, dlrs, EDA, fflib sample code, NPSP). Not the methods we admitted \u2014 the whole suite, including everything refused."
   },
   "coverage": {
     "corpus": "NPSP @ 19646faa (force-app)",

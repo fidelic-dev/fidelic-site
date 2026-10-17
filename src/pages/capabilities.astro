@@ -120,10 +120,17 @@ const CORPUS_LABEL = {
 
         <p class="fine">
           <strong>On those {tests.failed.toLocaleString()} failures.</strong> A failure means the
-          assertion compared two values and they differed. Sometimes that is this emulator
-          diverging from a real org; sometimes it is a test that depends on org state we do not
-          model — profiles, record types, org-wide defaults. We have not split them and will not
-          guess at the split, so we do not claim those failures are your code's fault.
+          assertion compared two values and they differed — sometimes this emulator diverging from
+          a real org, sometimes a test that depends on org state we do not model, like profiles or
+          record types. We have not split those two and will not guess at the split.
+        </p>
+        <p class="fine">
+          <strong>An ambiguous error counts against us, not against your test.</strong> Only a
+          message carrying the runner's own <code>Assertion Failed</code> prefix is scored as a
+          failure. Everything else is scored as our refusal even when it surfaces inside your
+          test — a query exception because we carry no schema for <code>ApexClass</code>, or a
+          wrong-arity call because method overloading is not modelled. Counting those the other
+          way would have made this page look better by several points, which is why it does not.
         </p>
 
         <div class="tablewrap">

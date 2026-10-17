@@ -162,6 +162,15 @@ sfemu … listening on :8080 (store: sqlite ":memory:", client-secret: false, me
           values and they differed — sometimes this emulator diverging, sometimes a test that
           depends on org state we do not model. We have not split them and do not claim the split.
         </p>
+        <p class="fine">
+          <strong>The failed/refused split is drawn conservatively.</strong> Only the runner's own
+          <code>Assertion Failed</code> prefix counts as a failure; every other non-passing
+          message counts as our refusal, including ones that surface inside your test — a
+          <code>QueryException</code> on an object we carry no schema for, or a wrong-arity call
+          because method overloading is not modelled. The looser reading would move several
+          hundred results out of <em>refused</em> and into <em>failed</em>, improving every
+          percentage on this page. It is not used.
+        </p>
         <p class="src">
           Reproduce: boot against your source, then <code>{tests.command}</code> —{' '}
           <code>GET</code> reports what would run, <code>POST</code> runs it. The commits for each
