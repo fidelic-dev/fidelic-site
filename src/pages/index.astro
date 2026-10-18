@@ -11,6 +11,10 @@ import orgGraph from "../../public/org-graph.svg?raw";
 // canvas's aspect the graph RELAXES into portrait rather than being squashed into it. Same
 // 39 objects, same 59 relationships; only the arrangement differs.
 import orgGraphTall from "../../public/org-graph-tall.svg?raw";
+// THE LEGEND'S FIGURES ARE THE DRAWING'S OWN, written by the same run that drew it. A
+// legend saying "9 master-detail" beside a picture with eleven of them is worse than no
+// legend, and that is exactly what a hand-typed one becomes after the next regeneration.
+import graphStats from "../data/org-graph.json";
 const title =
   "Fidelic: run your Salesforce integration tests without waiting for a sandbox.";
 const description =
@@ -89,6 +93,50 @@ const TRANSCRIPT = [
     <div class="graph-wrap graph graph-tall" set:html={orgGraphTall} />
     <p class="graph-caption">
       This is a mid-size Salesforce org. Every line is something a change can break.
+    </p>
+
+    {/* THE LEGEND SAYS WHAT THE ENCODING MEANS, and every number in it is generated.
+        Without it the picture asks the reader to infer that size means degree and that
+        green means something — and the one thing green means on this site is worth
+        spelling out rather than leaving to be guessed. */}
+    <ul class="legend">
+      <li>
+        <svg class="sw" viewBox="0 0 34 14" aria-hidden="true">
+          <circle cx="7" cy="7" r="2.6" fill="#50505C" /><circle cx="24" cy="7" r="6" fill="#50505C" />
+        </svg>
+        <span>Each circle is an object — bigger means more relationships, up to
+        {graphStats.maxDegree}.<span class="exp"> The biggest are the ones most code
+        depends on.</span></span>
+      </li>
+      <li>
+        <svg class="sw" viewBox="0 0 34 14" aria-hidden="true">
+          <circle cx="17" cy="7" r="12" fill="#3FB950" opacity=".18" />
+          <circle cx="17" cy="7" r="5" fill="#3FB950" />
+        </svg>
+        <span>Green carries an Apex trigger — {graphStats.withTriggers} of
+        {graphStats.objects}.<span class="exp"> Code runs when the record changes.</span></span>
+      </li>
+      <li>
+        <svg class="sw" viewBox="0 0 34 14" aria-hidden="true">
+          <line x1="2" y1="7" x2="32" y2="7" stroke="#2A2A31" stroke-width="1" />
+        </svg>
+        <span>A thin line is a lookup ({graphStats.lookup}).</span>
+      </li>
+      <li>
+        <svg class="sw" viewBox="0 0 34 14" aria-hidden="true">
+          <line x1="2" y1="7" x2="32" y2="7" stroke="#3A3A44" stroke-width="1.5" />
+        </svg>
+        <span>A heavier line is master-detail ({graphStats.masterDetail}).<span class="exp">
+        Deleting the parent deletes the child.</span></span>
+      </li>
+    </ul>
+
+    {/* Reserved height, so selecting an object cannot shift the page under the pointer. */}
+    <p class="graph-readout" id="graph-readout" aria-live="polite">
+      <span class="hint">
+        <span class="on-hover">Point at</span><span class="on-touch">Tap</span>
+        any object to see what a change to it would touch.
+      </span>
     </p>
   </section>
 
@@ -228,7 +276,7 @@ const TRANSCRIPT = [
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: clamp(1.4rem, 3.5svh, 2.4rem);
+    gap: clamp(0.85rem, 2svh, 1.5rem);
     text-align: center;
     padding: 4svh 0;
     box-sizing: border-box;
@@ -242,7 +290,7 @@ const TRANSCRIPT = [
     height: auto;
     /* The graph must never push the caption off the screen: it is the hero's flexible
        part and the caption is the fixed one, so the picture gives way first. */
-    max-height: 72svh;
+    max-height: 58svh;
     object-fit: contain;
     /* A SUBTLE FADE AND NOTHING ELSE. No pan, no draw-on, no parallax — the picture is
        evidence, and animating evidence into place makes it look staged. */
@@ -257,6 +305,68 @@ const TRANSCRIPT = [
     max-width: 52ch;
     text-wrap: balance;
     animation: graph-in 760ms ease-out 240ms both;
+  }
+
+  /* ── LEGEND ────────────────────────────────────────────────────────────────────────
+     A row on wide screens, a column on narrow ones. The swatches are inline SVG using the
+     literal colours and widths the generator emits, so a palette change that misses one of
+     them is visible rather than subtle. */
+  /* A GRID, NOT A WRAPPING ROW. Flex-wrap flowed the four items into a ragged three-row
+     shape — two on the first row, one stranded beside the third — which reads as a layout
+     accident rather than a key. Two fixed columns keep the swatches aligned down the left
+     and every item on its own line. */
+  .legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: center;
+    gap: 0.5rem 2rem;
+    max-width: 74ch;
+    text-align: left;
+    animation: graph-in 760ms ease-out 360ms both;
+  }
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: 0.86rem;
+    text-align: left;
+  }
+  .legend .sw { width: 34px; height: 14px; flex: none; overflow: visible; }
+
+  /* The readout. Height is reserved for one line so selecting an object cannot shift the
+     page under the pointer that selected it. */
+  .graph-readout {
+    margin: 0;
+    min-height: 1.4em;
+    font-size: 0.88rem;
+    color: var(--muted);
+    animation: graph-in 760ms ease-out 480ms both;
+  }
+  .graph-readout .hint { opacity: 0.72; }
+  /* The explanatory half of each legend line. Dropped on phones, where four two-line items
+     pushed the last one below the fold — but only the PROSE goes; every generated figure
+     stays, because those are the numbers the legend exists to state. */
+  @media (max-width: 640px) { .exp { display: none; } }
+  .graph-readout .name { color: var(--fg); font-family: var(--mono); }
+  .graph-readout .trig { color: var(--accent); }
+  /* "Point at" or "Tap", decided by whether the device actually has a pointer rather than
+     by guessing from width — a touch laptop is both wide and untappable-at. */
+  .on-touch { display: none; }
+  @media (hover: none) {
+    .on-hover { display: none; }
+    .on-touch { display: inline; }
+  }
+
+  /* The graph is a control now, so it takes focus; the ring is the page's foreground
+     colour and sits outside the drawing. */
+  .graph :global(svg:focus-visible) {
+    outline: 2px solid var(--fg);
+    outline-offset: 4px;
+    border-radius: 6px;
   }
 
   /* ── THE THREE QUESTIONS ───────────────────────────────────────────────────────────
@@ -427,12 +537,16 @@ const TRANSCRIPT = [
      caption gets a line. Height is the constraint here, so height drives the scale. */
   @media (max-height: 820px) and (min-width: 641px) {
     .hero { padding: 3svh 0; }
-    .graph :global(svg) { max-height: 64svh; }
+    .graph :global(svg) { max-height: 50svh; }
     .question p { font-size: clamp(1.6rem, 3.6vw, 2.4rem); }
   }
 
   @media (max-width: 640px) {
-    .hero { padding: 3svh 0; gap: 1.2rem; }
+    /* THE LEGEND COSTS 192px STACKED, which is what pushed the hero 21px past the
+       viewport. The space comes out of the hero's own padding and gaps before it comes out
+       of the drawing: the legend is what makes the drawing readable, so shrinking the
+       drawing to fit the legend would be paying twice. */
+    .hero { padding: 2svh 0; gap: 0.7rem; }
     /* ON A PHONE THE GRAPH IS THE WHOLE POINT AND WIDTH IS THE PROBLEM. A 2:1 drawing in a
        343px column is 175px tall — a smear with unreadable labels. Bleeding to the full
        viewport width buys back the page gutters, and the taller cap gives it room to be
@@ -444,7 +558,7 @@ const TRANSCRIPT = [
     }
     .graph-wide { display: none; }
     .graph-tall { display: flex; }
-    .graph :global(svg) { max-height: 62svh; }
+    .graph :global(svg) { max-height: 41svh; }
     /* LABELS OFF ON A PHONE. The viewBox is 1154 wide, so at 375px the 11-unit type
        renders under 4 CSS px: not small, ILLEGIBLE — it reads as speckle and makes the
        drawing look like a rendering artefact. The names are not lost, they are in the
@@ -452,6 +566,11 @@ const TRANSCRIPT = [
        survives at this width, and structure is what the caption is about. */
     .graph :global(text) { display: none; }
     .graph-caption { font-size: 0.95rem; padding: 0 0.25rem; }
+    /* STACKED ON A PHONE. Four legend items side by side at 375px wrap mid-sentence and
+       read as eight fragments; one per row keeps each swatch beside the words it explains. */
+    .legend { grid-template-columns: 1fr; gap: 0.4rem; padding: 0 0.25rem; }
+    .legend li { font-size: 0.82rem; }
+    .graph-readout { font-size: 0.84rem; padding: 0 0.25rem; }
     .question { padding: 8svh 0; }
     .question p { font-size: clamp(1.5rem, 7.2vw, 2rem); max-width: 16ch; }
     .screen { padding: 6svh 0; }
@@ -462,6 +581,20 @@ const TRANSCRIPT = [
     .hero-caption { font-size: 0.88rem; }
     .waitlist { padding: 1.5rem; }
   }
+  /* THE SMALL-PHONE CASE, measured rather than assumed. A 360x640 Android has 7px less
+     than the hero needs once the legend is stacked; taking it out of the drawing for every
+     phone would be paying for one device with all of them. This rule fires only where the
+     shortfall exists.
+
+     PLACED AFTER the max-width block on purpose: same specificity, so source order
+     decides, and sitting above it this was simply overridden and did nothing. */
+  @media (max-width: 640px) and (max-height: 660px) {
+    .hero { gap: 0.55rem; padding: 1.5svh 0; }
+    .graph :global(svg) { max-height: 36svh; }
+    .graph-caption { font-size: 0.9rem; }
+    .legend li { font-size: 0.78rem; }
+  }
+
 </style>
 
 <script>
@@ -553,6 +686,138 @@ const TRANSCRIPT = [
   } else {
     showCaption();
   }
+
+  // --- the org graph: point at an object, see what it touches ------------------------
+  //
+  // The caption says every line is something a change can break. This makes that operable:
+  // selecting an object lights its relationships and the objects on the other end of them,
+  // and fades the rest. Everything it needs is already in the SVG — the generator emits a
+  // hit target per object carrying the name, the degree and whether it has a trigger — so
+  // the page never holds a second copy of the graph that could disagree with the drawing.
+  const readout = document.getElementById("graph-readout");
+  const hintHTML = readout ? readout.innerHTML : "";
+
+  document.querySelectorAll(".graph svg").forEach((svg) => {
+    const hits = [...svg.querySelectorAll(".hit")];
+    if (!hits.length) return;
+    const lines = [...svg.querySelectorAll("line.e")];
+    const nodes = [...svg.querySelectorAll("circle.n")];
+    const halos = [...svg.querySelectorAll("circle.halo")];
+    const labels = [...svg.querySelectorAll("text.lbl")];
+    const byIndex = (list) => {
+      const m = new Map();
+      list.forEach((el) => {
+        const i = el.dataset.i;
+        if (!m.has(i)) m.set(i, []);
+        m.get(i).push(el);
+      });
+      return m;
+    };
+    const nodeEls = byIndex(nodes), haloEls = byIndex(halos), labelEls = byIndex(labels);
+
+    // Adjacency comes from the drawn lines, not from a parallel data structure. If an edge
+    // is not drawn it cannot light up, which is the correct behaviour rather than a bug.
+    const near = new Map();
+    lines.forEach((l) => {
+      const { a, b } = l.dataset;
+      if (!near.has(a)) near.set(a, new Set());
+      if (!near.has(b)) near.set(b, new Set());
+      near.get(a).add(b);
+      near.get(b).add(a);
+    });
+
+    let pinned = null;   // set by click/tap, so a touch selection survives the finger lifting
+    let current = null;
+
+    const clear = () => {
+      svg.classList.remove("sel");
+      [...lines, ...nodes, ...halos, ...labels].forEach((el) =>
+        el.classList.remove("on", "near"));
+      current = null;
+      if (readout) readout.innerHTML = hintHTML;
+    };
+
+    const mark = (list, i, cls) => (list.get(String(i)) || []).forEach((el) =>
+      el.classList.add(cls));
+
+    const select = (i) => {
+      if (current === String(i)) return;
+      clear();
+      current = String(i);
+      svg.classList.add("sel");
+      mark(nodeEls, i, "on"); mark(haloEls, i, "on"); mark(labelEls, i, "on");
+      (near.get(current) || new Set()).forEach((j) => {
+        mark(nodeEls, j, "near"); mark(haloEls, j, "near"); mark(labelEls, j, "near");
+      });
+      lines.forEach((l) => {
+        if (l.dataset.a === current || l.dataset.b === current) l.classList.add("on");
+      });
+      const hit = hits.find((h) => h.dataset.i === current);
+      if (readout && hit) {
+        const deg = Number(hit.dataset.deg);
+        const name = hit.dataset.name;
+        // textContent for the name, which comes from customer metadata and is never
+        // trusted as markup. The rest is ours.
+        const el = document.createElement("span");
+        el.className = "name";
+        el.textContent = name;
+        readout.textContent = "";
+        readout.append(el, ` — ${deg} relationship${deg === 1 ? "" : "s"}`);
+        if (hit.dataset.t === "1") {
+          const t = document.createElement("span");
+          t.className = "trig";
+          t.textContent = " · carries an Apex trigger";
+          readout.append(t);
+        }
+      }
+    };
+
+    hits.forEach((hit) => {
+      hit.addEventListener("pointerenter", () => { if (!pinned) select(hit.dataset.i); });
+      hit.addEventListener("pointerleave", () => { if (!pinned) clear(); });
+      // TAP PINS. On a phone there is no hover and pointerleave may never arrive, so a tap
+      // that only previewed would clear itself the moment the finger lifted. Tapping the
+      // same object again releases it.
+      hit.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        if (pinned === hit.dataset.i) { pinned = null; clear(); return; }
+        pinned = hit.dataset.i;
+        select(hit.dataset.i);
+      });
+    });
+
+    // ONE TAB STOP FOR THE WHOLE GRAPH, not thirty-nine.
+    //
+    // Making every dot focusable is the obvious move and it buries the rest of the page
+    // behind 39 tab presses. The graph takes focus once and arrow keys walk it, which is
+    // the roving pattern a listbox uses. Objects are walked in the order the legend
+    // explains — most relationships first — so the first thing a keyboard reaches is the
+    // hub, not whichever node the layout happened to emit first.
+    const order = hits
+      .map((h) => h.dataset.i)
+      .sort((x, y) => {
+        const hx = hits.find((h) => h.dataset.i === x), hy = hits.find((h) => h.dataset.i === y);
+        return Number(hy.dataset.deg) - Number(hx.dataset.deg) ||
+          hx.dataset.name.localeCompare(hy.dataset.name);
+      });
+    let cursor = -1;
+    svg.setAttribute("tabindex", "0");
+    svg.addEventListener("keydown", (ev) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[ev.key];
+      if (step) {
+        ev.preventDefault();
+        cursor = (cursor + step + order.length) % order.length;
+        pinned = order[cursor];
+        select(pinned);
+      } else if (ev.key === "Escape") {
+        cursor = -1; pinned = null; clear();
+      }
+    });
+    svg.addEventListener("blur", () => { if (pinned !== null && cursor >= 0) { cursor = -1; pinned = null; clear(); } });
+
+    // Clicking the background releases a pinned selection.
+    svg.addEventListener("click", () => { if (pinned) { pinned = null; clear(); } });
+  });
 
   // --- section reveals ----------------------------------------------------------------
   const bands = document.querySelectorAll(".reveal");

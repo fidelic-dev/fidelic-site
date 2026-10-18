@@ -1,0 +1,9 @@
+{
+ "objects": 39,
+ "withTriggers": 20,
+ "relationships": 59,
+ "lookup": 50,
+ "masterDetail": 9,
+ "labelled": 20,
+ "maxDegree": 10
+}
