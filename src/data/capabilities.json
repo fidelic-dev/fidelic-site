@@ -1,8 +1,8 @@
 {
-  "build": "2c12af2",
+  "build": "27eb778",
   "imageRef": "fidelic/emulator:latest",
-  "imageVersion": "f0cded6",
-  "generated": "2026-10-17",
+  "imageVersion": "27eb778",
+  "generated": "2026-10-20",
   "shippedTier": "C1",
   "capabilities": [
     {
@@ -50,6 +50,19 @@
       "verdict": "UNRESOLVED",
       "simulated": false,
       "note": "Database.query and Database.merge"
+    },
+    {
+      "family": "managed-package-code",
+      "verdict": "UNRESOLVED",
+      "simulated": false,
+      "note": "calling a managed package's Apex"
+    },
+    {
+      "family": "managed-package-objects",
+      "verdict": "EXECUTE",
+      "simulated": true,
+      "simulationNote": "the package's objects are ordinary objects here and its own triggers and validation do not exist, so logic the package would run in a real org does not run",
+      "note": "a managed package's objects and fields, from your retrieval"
     },
     {
       "family": "recorded-effect",
@@ -174,6 +187,21 @@
       ],
       "families": [
         "settings"
+      ]
+    },
+    {
+      "key": "packages",
+      "title": "Managed packages",
+      "covers": "their objects, and their Apex",
+      "status": "partial",
+      "summary": "Your code can read and write a managed package's objects and fields \u2014 include them in your retrieval and they behave like any other object. It cannot call the package's Apex, which is not in your repo, and the package's own triggers and validation do not run here.",
+      "differences": [
+        "not supported: calling a managed package's Apex",
+        "the package's objects are ordinary objects here and its own triggers and validation do not exist, so logic the package would run in a real org does not run"
+      ],
+      "families": [
+        "managed-package-code",
+        "managed-package-objects"
       ]
     },
     {
