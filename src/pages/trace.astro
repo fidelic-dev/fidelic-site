@@ -1,0 +1,161 @@
+---
+import Base from "../layouts/Base.astro";
+
+const title = "Read a Fidelic trace";
+const description =
+  "Paste an execution trace from /__emulator__/trace and read it as a diagram: what fired, in what order, what each step changed, and what was rolled back. Rendered entirely in your browser — the document is never sent anywhere.";
+---
+
+<Base title={title} description={description} wide>
+  <article class="prose">
+    <p class="back"><a href="/">← Home</a></p>
+    <h1>Read a trace</h1>
+
+    <p class="lede">
+      Paste the document from <code>GET /__emulator__/trace</code>. It renders here, in this
+      tab. <strong>Nothing is uploaded</strong> — there is no server to send it to and no
+      request is made. Traces carry your record field values, which is also why the emulator
+      keeps them in memory and never writes them to disk.
+    </p>
+
+    <div class="io">
+      <label class="lbl" for="src">Trace JSON</label>
+      <textarea
+        id="src"
+        spellcheck="false"
+        autocomplete="off"
+        placeholder={'{"enabled":true,"traces":[{"id":"req-1","trace":{ … }}]}'}
+      ></textarea>
+      <div class="row">
+        <button class="btn" id="go" type="button">Render</button>
+        <button class="btn btn-quiet" id="sample" type="button">Load a sample</button>
+        <span class="note" id="status"></span>
+      </div>
+    </div>
+
+    <div class="out" id="out" hidden></div>
+
+    <p class="src">
+      The same renderer draws the panel inside the
+      <a href="/playground">playground</a> and the still on the home page — one
+      implementation, so a document cannot be shown three different ways.
+      <a href="/docs/api#running-your-apex-test-classes-__emulator__testrun">What the trace
+      contains</a>.
+    </p>
+  </article>
+</Base>
+
+<style>
+  .lede { max-width: 68ch; color: var(--muted); font-size: 1.02rem; }
+  .lede code, .lede strong { color: var(--fg); }
+
+  .io { margin: 1.6rem 0 1rem; }
+  .lbl {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  textarea {
+    width: 100%;
+    min-height: 11rem;
+    box-sizing: border-box;
+    padding: 0.9rem 1rem;
+    background: var(--term-bg);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    resize: vertical;
+  }
+  textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.8rem; flex-wrap: wrap; }
+  .btn-quiet {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--border);
+  }
+  .note { font-size: 0.85rem; color: var(--muted); }
+  .note.bad { color: #FF8077; }
+
+  /* THE DRAWING SCROLLS SIDEWAYS IN ITS OWN BOX rather than scaling to nothing. The viewBox
+     is 1180 wide; at 375px that is 13px type rendered at 4px, which is the same illegibility
+     the org graph's labels hit. Contained, so a sideways flick never drags the page. */
+  .out {
+    margin-top: 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--term-bg);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .out :global(svg) { display: block; min-width: 980px; width: 100%; height: auto; }
+  @media (min-width: 1060px) { .out :global(svg) { min-width: 0; } }
+
+  .src { margin-top: 1.4rem; color: var(--muted); font-size: 0.85rem; max-width: 68ch; }
+
+  @media (max-width: 640px) {
+    textarea { font-size: 0.8rem; min-height: 9rem; }
+    .lede { font-size: 0.96rem; }
+  }
+</style>
+
+<script>
+  // EVERYTHING HERE RUNS IN THE TAB. No fetch, no beacon, no analytics call carrying the
+  // pasted document. A trace carries record field values, and a page that offered to render
+  // one and quietly posted it somewhere would be the exact betrayal this product sells
+  // against.
+  import { renderTrace } from "../lib/trace-render.js";
+  import sample from "../data/trace-sample.json";
+
+  const src = document.getElementById("src") as HTMLTextAreaElement;
+  const out = document.getElementById("out") as HTMLElement;
+  const status = document.getElementById("status") as HTMLElement;
+
+  const say = (msg: string, bad = false) => {
+    status.textContent = msg;
+    status.classList.toggle("bad", bad);
+  };
+
+  function draw() {
+    const text = src.value.trim();
+    if (!text) { say("paste a trace document first", true); return; }
+    let doc: unknown;
+    try {
+      doc = JSON.parse(text);
+    } catch (e) {
+      // The parser's own message names the offset, which is more use than "invalid JSON".
+      say(`that is not valid JSON — ${(e as Error).message}`, true);
+      out.hidden = true;
+      return;
+    }
+    try {
+      // innerHTML with renderer output: the SVG is built here from the parsed document and
+      // every value it prints is escaped by the renderer. The pasted text is never inserted
+      // as markup.
+      out.innerHTML = renderTrace(doc);
+      out.hidden = false;
+      const n = (out.querySelectorAll("rect[rx='7']") || []).length;
+      say(`${n} entries`);
+    } catch (e) {
+      out.hidden = true;
+      say((e as Error).message, true);
+    }
+  }
+
+  document.getElementById("go")?.addEventListener("click", draw);
+  document.getElementById("sample")?.addEventListener("click", () => {
+    src.value = JSON.stringify(sample, null, 2);
+    draw();
+  });
+  // Ctrl/Cmd+Enter renders, because anyone pasting JSON into a box expects it to.
+  src.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); draw(); }
+  });
+</script>
