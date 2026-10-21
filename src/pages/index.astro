@@ -144,27 +144,6 @@ const TRANSCRIPT = [
     </p>
   </section>
 
-  {/* ── THE TRACE: the same org, one request deep ─────────────────────────────────────
-      The graph above says a change can break something three objects away. This says what
-      that looks like from inside a single request — and it is the same NPSP org, so the two
-      pictures are about one thing rather than two. */}
-  <section class="screen reveal" id="trace-still">
-    <div class="screen-inner">
-      <h2>One request, from the inside.</h2>
-      <p class="answer">
-        A record is created. NPSP's own handler sets the batch status, and a second handler —
-        staged for this picture — closes it again in the after-insert phase. The trace shows
-        both writes, which trigger made each, and that the second one won.
-      </p>
-      <div class="trace-wrap" set:html={traceStill} />
-      <p class="src">
-        Real output, not a diagram: captured from <code>GET /__emulator__/trace</code> and
-        rendered by the same code that draws the panel in the playground.
-        <a href="/trace">Paste your own trace →</a>
-      </p>
-    </div>
-  </section>
-
   {/* ── QUESTIONS: three screens, one question each ───────────────────────────────────
       Large type and nothing else on the screen — no terminal, no caption, no link. These
       are the only things on this site that ask the reader to think about their own org
@@ -202,61 +181,37 @@ const TRANSCRIPT = [
     </div>
   </section>
 
-  {/* ── PROOF: the labels, the one command, the receipts ──────────────────────────────
-      Shortened deliberately. The long form lives on /capabilities and /receipts; this
-      screen establishes that the labels are the machine's own and that every figure has a
-      command behind it. */}
-  <section class="screen reveal">
-    <div class="screen-inner">
-      <h2>Every trigger gets one of four labels.</h2>
-      <ul class="labels">
-        <li>
-          <span class="tag tag-exec">EXECUTE</span>
-          nothing in the reachable code is unsupported, so the interpreter will attempt to
-          run your real Apex.
-        </li>
-        <li>
-          <span class="tag tag-hook">HOOKS</span>
-          the effect is reproduced by a rule instead of by running the Apex.
-        </li>
-        <li>
-          <span class="tag tag-rec">RECORDED-ONLY</span>
-          the code could run, but the thing that starts it cannot happen on your machine, a
-          platform event for instance.
-        </li>
-        <li>
-          <span class="tag tag-unres">UNRESOLVED</span>
-          refused, with the file name, line number, and the construct it uses that we do not
-          support.
-        </li>
-      </ul>
+  {/* ── PROOF: one request, shown ────────────────────────────────────────────────────
+      THE FOUR LABELS ARE GONE FROM HERE. They were the analyzer's vocabulary — EXECUTE,
+      HOOKS, RECORDED-ONLY, UNRESOLVED — explained on the page a reader meets before they
+      have any reason to care which word applies to their trigger. The vocabulary still
+      exists and /capabilities still defines it; what belongs on the front page is the thing
+      that makes the words unnecessary: a real request, opened up, showing what ran and what
+      it changed.
 
-      <div
-        class="terminal"
-        role="img"
-        aria-label="Analyzer output for the Nonprofit Success Pack: 28 percent of the org classifies EXECUTE, 51 of 177 trigger-context pairs across 8 of 26 triggers. The report states that EXECUTE does not mean the code was run. One refused trigger is shown, naming the built-in method that blocked it."
-      >
-        <pre><span class="cmd">docker run --rm -v ./mdapi:/mdapi:ro --entrypoint /sfapex fidelic/emulator coverage /mdapi</span>
-<span class="out">CAN I TRUST THIS TEST?</span>
-<span class="out">  28% of this org classifies </span><span class="pass">EXECUTE</span><span class="out"> — 51 of 177 trigger-context pairs, across 8 of 26 triggers.</span>
-<span class="out">  EXECUTE means no blocker was found in the reachable code. It does NOT mean we ran it —</span>
-<span class="out">  run your tests and read /__emulator__/fired to see what actually fired.</span>
-<span class="dim">  build:  sfapex f0cded6</span>
-<span class="out">WHAT DOES NOT, AND WHY (18)</span>
-<span class="bad">  TDTM_EngagementPlan</span><span class="out">  stdlib not implemented: Date.daysBetween() [C3]</span>
-<span class="dim">      unblocked by: that built-in method</span>
-<span class="dim">  … 17 more, each naming what blocked it</span></pre>
-      </div>
+      The graph above says a change can break something three objects away. This says what
+      that looks like one request deep, on the SAME NPSP org, so the two pictures are about
+      one thing rather than two. */}
+  <section class="screen reveal" id="trace-still">
+    <div class="screen-inner">
+      <h2>One request, from the inside.</h2>
+      <p class="answer">
+        A record is created. NPSP's own handler sets the batch status, and a second handler —
+        staged for this picture — closes it again in the after-insert phase. The trace shows
+        both writes, which trigger made each, and that the second one won.
+      </p>
+      <div class="trace-wrap" set:html={traceStill} />
       <p class="src">
-        The labels are the analyzer's, not a summary of them. It says so itself in line
-        three: a label is what the code reads like, not proof it ran.
-        <a href="/capabilities">See exactly what we support</a>.
+        Real output, not a diagram: captured from <code>GET /__emulator__/trace</code> and
+        rendered by the same code that draws the panel in the playground.
+        <a href="/trace">Paste your own trace →</a> ·
+        <a href="/capabilities">See exactly what we support</a>
       </p>
       <p class="src">
-        Every number on this page comes from a command you can run yourself — including the
-        graph at the top, generated from NPSP's own object metadata and never drawn. The
-        conformance suite is public and is the same one we gate on:
-        <code>go run ./cmd/confrun --target=emulator</code> reports
+        Every number and every picture on this page comes from a command you can run
+        yourself — the graph from NPSP's own object metadata, this trace from a real request,
+        neither of them drawn. The conformance suite is public and is the same one we gate
+        on: <code>go run ./cmd/confrun --target=emulator</code> reports
         <span class="pass">75/75 PASS</span>.
         <a href="/receipts">Every number, and the command that produced it</a>.
       </p>
@@ -511,33 +466,6 @@ const TRANSCRIPT = [
     max-width: 66ch;
   }
   .screen .src code { color: var(--fg); font-size: 0.95em; }
-
-  /* The four labels. A list, not cards: the tag carries the colour and the line carries
-     the meaning. */
-  .labels { list-style: none; margin: 0 0 1.6rem; padding: 0; max-width: 62ch; }
-  .labels li {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 0 0.75rem;
-    align-items: baseline;
-    padding: 0.85rem 0;
-    border-top: 1px solid var(--border);
-    color: var(--fg);
-  }
-  .labels li:last-child { border-bottom: 1px solid var(--border); }
-  .tag {
-    display: inline-block;
-    padding: 0.1rem 0.45rem;
-    border-radius: 4px;
-    font-family: "JetBrains Mono", var(--mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-  }
-  .tag-exec  { background: rgba(63, 185, 80, 0.15);  color: #56D364; }
-  .tag-hook  { background: rgba(154, 164, 178, 0.15); color: #AEB6C2; }
-  .tag-rec   { background: rgba(217, 163, 58, 0.15);  color: #E0B341; }
-  .tag-unres { background: rgba(248, 81, 73, 0.15);   color: #FF8077; }
 
   /* The one surface on the page, so it states all four sides of its own padding rather
      than inheriting a section rule that zeroes the horizontal half. */
