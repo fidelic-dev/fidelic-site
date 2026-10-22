@@ -71,10 +71,14 @@ const TRANSCRIPT = [
                                 playground reports warmSeconds 13.9 at /api/health
         "what fired"          → GET /__emulator__/fired, outcome entered-clean
         the transcript        → a real playground session, verbatim
-        the analyzer block    → docker run --rm -v ./mdapi:/mdapi:ro --entrypoint /sfapex
-                                fidelic/emulator coverage /mdapi — pasted verbatim,
-                                including the line saying EXECUTE is not proof it ran
-        "75 of 75"            → go run ./cmd/confrun --target=emulator
+        the trace still       → node scripts/trace-still.mjs --in <trace.json>
+                                -out public/trace-still.svg        (sfemu repo)
+                                12 entries from a real captured request, through the same
+                                renderer that draws the playground panel and /trace
+
+      THE ANALYZER BLOCK AND THE CONFORMANCE LINE ARE NO LONGER ON THIS PAGE, so their rows
+      are gone from this table rather than left here describing copy that does not exist.
+      Both claims still live, with their commands, on /receipts.
 
       EVERY VISUAL IS REAL OUTPUT. No mock Salesforce UI, no screenshot of anyone's product,
       no invented figure, no illustration. The graph is the only non-terminal visual here and
@@ -82,9 +86,9 @@ const TRANSCRIPT = [
       loaders the emulator uses — so if the loader stops seeing a relationship, the line
       disappears from the hero too. It is not drawn, and it must never become drawn.
 
-      FINDINGS #18 review: no count of triggers that RUN appears on this page. The analyzer
-      block says "classifies EXECUTE" and carries its own disclaimer that this is not proof
-      anything ran. */}
+      FINDINGS #18 review: no count of triggers that RUN appears on this page. The trace
+      still shows what DID run for one real request, which is an observation rather than a
+      classification, so the distinction the finding is about does not arise here. */}
 
   {/* ── PROBLEM: the org, as a graph ──────────────────────────────────────────────────
       One screen: the picture and one line under it. No heading competing with it, because
@@ -182,38 +186,30 @@ const TRANSCRIPT = [
   </section>
 
   {/* ── PROOF: one request, shown ────────────────────────────────────────────────────
-      THE FOUR LABELS ARE GONE FROM HERE. They were the analyzer's vocabulary — EXECUTE,
-      HOOKS, RECORDED-ONLY, UNRESOLVED — explained on the page a reader meets before they
-      have any reason to care which word applies to their trigger. The vocabulary still
-      exists and /capabilities still defines it; what belongs on the front page is the thing
-      that makes the words unnecessary: a real request, opened up, showing what ran and what
-      it changed.
+      The four labels used to be here — EXECUTE, HOOKS, RECORDED-ONLY, UNRESOLVED — a
+      glossary on the page a reader meets before they have any reason to care which word
+      applies to their trigger. They still live on /capabilities, where someone looking for
+      them will be looking.
 
-      The graph above says a change can break something three objects away. This says what
-      that looks like one request deep, on the SAME NPSP org, so the two pictures are about
-      one thing rather than two. */}
+      The copy here is deliberately short. "Real output, not a diagram", the capture command,
+      the note about one renderer serving three surfaces and the conformance line were all
+      true and all answering questions nobody has yet. They are on /receipts and
+      /capabilities, which is where a reader goes once this picture has made them curious. */}
   <section class="screen reveal" id="trace-still">
     <div class="screen-inner">
-      <h2>One request, from the inside.</h2>
+      <h2>You saved a record. This is what ran.</h2>
       <p class="answer">
-        A record is created. NPSP's own handler sets the batch status, and a second handler —
-        staged for this picture — closes it again in the after-insert phase. The trace shows
-        both writes, which trigger made each, and that the second one won.
+        Every save, update, and delete comes back with a trace like this. Which triggers ran,
+        what each one changed, in what order.
       </p>
       <div class="trace-wrap" set:html={traceStill} />
       <p class="src">
-        Real output, not a diagram: captured from <code>GET /__emulator__/trace</code> and
-        rendered by the same code that draws the panel in the playground.
-        <a href="/trace">Paste your own trace →</a> ·
-        <a href="/capabilities">See exactly what we support</a>
+        The purple row is a bug we planted so you can see how it looks.
+        <a href="/trace">Paste your own trace</a>
       </p>
       <p class="src">
-        Every number and every picture on this page comes from a command you can run
-        yourself — the graph from NPSP's own object metadata, this trace from a real request,
-        neither of them drawn. The conformance suite is public and is the same one we gate
-        on: <code>go run ./cmd/confrun --target=emulator</code> reports
-        <span class="pass">75/75 PASS</span>.
-        <a href="/receipts">Every number, and the command that produced it</a>.
+        Everything on this page comes from a command you can run.
+        <a href="/receipts">See the receipts</a>
       </p>
     </div>
   </section>
