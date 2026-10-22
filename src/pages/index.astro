@@ -203,8 +203,13 @@ const TRANSCRIPT = [
         what each one changed, in what order.
       </p>
       <div class="trace-wrap" set:html={traceStill} />
+      {/* "two rows above", not "the row above". DIB_CloseOnInsert is seq 9; the row
+          immediately above it is TDTM_DataImportBatch (after update) at seq 8, and the
+          Open -> Closed flip is at seq 7. One word, added so the caption survives someone
+          checking it — which on this site is the only kind of reader there is. */}
       <p class="src">
-        The purple row is a bug we planted so you can see how it looks.
+        DIB_CloseOnInsert is a bug we planted so you can see how it looks. The row two above
+        it is where it flipped the status from Open to Closed.
         <a href="/trace">Paste your own trace</a>
       </p>
       <p class="src">
