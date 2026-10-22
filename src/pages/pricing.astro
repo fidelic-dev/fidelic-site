@@ -1,0 +1,56 @@
+---
+import Base from "../layouts/Base.astro";
+
+const title = "Pricing";
+const description =
+  "A paid pilot: $2,500 for 90 days, one org, any number of developers. Includes a build for your org's metadata and a weekly call if you want one. Monthly pricing is set with you at the end of the pilot.";
+---
+
+<Base title={title} description={description}>
+  <article class="prose">
+    <h1>Pricing.</h1>
+
+    {/* ONE OFFER, NO LADDER. No tiers, no comparison table, no FAQ — a pricing page that
+        makes a reader choose between columns before they have run the thing is asking them
+        to estimate a value they cannot estimate yet. The figure, what it covers, and how to
+        start. Everything else is a conversation. */}
+    <p class="offer">
+      <strong>Paid pilot. $2,500 for 90 days.</strong> One org, any number of developers.
+      Includes a build for your org's metadata and a weekly call if you want one. Monthly
+      pricing is set with you at the end of the pilot.
+    </p>
+
+    <p class="start">
+      <strong>How to start:</strong> email
+      <a href="mailto:hello@fidelic.dev">hello@fidelic.dev</a> with the output of
+      <a href="/capabilities">the analyzer</a>. We reply within two business days.
+    </p>
+  </article>
+</Base>
+
+<style>
+  /* Type scale and colour come from the prose layout, which every other page uses; this
+     file only sets the rhythm of two paragraphs so the page does not read as a stub. */
+  .offer {
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    line-height: 1.6;
+    max-width: 58ch;
+    margin: 1.6rem 0 2.2rem;
+  }
+  .offer strong { color: var(--fg); }
+
+  .start {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 58ch;
+    color: var(--muted);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--border);
+  }
+  .start strong { color: var(--fg); }
+
+  @media (max-width: 640px) {
+    .offer { font-size: 1.02rem; margin: 1.3rem 0 1.8rem; }
+    .start { font-size: 0.96rem; }
+  }
+</style>
