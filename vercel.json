@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
   "redirects": [
     {
       "source": "/blog/why-a-fake-org",

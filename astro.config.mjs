@@ -11,7 +11,11 @@ export default defineConfig({
   // points at a URL that immediately redirects.
   site: 'https://www.fidelic.dev',
   output: 'static',
-  trailingSlash: 'ignore',
+  // 'always', matching vercel.json's trailingSlash. Astro writes every internal link,
+  // canonical, og:url and sitemap entry with the slash; Vercel 308s the slashless form to
+  // it at the edge. Both halves are required: Astro alone would emit canonical URLs the
+  // edge does not enforce, and Vercel alone would redirect to URLs the HTML never links to.
+  trailingSlash: 'always',
   // Exclude /thanks — post-submit confirmation, noindex'd, no search value.
   // Filter compares against the FULL url built from `site`, so this string has to track
   // it — hardcoding the apex here would have silently stopped excluding /thanks the
