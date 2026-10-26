@@ -4,12 +4,12 @@
   "redirects": [
     {
       "source": "/blog/why-a-fake-org",
-      "destination": "/blog/why-is-there-no-localstack-for-salesforce",
+      "destination": "/blog/why-is-there-no-localstack-for-salesforce/",
       "statusCode": 301
     },
     {
       "source": "/blog/why-a-fake-org/",
-      "destination": "/blog/why-is-there-no-localstack-for-salesforce",
+      "destination": "/blog/why-is-there-no-localstack-for-salesforce/",
       "statusCode": 301
     },
     {
