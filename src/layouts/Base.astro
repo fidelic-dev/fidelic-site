@@ -66,6 +66,11 @@ const jsonLd = article && {
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;620;700&family=JetBrains+Mono:wght@400;500&display=swap"
     />
+    {/* Vercel Web Analytics. Served from this origin (/_vercel/insights/*) by the platform,
+        so it adds no third-party connection and nothing to preconnect to. `defer` keeps it
+        off the critical path — it must never delay first paint on a page whose whole point
+        is a terminal rendering fast. */}
+    <script defer src="/_vercel/insights/script.js"></script>
     {/* Per-page head additions. */}
     <slot name="head" />
   </head>
