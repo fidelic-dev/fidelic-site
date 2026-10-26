@@ -25,7 +25,7 @@ const fmt = (d: Date) =>
   article={{ date: post.data.date, markdown: `/blog/${post.id}.md` }}
 >
   <article class="prose">
-    <p class="back"><a href="/blog">← Blog</a></p>
+    <p class="back"><a href="/blog/">← Blog</a></p>
     <h1>{post.data.title}</h1>
     <p class="article-meta">
       <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>

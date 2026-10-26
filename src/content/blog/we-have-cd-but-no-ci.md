@@ -21,13 +21,13 @@ The deployment side is genuinely excellent. Copado and Gearset are real companie
 
 On the flip side, in a normal stack, "CI/CD" is one compound word because the two halves work in tandem: continuous integration _verifies_ every change (spin up a clean environment, run the tests, tear it down), and continuous deployment _ships_ the verified change. The verification half is the reason the deployment half is safe.
 
-In Salesforce, the CD tooling markets itself as "CI/CD" while what runs in those pipelines is: metadata validation (does it deploy?), Apex unit tests (does [75% of the code execute](/blog/your-75-percent-code-coverage-is-testing-nothing)?), maybe static analysis. What doesn't run: anything that verifies the _behavior_ of the org — the trigger cascades, the integration calls, the failure paths. The pipeline confirms your code deployed. Nothing confirms it works.
+In Salesforce, the CD tooling markets itself as "CI/CD" while what runs in those pipelines is: metadata validation (does it deploy?), Apex unit tests (does [75% of the code execute](/blog/your-75-percent-code-coverage-is-testing-nothing/)?), maybe static analysis. What doesn't run: anything that verifies the _behavior_ of the org — the trigger cascades, the integration calls, the failure paths. The pipeline confirms your code deployed. Nothing confirms it works.
 
 ## Why the gap exists
 
 This isn't because Salesforce teams don't know what CI is. It's because CI has a hard prerequisite the platform never provided: **a disposable environment.**
 
-Real CI needs an environment you can create in seconds, trash, and recreate. You need one per test run, in parallel, on every commit. Every part of a modern stack has one: databases run in containers, AWS has LocalStack, browsers have headless mode. [Salesforce orgs are the opposite of disposable](/blog/why-is-there-no-localstack-for-salesforce): shared, stateful, slow to provision, rate-limited, and incapable of producing their own failure modes on demand.
+Real CI needs an environment you can create in seconds, trash, and recreate. You need one per test run, in parallel, on every commit. Every part of a modern stack has one: databases run in containers, AWS has LocalStack, browsers have headless mode. [Salesforce orgs are the opposite of disposable](/blog/why-is-there-no-localstack-for-salesforce/): shared, stateful, slow to provision, rate-limited, and incapable of producing their own failure modes on demand.
 
 If you as Salesforce, they will answer with scratch orgs. If you read the [official CI docs](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ci.htm), the architecture is: your pipeline _rents a real cloud org_ for each run. Minutes to provision. Daily creation quotas. Still a real org on shared infrastructure that can't produce a row lock, can't return a rate-limit error on demand, can't run twelve in parallel on a pull request without hitting allocation walls (to name a few!)
 
@@ -37,7 +37,7 @@ So the industry did what industries do with an impossible requirement: it stoppe
 
 The cost isn't abstract. It's a specific, recurring sequence that every integration team knows:
 
-A change ships through a beautiful pipeline, fully "tested" by the coverage gate. It works in the sandbox, because the sandbox saw one tidy record from one careful admin. Then production traffic arrives: 200 records through the Bulk API, two systems colliding on the same parent Account, an API quota shared with the whole company. The failure modes that were [structurally impossible to rehearse](/blog/unable-to-lock-row): the lock, the limit, the retry that double-fires. These execute for the first time ever, in production, at whatever hour production chooses.
+A change ships through a beautiful pipeline, fully "tested" by the coverage gate. It works in the sandbox, because the sandbox saw one tidy record from one careful admin. Then production traffic arrives: 200 records through the Bulk API, two systems colliding on the same parent Account, an API quota shared with the whole company. The failure modes that were [structurally impossible to rehearse](/blog/unable-to-lock-row/): the lock, the limit, the retry that double-fires. These execute for the first time ever, in production, at whatever hour production chooses.
 
 Then the postmortem, where someone asks "why didn't the tests catch this?" and the honest answer which nobody writes down, is that no test _could_ have. There was nowhere to run it.
 

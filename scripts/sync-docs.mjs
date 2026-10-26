@@ -122,11 +122,14 @@ const stripLeadingH1 = (text) => text.trimStart().replace(/^#\s+.*\r?\n+/, '');
 // the file on GitHub and a 404 for someone reading it here. Rewrite them to site paths
 // at sync time so the source stays right for BOTH audiences — the alternative is
 // breaking the repo's own links to satisfy the site.
+// Slash-terminated, matching astro.config's trailingSlash:'always' and vercel.json. These
+// are the ONLY place doc-to-doc site paths are produced — sfemu's markdown carries
+// repo-relative .md links, which stay correct for someone reading on GitHub.
 const DOC_LINK_MAP = {
-  'QUICKSTART.md': '/docs/quickstart',
-  'API.md': '/docs/api',
-  'github-actions.md': '/docs/ci-github-actions',
-  'gitlab.md': '/docs/ci-gitlab',
+  'QUICKSTART.md': '/docs/quickstart/',
+  'API.md': '/docs/api/',
+  'github-actions.md': '/docs/ci-github-actions/',
+  'gitlab.md': '/docs/ci-gitlab/',
 };
 const rewriteDocLinks = (text) =>
   text.replace(/\]\(([^)]+?\.md)(#[^)]*)?\)/g, (whole, target, hash = '') => {

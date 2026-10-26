@@ -87,7 +87,7 @@ const [featured, ...rest] = posts;
         <span>{readingTime(featured)} min read</span>
         {featured.data.draft && <span class="draft-tag">DRAFT</span>}
       </p>
-      <h2><a href={`/blog/${featured.id}`}>{featured.data.title}</a></h2>
+      <h2><a href={`/blog/${featured.id}/`}>{featured.data.title}</a></h2>
       <p class="lead">{lead(featured)}</p>
     </article>
   )}
@@ -102,7 +102,7 @@ const [featured, ...rest] = posts;
             <span>{readingTime(post)} min read</span>
             {post.data.draft && <span class="draft-tag">DRAFT</span>}
           </p>
-          <h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
+          <h2><a href={`/blog/${post.id}/`}>{post.data.title}</a></h2>
           <p class="desc">{post.data.description}</p>
         </li>
       ))}

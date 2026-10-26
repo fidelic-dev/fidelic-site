@@ -63,7 +63,7 @@ const docs = (await getCollection('docs')).sort((a, b) => a.data.order - b.data.
     {docs.map((doc) => (
       <li>
         <a
-          href={`/docs/${doc.id}`}
+          href={`/docs/${doc.id}/`}
           class={doc.id === current ? 'is-current' : ''}
           aria-current={doc.id === current ? 'page' : undefined}
         >
@@ -79,7 +79,7 @@ const docs = (await getCollection('docs')).sort((a, b) => a.data.order - b.data.
       </li>
     ))}
   </ul>
-  <p class="docsnav-foot"><a href="/docs">All docs</a></p>
+  <p class="docsnav-foot"><a href="/docs/">All docs</a></p>
 </nav>
 
 <script>
