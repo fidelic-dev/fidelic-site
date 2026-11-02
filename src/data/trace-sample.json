@@ -3,11 +3,12 @@
   "enabled": true,
   "header": "X-Fidelic-Trace",
   "retained": "last 16 requests, in memory only \u2014 traces are never written to disk (they carry record field values)",
+  "ring": 16,
   "traces": [
     {
       "id": "req-1",
       "trace": {
-        "trace_version": 3,
+        "trace_version": 4,
         "request": {
           "clock": "emulator",
           "ended": 12,
