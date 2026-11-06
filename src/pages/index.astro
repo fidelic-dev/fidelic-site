@@ -232,6 +232,7 @@ const TRANSCRIPT = [
             aria-label="Email address"
             required
           />
+          <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" />
           <input type="hidden" name="_subject" value="Email me" />
           <input type="hidden" name="_next" value="https://www.fidelic.dev/thanks" />
           <button class="btn" type="submit">Email me</button>
@@ -478,6 +479,14 @@ const TRANSCRIPT = [
     max-width: 40rem;
   }
   .waitlist h2 { margin-top: 0; }
+
+  /* Formspree's honeypot: a field a person never sees and a bot fills in. Off-canvas rather
+     than display:none, because a bot that skips hidden inputs skips the trap — which is the
+     one thing it must not do. tabindex="-1" keeps it out of the keyboard path. */
+  .hp {
+    position: absolute;
+    left: -10000px;
+  }
 
   /* ── MOTION ────────────────────────────────────────────────────────────────────────
      Fade and rise: 14px of travel, 320ms. Enough to read as deliberate, short enough that
