@@ -216,6 +216,31 @@ const TRANSCRIPT = [
         Everything on this page comes from a command you can run.
         <a href="/receipts/">See the receipts</a>
       </p>
+
+      {/* AGENT MODE. The faults[0] block is from the graded run in sfemu's
+          docs/demo-agent-mode.md, with fired_at_request and retry_request removed: those two
+          and `requests` are request-counter artifacts of one LLM-driven run and differ on a
+          re-run, so they do not belong in copy a reader will check. Everything kept here was
+          identical across two runs on build b9bf620. */}
+      <h3 class="agent-head">Also an MCP server for AI agents</h3>
+      <p class="answer">
+        An agent can use the emulator as its Salesforce, through tools instead of a real org.
+        You arm a failure it is not told about, and afterwards the emulator reports whether it
+        recovered.
+      </p>
+      <pre class="agent-grade"><code>{`"faults": [
+  {
+    "errorCode": "UNABLE_TO_LOCK_ROW",
+    "object": "Opportunity",
+    "record_id": "a03000000000079AAA",
+    "retried": true,
+    "retry_succeeded": true,
+    "verdict": "RECOVERED"
+  }
+]`}</code></pre>
+      <p class="src">
+        <a href="/docs/agent-mode/">Agent mode</a>
+      </p>
     </div>
   </section>
 
@@ -468,6 +493,32 @@ const TRANSCRIPT = [
     max-width: 66ch;
   }
   .screen .src code { color: var(--fg); font-size: 0.95em; }
+
+  /* The agent-mode block. h3 rather than h2: it sits inside the trace section, under its
+     heading, and promoting it would read as a second top-level claim on the page. */
+  .agent-head {
+    margin: 2.6rem 0 0;
+    font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+  }
+  /* SCROLLS IN ITS OWN BOX. Seven lines of JSON at 375px is wider than the viewport, and a
+     page that scrolls sideways as a whole is the one thing the overflow ruler forbids. */
+  .agent-grade {
+    margin: 1rem 0 0;
+    padding: 1rem 1.1rem;
+    background: var(--term-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--muted);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .agent-grade code { color: inherit; }
+  @media (max-width: 640px) {
+    .agent-grade { font-size: 0.76rem; padding: 0.85rem 0.9rem; }
+  }
 
   /* The one surface on the page, so it states all four sides of its own padding rather
      than inheriting a section rule that zeroes the horizontal half. */

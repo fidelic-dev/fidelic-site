@@ -206,6 +206,36 @@ curl -sX POST localhost:8080/__emulator__/testrun     # run it</code></pre>
     <p class="receipts-link">
       <a href="/receipts/">Every number, and the command that produced it →</a>
     </p>
+
+    <h2>What an agent can do here</h2>
+
+    <p>
+      The emulator also runs as an MCP server, so an AI agent can use it as its Salesforce. With
+      <code>--agent-tools-only</code> the agent sees five tools and nothing else:
+      <code>sf.query</code>, <code>sf.create</code>, <code>sf.update</code>,
+      <code>sf.delete</code> and <code>sf.describe</code>. The nine tools that set up a run — the
+      session, fault, limits, callout, hook and Apex test controls — are hidden from it.
+    </p>
+
+    <p>
+      Eight failures can be injected before the agent starts: <code>UNABLE_TO_LOCK_ROW</code>,
+      <code>REQUEST_LIMIT_EXCEEDED</code>, injected latency, a hook rejection, the three
+      <code>System.LimitException</code> ceilings for SOQL queries, DML statements and DML rows,
+      and a failed callout. A fault can be scoped to one object and to writes, so the agent's
+      reads and its work on other objects are untouched.
+    </p>
+
+    <p>
+      Afterwards the emulator reports what the agent did: records changed, triggers fired, and
+      whether each injected failure was recovered from. That report is built from the request
+      trace the emulator already keeps, not from a model's account of its own work. Governor
+      counters in it carry the label <code>APPROXIMATE</code>, because they count modeled
+      operations only.
+    </p>
+
+    <p class="receipts-link">
+      <a href="/docs/agent-mode/">Agent mode, and the commands that run it →</a>
+    </p>
   </article>
 </Base>
 

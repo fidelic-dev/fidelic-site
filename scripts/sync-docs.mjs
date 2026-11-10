@@ -63,6 +63,16 @@ const DOCS = [
     },
   },
   {
+    src: 'docs/AGENT-MODE.md',
+    dest: 'src/content/docs/agent-mode.md',
+    frontmatter: {
+      title: 'Agent mode: test an AI agent against your org',
+      description:
+        'Run the emulator as an MCP server, let an agent use it as its Salesforce, inject a failure it was not told about, and read back what it actually did.',
+      order: 11,
+    },
+  },
+  {
     src: 'docs/API.md',
     dest: 'src/content/docs/api.md',
     frontmatter: {
