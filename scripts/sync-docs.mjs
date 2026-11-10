@@ -12,6 +12,7 @@
 //
 // Add a future mirrored doc by appending to DOCS below. Repo owns, site renders.
 
+import { execFileSync } from 'node:child_process';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -87,15 +88,39 @@ const DOCS = [
 const REPO = 'fidelic-dev/sfemu';
 const REF = process.env.SFEMU_DOCS_REF || 'main';
 
+// sourceCommit reports the sfemu commit a local checkout is sitting on, or null when the
+// source is not a local checkout (the GitHub path already names its ref).
+//
+// WHICH BRANCH A LOCAL MIRROR CAME FROM IS INVISIBLE OTHERWISE. The sibling checkout is
+// whatever branch someone left it on, so a local build can mirror an unpushed doc and look
+// exactly like a build that mirrored main. The precedence is unchanged — this only says out
+// loud which source was used and what it was pointing at.
+function sourceCommit(dir) {
+  try {
+    const out = execFileSync('git', ['-C', dir, 'rev-parse', '--short', 'HEAD'], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    const branch = execFileSync('git', ['-C', dir, 'rev-parse', '--abbrev-ref', 'HEAD'], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    const dirty = execFileSync('git', ['-C', dir, 'status', '--porcelain'], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim() !== '';
+    return `${branch}@${out}${dirty ? '-dirty' : ''}`;
+  } catch {
+    return null; // not a checkout, or no git: say nothing rather than guess
+  }
+}
+
 async function fetchSource(src) {
   // 1. explicit repo path
   if (process.env.SFEMU_REPO) {
     const p = resolve(process.env.SFEMU_REPO, src);
-    if (existsSync(p)) return { from: p, text: await readFile(p, 'utf8') };
+    if (existsSync(p)) return { via: 'SFEMU_REPO', from: p, text: await readFile(p, 'utf8') };
   }
   // 2. sibling checkout
   const sibling = resolve(ROOT, '..', 'sfemu', src);
-  if (existsSync(sibling)) return { from: sibling, text: await readFile(sibling, 'utf8') };
+  if (existsSync(sibling)) return { via: 'sibling', from: sibling, text: await readFile(sibling, 'utf8') };
 
   // 3. GitHub raw (private repo needs a token)
   const token = process.env.SFEMU_DOCS_TOKEN || process.env.GITHUB_TOKEN;
@@ -103,7 +128,7 @@ async function fetchSource(src) {
     const url = `https://raw.githubusercontent.com/${REPO}/${REF}/${src}`;
     const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
     if (!res.ok) throw new Error(`fetch ${url} -> ${res.status} ${res.statusText}`);
-    return { from: url, text: await res.text() };
+    return { via: `github@${REF}`, from: url, text: await res.text() };
   }
 
   throw new Error(
@@ -148,11 +173,26 @@ const rewriteDocLinks = (text) =>
     return dest ? `](${dest}${hash})` : whole;
   });
 
+const used = new Set();
 for (const doc of DOCS) {
-  const { from, text } = await fetchSource(doc.src);
+  const { via, from, text } = await fetchSource(doc.src);
   const out = `${frontmatter(doc.frontmatter)}\n\n${BANNER(doc.src)}\n\n${rewriteDocLinks(stripLeadingH1(text))}`;
   const dest = resolve(ROOT, doc.dest);
   await mkdir(dirname(dest), { recursive: true });
   await writeFile(dest, out);
-  console.log(`docs: ${doc.dest}  <-  ${from}`);
+  console.log(`docs: ${doc.dest}  <-  [${via}] ${from}`);
+  used.add(via);
 }
+
+// ONE SUMMARY LINE, ALWAYS. A build log that does not say where its docs came from cannot be
+// used to answer the question afterwards, and that question is asked exactly when something
+// has already shipped wrong.
+const localDir = process.env.SFEMU_REPO
+  ? resolve(process.env.SFEMU_REPO)
+  : resolve(ROOT, '..', 'sfemu');
+const at = [...used].some((v) => v === 'SFEMU_REPO' || v === 'sibling') ? sourceCommit(localDir) : null;
+console.log(
+  `docs: ${DOCS.length} mirrored from ${[...used].join(', ')}` +
+    (at ? ` — sfemu ${at}` : '') +
+    (at && at.endsWith('-dirty') ? ' (uncommitted changes in that checkout)' : ''),
+);
